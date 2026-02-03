@@ -22,6 +22,7 @@
 #include "../movie/Movie.h"
 #include "../font/TTFont.h"
 #include "../leveldata/ThingSettings.h"
+#include "../io/File.h"
 
 #define MANAGERS_LEN 50
 
@@ -54,13 +55,22 @@ void ResourceManagerList_Init(void)
 		return;
 	}
 
+	MString* tempString = NULL;
+
 	{
 		ResourceManager* animTileMan = ResourceManagerList_AnimTile();
 		ResourceManager_Init(animTileMan);
 		Utils_strlcpy(animTileMan->_mResourceType, "AnimTile", EE_FILENAME_MAX);
 		Utils_strlcpy(animTileMan->_mDatFileName, "animtile.dat", EE_FILENAME_MAX);
+		Utils_strlcpy(animTileMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
+		File_PathCombine2(&tempString, "data", "animtile");
+		Utils_strlcpy(animTileMan->_mDirectory, MString_Text(tempString), EE_FILENAME_MAX);
 		animTileMan->_mFromStream = (ResourceManager_FromStreamFunc)AnimTile_FromStream;
 		animTileMan->_mDispose = (ResourceManager_DisposeFunc)AnimTile_Dispose;
+		animTileMan->_mRead = (ResourceManager_ReadFunc)AnimTile_Read;
+		animTileMan->_mWrite = (ResourceManager_WriteFunc)AnimTile_Write;
+		animTileMan->_mReadFromDirectory = true;
+		animTileMan->_mIsReadingText = true;
 	}
 
 	{
@@ -68,10 +78,15 @@ void ResourceManagerList_Init(void)
 		ResourceManager_Init(propMan);
 		Utils_strlcpy(propMan->_mResourceType, "Prop", EE_FILENAME_MAX);
 		Utils_strlcpy(propMan->_mDatFileName, "props.dat", EE_FILENAME_MAX);
+		Utils_strlcpy(propMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
+		File_PathCombine2(&tempString, "data", "props");
+		Utils_strlcpy(propMan->_mDirectory, MString_Text(tempString), EE_FILENAME_MAX);
 		propMan->_mFromStream = (ResourceManager_FromStreamFunc)Prop_FromStream;
 		propMan->_mDispose = (ResourceManager_DisposeFunc)Prop_Dispose;
 		propMan->_mRead = (ResourceManager_ReadFunc)Prop_Read;
 		propMan->_mWrite = (ResourceManager_WriteFunc)Prop_Write;
+		propMan->_mReadFromDirectory = true;
+		propMan->_mIsReadingText = true;
 	}
 
 	{
@@ -163,8 +178,15 @@ void ResourceManagerList_Init(void)
 		ResourceManager_Init(particleMan);
 		Utils_strlcpy(particleMan->_mResourceType, "Particle", EE_FILENAME_MAX);
 		Utils_strlcpy(particleMan->_mDatFileName, "particles.dat", EE_FILENAME_MAX);
+		Utils_strlcpy(particleMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
+		File_PathCombine2(&tempString, "data", "particles");
+		Utils_strlcpy(particleMan->_mDirectory, MString_Text(tempString), EE_FILENAME_MAX);
 		particleMan->_mFromStream = (ResourceManager_FromStreamFunc)Particle_FromStream;
 		particleMan->_mDispose = (ResourceManager_DisposeFunc)Particle_Dispose;
+		particleMan->_mRead = (ResourceManager_ReadFunc)Particle_Read;
+		particleMan->_mWrite = (ResourceManager_WriteFunc)Particle_Write;
+		particleMan->_mReadFromDirectory = true;
+		particleMan->_mIsReadingText = true;
 	}
 
 	{
@@ -202,6 +224,8 @@ void ResourceManagerList_Init(void)
 		thingSettingsMan->_mFromStream = (ResourceManager_FromStreamFunc)ThingSettings_FromStream;
 		thingSettingsMan->_mDispose = (ResourceManager_DisposeFunc)ThingSettings_Dispose;
 	}
+
+	MString_Dispose(&tempString);
 
 	_mHasInit = true;
 }

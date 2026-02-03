@@ -204,29 +204,29 @@ const char* InputCheck_GetNameTypeButton(InputCheck* data)
 		return "X";
 	case BUTTONS_Y:
 		return "Y";
-	case BUTTONS_LeftStick:
+	case BUTTONS_LEFTSTICK:
 		return "LS";
-	case BUTTONS_LeftShoulder:
+	case BUTTONS_LEFTSHOULDER:
 		return "LB";
 		/*case BUTTONS_LeftTrigger:
 			return "LT";*/
-	case BUTTONS_RightStick:
+	case BUTTONS_RIGHTSTICK:
 		return "RS";
-	case BUTTONS_RightShoulder:
+	case BUTTONS_RIGHTSHOULDER:
 		return "RB";
 		/*case BUTTONS_RightTrigger:
 			return "RT";*/
-	case BUTTONS_Start:
+	case BUTTONS_START:
 		return "START";
-	case BUTTONS_Back:
+	case BUTTONS_BACK:
 		return "BACK";
-	case BUTTONS_DPadUp:
+	case BUTTONS_DPADUP:
 		return "DPAD_UP";
-	case BUTTONS_DPadRight:
+	case BUTTONS_DPADRIGHT:
 		return "DPAD_RIGHT";
-	case BUTTONS_DPadDown:
+	case BUTTONS_DPADDOWN:
 		return "DPAD_DOWN";
-	case BUTTONS_DPadLeft:
+	case BUTTONS_DPADLEFT:
 		return "DPAD_LEFT";
 		/*case BUTTONS_LeftThumbstickUp:
 			return "LS_UP";
@@ -266,43 +266,43 @@ const char* InputCheck_GetNameTypeMouseButton(InputCheck* data)
 }
 const char* InputCheck_GetGlyphStringTypeKey(InputCheck* data)
 {
-	if (data->mKey == KEYS_OemSemicolon)
+	if (data->mKey == KEYS_OEMSEMICOLON)
 	{
 		return "Semicolon";
 	}
-	if (data->mKey == KEYS_OemPlus)
+	if (data->mKey == KEYS_OEMPLUS)
 	{
 		return "Plus";
 	}
-	if (data->mKey == KEYS_OemComma)
+	if (data->mKey == KEYS_OEMCOMMA)
 	{
 		return "Comma";
 	}
-	if (data->mKey == KEYS_OemMinus)
+	if (data->mKey == KEYS_OEMMINUS)
 	{
 		return "Minus";
 	}
-	if (data->mKey == KEYS_OemPeriod)
+	if (data->mKey == KEYS_OEMPERIOD)
 	{
 		return "Period";
 	}
-	if (data->mKey == KEYS_OemQuestion)
+	if (data->mKey == KEYS_OEMQUESTION)
 	{
 		return "/";
 	}
-	if (data->mKey == KEYS_OemBackslash)
+	if (data->mKey == KEYS_OEMBACKSLASH)
 	{
 		return "\\";
 	}
-	if (data->mKey == KEYS_OemTilde)
+	if (data->mKey == KEYS_OEMTILDE)
 	{
 		return "`";
 	}
-	if (data->mKey == KEYS_OemOpenBrackets)
+	if (data->mKey == KEYS_OEMOPENBRACKETS)
 	{
 		return "[";
 	}
-	if (data->mKey == KEYS_OemCloseBrackets)
+	if (data->mKey == KEYS_OEMCLOSEBRACKETS)
 	{
 		return "]";
 	}

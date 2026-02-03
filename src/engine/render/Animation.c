@@ -91,8 +91,10 @@ void Animation_Init(Animation* data, const char* spriteSheet, int32_t flipTimer)
 	}
 	else
 	{
-		Logger_LogError("Unable to setup animation:");
-		Logger_LogError(spriteSheet);
+		MString* tempString = NULL;
+		MString_Combine2(&tempString, "Unable to setup animation:", spriteSheet);
+		Logger_LogError(MString_Text(tempString));
+		MString_Dispose(&tempString);
 	}
 }
 void Animation_Init2(Animation* data, Sheet** sheets, int32_t sheetsLen, int32_t flipTimer)

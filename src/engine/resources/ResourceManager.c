@@ -12,6 +12,7 @@
 #include "../io/File.h"
 #include "../io/DatReader.h"
 #include "../utils/IStrings.h"
+#include "../utils/IStringArray.h"
 #include "../io/DynamicByteBuffer.h"
 
 static void PrintHelper(const char* str1, const char* str2)
@@ -112,6 +113,12 @@ const char* ResourceManager_GetDatFileName(ResourceManager* rm)
 }
 void ResourceManager_LoadAllFromDat(ResourceManager* rm)
 {
+	if (rm->_mReadFromDirectory)
+	{
+		ResourceManager_LoadAllFromDirectory(rm, rm->_mIsReadingText);
+		return;
+	}
+
 	MString* path = NULL;
 	File_PathCombine2(&path, "data", ResourceManager_GetDatFileName(rm));
 	if (!File_Exists(MString_Text(path)))
@@ -225,7 +232,6 @@ void ResourceManager_WriteAll(ResourceManager* rm, bool isWritingText)
 		ResourceManager_Write(rm, rm->sh_resources[i].key, isWritingText);
 	}
 }
-
 void ResourceManager_Read(ResourceManager* rm, const char* filenameWithoutExtension, bool isReadingText)
 {
 	if (rm->_mRead == NULL)
@@ -258,11 +264,41 @@ void ResourceManager_Read(ResourceManager* rm, const char* filenameWithoutExtens
 		MString_Dispose(&tempString);
 	}
 }
-
 void ResourceManager_ReadAll(ResourceManager* rm, bool isReadingText)
 {
 	for (int32_t i = 0; i < shlen(rm->sh_resources); i += 1)
 	{
 		ResourceManager_Read(rm, rm->sh_resources[i].key, isReadingText);
+	}
+}
+void ResourceManager_LoadAllFromDirectory(ResourceManager* rm, bool isReadingText)
+{
+	if (Utils_StringEqualTo(rm->_mDirectory, EE_STR_EMPTY))
+	{
+		Logger_LogError("Directory missing for resource manager");
+		return;
+	}
+
+	IStringArray* files = IStringArray_Create();
+	{
+		MString* tempString = NULL;
+		MString_Combine2(&tempString, "*", rm->_mFileExtension);
+		File_GetFiles(files, rm->_mDirectory, MString_Text(tempString));
+		MString_Dispose(&tempString);
+	}
+
+	for (int i = 0; i < IStringArray_Length(files); i += 1)
+	{
+		MString* nextPath = NULL;
+		const char* filename = IStringArray_Get(files, i);
+		MString* fileNameWithoutExtension = NULL;
+		File_PathCombine2(&nextPath, rm->_mDirectory, filename);
+		File_GetFileNameWithoutExtension(&fileNameWithoutExtension, MString_Text(nextPath));
+		BufferReader* br = BufferReader_CreateFromPath(MString_Text(nextPath));
+		BufferReader_SetIsReadingText(br, isReadingText);
+		ResourceManager_LoadAssetFromStreamAndCreateResource(rm, br, MString_Text(fileNameWithoutExtension), MString_Text(nextPath));
+		BufferReader_Dispose(br);
+		MString_Dispose(&nextPath);
+		MString_Dispose(&fileNameWithoutExtension);
 	}
 }

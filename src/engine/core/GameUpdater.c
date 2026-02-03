@@ -96,27 +96,27 @@ static void Cheats(void)
 {
 	if (Input_IsCtrlPressed())
 	{
-		if (Input_IsKeyTapped(KEYS_NumPad0))
+		if (Input_IsKeyTapped(KEYS_NUMPAD0))
 		{
 			GameUpdater_CycleDebugShowInfo();
 		}
-		if (Input_IsKeyTapped(KEYS_NumPad1))
+		if (Input_IsKeyTapped(KEYS_NUMPAD1))
 		{
 			SetDebugAutoSpeed(false);
 			GLOBALS_DEBUG_GAME_LOGIC_SPEED = GLOBALS_DEFAULT_DEBUG_GAME_LOGIC_SPEED;
 			DebugLogBoolHelper("Auto Speed: ", _mIsDebugAutoSpeedOn);
 		}
-		if (Input_IsKeyTapped(KEYS_NumPad2))
+		if (Input_IsKeyTapped(KEYS_NUMPAD2))
 		{
 			GameUpdater_ToggleDebugAutoSpeed();
 			DebugLogBoolHelper("Auto Speed: ", _mIsDebugAutoSpeedOn);
 		}
-		if (Input_IsKeyTapped(KEYS_NumPad3))
+		if (Input_IsKeyTapped(KEYS_NUMPAD3))
 		{
 			//UNUSED
 			Logger_LogInformation("Reloaded Audio");
 		}
-		if (Input_IsKeyTapped(KEYS_NumPad4))
+		if (Input_IsKeyTapped(KEYS_NUMPAD4))
 		{
 			GameUpdater_DebugReloadGraphics();
 			Logger_LogInformation("Reloaded All Assets And Animations");
@@ -127,7 +127,7 @@ static void Cheats(void)
 	}
 	else if (Input_IsAltPressed())
 	{
-		if (Input_IsKeyTapped(KEYS_NumPad0))
+		if (Input_IsKeyTapped(KEYS_NUMPAD0))
 		{
 			Globals_DebugSetRenderDisabled(!Globals_DebugIsRenderDisabled());
 			DebugLogBoolHelper("Render Disabled: ", Globals_DebugIsRenderDisabled());
@@ -135,7 +135,7 @@ static void Cheats(void)
 	}
 	else
 	{
-		if (Input_IsKeyTapped(KEYS_NumPad0))
+		if (Input_IsKeyTapped(KEYS_NUMPAD0))
 		{
 			Globals_ToggleGodMode();
 		}
@@ -146,7 +146,7 @@ static void Cheats(void)
 		{
 			timeGo = true;
 		}
-		if (Input_IsKeyPressed(KEYS_NumPad1) && Input_IsKeyPressed(KEYS_NumPad2))
+		if (Input_IsKeyPressed(KEYS_NUMPAD1) && Input_IsKeyPressed(KEYS_NUMPAD2))
 		{
 			if (GLOBALS_DEBUG_GAME_LOGIC_SPEED != 100)
 			{
@@ -155,7 +155,7 @@ static void Cheats(void)
 				DebugLogGameSpeed();
 			}
 		}
-		else if (Input_IsKeyPressed(KEYS_NumPad1))
+		else if (Input_IsKeyPressed(KEYS_NUMPAD1))
 		{
 			_mDebugTimeHeld += 1;
 			if (timeGo)
@@ -169,7 +169,7 @@ static void Cheats(void)
 				DebugLogGameSpeed();
 			}
 		}
-		else if (Input_IsKeyPressed(KEYS_NumPad2))
+		else if (Input_IsKeyPressed(KEYS_NUMPAD2))
 		{
 			_mDebugTimeHeld += 1;
 			if (timeGo)
@@ -183,29 +183,29 @@ static void Cheats(void)
 		{
 			_mDebugTimeHeld = 0;
 		}
-		if (Input_IsKeyTapped(KEYS_NumPad3))
+		if (Input_IsKeyTapped(KEYS_NUMPAD3))
 		{
 			GLOBALS_DEBUG_IS_PAUSED = !GLOBALS_DEBUG_IS_PAUSED;
 			DebugLogBoolHelper("Is Paused: ", GLOBALS_DEBUG_IS_PAUSED);
 			return;
 		}
 
-		if (Input_IsKeyTapped(KEYS_NumPad5))
+		if (Input_IsKeyTapped(KEYS_NUMPAD5))
 		{
 			Cvars_FlipAsBool(CVARS_EDITOR_SHOW_PROPS);
 			DebugLogBoolHelper("Show Props: ", Cvars_GetAsBool(CVARS_EDITOR_SHOW_PROPS));
 		}
-		if (Input_IsKeyTapped(KEYS_NumPad6))
+		if (Input_IsKeyTapped(KEYS_NUMPAD6))
 		{
 			Cvars_FlipAsBool(CVARS_EDITOR_SHOW_THINGS);
 			DebugLogBoolHelper("Show Things: ", Cvars_GetAsBool(CVARS_EDITOR_SHOW_THINGS));
 		}
-		if (Input_IsKeyTapped(KEYS_NumPad7))
+		if (Input_IsKeyTapped(KEYS_NUMPAD7))
 		{
 			Cvars_FlipAsBool(CVARS_EDITOR_SHOW_TILES);
 			DebugLogBoolHelper("Show Tiles: ", Cvars_GetAsBool(CVARS_EDITOR_SHOW_TILES));
 		}
-		if (Input_IsKeyTapped(KEYS_NumPad8))
+		if (Input_IsKeyTapped(KEYS_NUMPAD8))
 		{
 			if (GLOBALS_DEBUG_IS_EDITOR_MODE)
 			{
@@ -218,7 +218,7 @@ static void Cheats(void)
 				DebugLogBoolHelper("Show InGame Col: ", GLOBALS_DEBUG_SHOW_INGAME_COLLISION);
 			}
 		}
-		if (Input_IsKeyTapped(KEYS_NumPad9))
+		if (Input_IsKeyTapped(KEYS_NUMPAD9))
 		{
 			GLOBALS_DEBUG_DISABLE_HUD = !GLOBALS_DEBUG_DISABLE_HUD;
 			DebugLogBoolHelper("Disable Hud: ", GLOBALS_DEBUG_DISABLE_HUD);
@@ -246,7 +246,7 @@ static void Cheats(void)
 		{
 			//GameUpdater_ToggleEditor(); //UNUSED
 		}
-		if (Input_IsKeyTapped(KEYS_OemComma))
+		if (Input_IsKeyTapped(KEYS_OEMCOMMA))
 		{
 			//Utils_ToggleNextUserLanguage(true); //UNUSED
 		}
@@ -306,7 +306,7 @@ static bool HandleDebugPauseAndStep(void)
 
 	Input_Update(true);
 
-	if (Input_IsKeyTapped(KEYS_NumPad4))
+	if (Input_IsKeyTapped(KEYS_NUMPAD4))
 	{
 		Tick();
 		Renderer_SetupRenderState();
@@ -314,13 +314,13 @@ static bool HandleDebugPauseAndStep(void)
 		return true;
 	}
 
-	if (Input_IsKeyTapped(KEYS_OemComma))
+	if (Input_IsKeyTapped(KEYS_OEMCOMMA))
 	{
 		//Utils_ToggleNextUserLanguage(true); //UNUSED
 		return true;
 	}
 
-	if (Input_IsKeyTapped(KEYS_OemPeriod))
+	if (Input_IsKeyTapped(KEYS_OEMPERIOD))
 	{
 		//Utils_ToggleNextUserLanguage(true); //UNUSED
 		Tick();

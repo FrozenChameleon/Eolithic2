@@ -9,7 +9,7 @@
 #include "Buttons.h"
 #include "Axes.h"
 #include "../utils/Utils.h"
-#include "ButtonList.h"
+#include "Buttons.h"
 #include "../math/Math.h"
 #include "../utils/Cvars.h"
 #include "../core/Game.h"
@@ -83,11 +83,11 @@ bool ControllerData_IsButtonPressedAtLoc(const ControllerData* cd, int32_t loc)
 {
 	return cd->_mIsButtonPressed[loc];
 }
-bool ControllerData_IsButtonPressed(const ControllerData* cd, int32_t button)
+bool ControllerData_IsButtonPressed(const ControllerData* cd, Button button)
 {
 	for (int32_t i = 0; i < BUTTONS_AMOUNT_OF_BUTTONS; i += 1)
 	{
-		if (button == ButtonList_GetButton(i))
+		if (button == Buttons_GetButton(i))
 		{
 			return ControllerData_IsButtonPressedAtLoc(cd, i);
 		}
@@ -128,15 +128,15 @@ float ControllerState_GetAnalogData(const ControllerState* cs, int32_t loc)
 {
 	return ControllerData_GetAnalogData(&cs->_mThisFrame, loc);
 }
-bool ControllerState_IsButtonPressed(const ControllerState* cs, int32_t button)
+bool ControllerState_IsButtonPressed(const ControllerState* cs, Button button)
 {
 	return ControllerData_IsButtonPressed(&cs->_mThisFrame, button);
 }
-bool ControllerState_IsButtonTapped(const ControllerState* cs, int32_t button)
+bool ControllerState_IsButtonTapped(const ControllerState* cs, Button button)
 {
 	return (!ControllerData_IsButtonPressed(&cs->_mLastFrame, button) && ControllerData_IsButtonPressed(&cs->_mThisFrame, button));
 }
-bool ControllerState_IsButtonReleased(const ControllerState* cs, int32_t button)
+bool ControllerState_IsButtonReleased(const ControllerState* cs, Button button)
 {
 	return (ControllerData_IsButtonPressed(&cs->_mLastFrame, button) && !ControllerData_IsButtonPressed(&cs->_mThisFrame, button));
 }

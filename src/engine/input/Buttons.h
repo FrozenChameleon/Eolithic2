@@ -15,25 +15,29 @@
 
 #pragma once
 
-enum
-{
-	BUTTONS_AMOUNT_OF_BUTTONS = 14,
-};
+#include "stdint.h"
+#include "stdbool.h"
+
+#define BUTTONS_AMOUNT_OF_BUTTONS 14
 
 typedef enum Button
 {
-	BUTTONS_DPadUp = 1,
-	BUTTONS_DPadDown = 2,
-	BUTTONS_DPadLeft = 4,
-	BUTTONS_DPadRight = 8,
-	BUTTONS_Start = 16,
-	BUTTONS_Back = 32,
-	BUTTONS_LeftStick = 64,
-	BUTTONS_RightStick = 128,
-	BUTTONS_LeftShoulder = 256,
-	BUTTONS_RightShoulder = 512,
+	BUTTONS_DPADUP = 1,
+	BUTTONS_DPADDOWN = 2,
+	BUTTONS_DPADLEFT = 4,
+	BUTTONS_DPADRIGHT = 8,
+	BUTTONS_START = 16,
+	BUTTONS_BACK = 32,
+	BUTTONS_LEFTSTICK = 64,
+	BUTTONS_RIGHTSTICK = 128,
+	BUTTONS_LEFTSHOULDER = 256,
+	BUTTONS_RIGHTSHOULDER = 512,
 	BUTTONS_A = 4096,
 	BUTTONS_B = 8192,
 	BUTTONS_X = 16384,
 	BUTTONS_Y = 32768,
 } Button;
+
+Button Buttons_GetButton(int32_t index);
+const Button* Buttons_GetArray(void);
+int32_t Buttons_GetArrayLength(void);

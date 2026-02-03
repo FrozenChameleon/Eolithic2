@@ -29,6 +29,10 @@ typedef struct ResourceManager
 	char _mDatFileName[EE_FILENAME_MAX];
 	char _mResourceType[EE_FILENAME_MAX];
 	char _mDefaultResource[EE_FILENAME_MAX];
+	char _mFileExtension[EE_FILENAME_MAX];
+	char _mDirectory[EE_PATH_MAX];
+	bool _mReadFromDirectory;
+	bool _mIsReadingText;
 } ResourceManager;
 
 void ResourceManager_Init(ResourceManager* rm);
@@ -50,3 +54,4 @@ void ResourceManager_Write(ResourceManager* rm, const char* filenameWithoutExten
 void ResourceManager_WriteAll(ResourceManager* rm, bool isWritingText);
 void ResourceManager_Read(ResourceManager* rm, const char* filenameWithoutExtension, bool isReadingText);
 void ResourceManager_ReadAll(ResourceManager* rm, bool isReadingText);
+void ResourceManager_LoadAllFromDirectory(ResourceManager* rm, bool isReadingText);

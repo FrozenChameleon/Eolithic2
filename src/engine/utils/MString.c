@@ -24,7 +24,7 @@ typedef struct MString
 static char _mEmptyString[1] = "";
 static uint64_t _mRefs;
 
-#define STRING_BUFFER_LEN 4096
+#define STRING_BUFFER_LEN EE_PATH_MAX
 #define NUMBER_BUFFER_LEN EE_SAFE_BUFFER_LEN_FOR_DOUBLE
 
 static char _mStringBuffer[STRING_BUFFER_LEN];

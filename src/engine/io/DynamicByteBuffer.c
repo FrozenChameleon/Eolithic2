@@ -387,6 +387,14 @@ void DynamicByteBuffer_WriteBoolean(DynamicByteBuffer* dbb, bool value)
 		BinaryWriter_WriteBool(dbb, value);
 	}
 }
+void DynamicByteBuffer_WriteMagicNumber(DynamicByteBuffer* dbb)
+{
+	DynamicByteBuffer_WriteI16(dbb, EE_MAGIC_NUMBER);
+}
+void DynamicByteBuffer_WriteVersionNumber(DynamicByteBuffer* dbb, int16_t versionNumber)
+{
+	DynamicByteBuffer_WriteI16(dbb, versionNumber);
+}
 void DynamicByteBuffer_WriteString(DynamicByteBuffer* dbb, const char* str, size_t maxlen)
 {
 	if (str == NULL)

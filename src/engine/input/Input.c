@@ -459,55 +459,55 @@ bool Input_IsMiddleMouseReleased(void)
 }
 bool Input_IsCtrlPressed(void)
 {
-	return KeyboardState_IsKeyPressed(KEYS_LeftControl) || KeyboardState_IsKeyPressed(KEYS_RightControl);
+	return KeyboardState_IsKeyPressed(KEYS_LEFTCONTROL) || KeyboardState_IsKeyPressed(KEYS_RIGHTCONTROL);
 }
 bool Input_IsTabPressed(void)
 {
-	return KeyboardState_IsKeyPressed(KEYS_Tab);
+	return KeyboardState_IsKeyPressed(KEYS_TAB);
 }
 bool Input_IsShiftPressed(void)
 {
-	return KeyboardState_IsKeyPressed(KEYS_LeftShift) || KeyboardState_IsKeyPressed(KEYS_RightShift);
+	return KeyboardState_IsKeyPressed(KEYS_LEFTSHIFT) || KeyboardState_IsKeyPressed(KEYS_RIGHTSHIFT);
 }
 bool Input_IsShiftTapped(void)
 {
-	return KeyboardState_IsKeyTapped(KEYS_LeftShift) || KeyboardState_IsKeyTapped(KEYS_RightShift);
+	return KeyboardState_IsKeyTapped(KEYS_LEFTSHIFT) || KeyboardState_IsKeyTapped(KEYS_RIGHTSHIFT);
 }
 bool Input_IsAltPressed(void)
 {
-	return KeyboardState_IsKeyPressed(KEYS_LeftAlt) || KeyboardState_IsKeyPressed(KEYS_RightAlt);
+	return KeyboardState_IsKeyPressed(KEYS_LEFTALT) || KeyboardState_IsKeyPressed(KEYS_RIGHTALT);
 }
 bool Input_IsDeletePressed(void)
 {
-	return KeyboardState_IsKeyPressed(KEYS_Delete);
+	return KeyboardState_IsKeyPressed(KEYS_DELETE);
 }
 bool Input_IsDeleteTapped(void)
 {
-	return KeyboardState_IsKeyTapped(KEYS_Delete);
+	return KeyboardState_IsKeyTapped(KEYS_DELETE);
 }
 bool Input_IsDeleteReleased(void)
 {
-	return KeyboardState_IsKeyReleased(KEYS_Delete);
+	return KeyboardState_IsKeyReleased(KEYS_DELETE);
 }
 bool Input_IsTildePressed(void)
 {
-	return KeyboardState_IsKeyPressed(KEYS_OemTilde);
+	return KeyboardState_IsKeyPressed(KEYS_OEMTILDE);
 }
 bool Input_IsTildeReleased(void)
 {
-	return KeyboardState_IsKeyReleased(KEYS_OemTilde);
+	return KeyboardState_IsKeyReleased(KEYS_OEMTILDE);
 }
 bool Input_IsEscapePressed(void)
 {
-	return KeyboardState_IsKeyPressed(KEYS_Escape);
+	return KeyboardState_IsKeyPressed(KEYS_ESCAPE);
 }
 bool Input_IsEscapeTapped(void)
 {
-	return KeyboardState_IsKeyTapped(KEYS_Escape);
+	return KeyboardState_IsKeyTapped(KEYS_ESCAPE);
 }
 bool Input_IsEnterTapped(void)
 {
-	return KeyboardState_IsKeyTapped(KEYS_Enter);
+	return KeyboardState_IsKeyTapped(KEYS_ENTER);
 }
 bool Input_IsModifierPressed(void)
 {
@@ -621,19 +621,19 @@ void Input_SetMasterRecordingState(int32_t state)
 	_mMasterRecordingState = state;
 }
 #ifdef EDITOR_MODE
-bool Input_IsKeyTapped(int32_t key)
+bool Input_IsKeyTapped(Key key)
 {
 	return KeyboardState_IsKeyTapped(key);
 }
-bool Input_IsKeyReleased(int32_t key)
+bool Input_IsKeyReleased(Key key)
 {
 	return KeyboardState_IsKeyReleased(key);
 }
-bool Input_IsKeyPressed(int32_t key)
+bool Input_IsKeyPressed(Key key)
 {
 	return KeyboardState_IsKeyPressed(key);
 }
-int32_t Input_GetKeyTimeHeld(int32_t key)
+int32_t Input_GetKeyTimeHeld(Key key)
 {
 	return KeyboardState_GetTimeHeld(key);
 }

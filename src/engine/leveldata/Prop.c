@@ -21,23 +21,13 @@
 
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
 
-static const char* TAG_IS_ADDITIVE = "is_additive";
-static const char* TAG_SCALER = "scaler";
-static const char* TAG_FLIP_SPEED = "flip_speed";
-static const char* TAG_IS_ANIMATION = "is_animation";
-static const char* TAG_TEXTURE_NAME = "texture_name";
-static const char* TAG_TILESET_FILTER = "tileset_filter";
-
-enum
-{
-	PROP_BINARY_VERSION = 2
-};
+#define VERSION_PROP 7
 
 void Prop_Init(Prop* p)
 {
 	Utils_memset(p, 0, sizeof(Prop));
 
-	p->_mSheet = Sheet_GetDefaultSheet();
+	p->mGraphics.mSheet = Sheet_GetDefaultSheet();
 	p->mScaler = 1;
 	Utils_strlcpy(p->mTextureName, EE_STR_EMPTY, EE_FILENAME_MAX);
 	Utils_strlcpy(p->mTilesetFilter, EE_STR_EMPTY, EE_FILENAME_MAX);
@@ -47,11 +37,11 @@ Sheet* Prop_GetSheet(Prop* p)
 {
 	if (p->mIsAnimation)
 	{
-		return Animation_GetCurrentSheet(&p->_mAnimation);
+		return Animation_GetCurrentSheet(&p->mGraphics.mAnimation);
 	}
 	else
 	{
-		return p->_mSheet;
+		return p->mGraphics.mSheet;
 	}
 }
 void Prop_Draw(Prop* p, SpriteBatch* spriteBatch, int32_t depth, Point position, float scale, float rotation, bool flipX, bool flipY, bool showInfo)
@@ -83,37 +73,37 @@ void Prop_Draw(Prop* p, SpriteBatch* spriteBatch, int32_t depth, Point position,
 }
 void Prop_UpdateResource(Prop* p)
 {
-	if (!p->_mIsSetup)
+	if (!p->mGraphics.mIsSetup)
 	{
 		Prop_LoadDrawing(p);
-		p->_mIsSetup = true;
+		p->mGraphics.mIsSetup = true;
 	}
 
 	if (p->mIsAnimation)
 	{
-		Animation_Update(&p->_mAnimation);
+		Animation_Update(&p->mGraphics.mAnimation);
 	}
 }
 void Prop_LoadDrawing(Prop* p)
 {
 	if (p->mIsAnimation)
 	{
-		Animation_Init(&p->_mAnimation, p->mTextureName, p->mFlipSpeed);
+		Animation_Init(&p->mGraphics.mAnimation, p->mTextureName, p->mFlipSpeed);
 	}
 	else
 	{
-		p->_mSheet = Sheet_GetSheet(p->mTextureName);
+		p->mGraphics.mSheet = Sheet_GetSheet(p->mTextureName);
 	}
 }
 Rectangle Prop_GetRectangle(Prop* p)
 {
 	if (!p->mIsAnimation)
 	{
-		return p->_mSheet->mRectangle;
+		return p->mGraphics.mSheet->mRectangle;
 	}
 	else
 	{
-		return Animation_GetCurrentSheet(&p->_mAnimation)->mRectangle;
+		return Animation_GetCurrentSheet(&p->mGraphics.mAnimation)->mRectangle;
 	}
 }
 const char* Prop_ToString(Prop* p)
@@ -122,25 +112,34 @@ const char* Prop_ToString(Prop* p)
 }
 Animation* Prop_GetAnimation(Prop* p)
 {
-	return &p->_mAnimation;
+	return &p->mGraphics.mAnimation;
 }
-void Prop_Write(Prop* p, DynamicByteBuffer* writer)
+void Prop_Read(Prop* p, BufferReader* br)
 {
-	DynamicByteBuffer_WriteBoolean(writer, p->mIsAdditive); //UNUSED
-	DynamicByteBuffer_WriteI32(writer, p->mScaler);
-	DynamicByteBuffer_WriteI32(writer, p->mFlipSpeed);
-	DynamicByteBuffer_WriteBoolean(writer, p->mIsAnimation);
-	DynamicByteBuffer_WriteString(writer, p->mTextureName, EE_FILENAME_MAX);
-	DynamicByteBuffer_WriteString(writer, p->mTilesetFilter, EE_FILENAME_MAX);
+	if (!BufferReader_ReadMagicNumber(br))
+	{
+		return;
+	}
+	BufferReader_ReadVersionNumber(br);
+
+	p->mIsAdditive = BufferReader_ReadBoolean(br);
+	p->mScaler = BufferReader_ReadI32(br);
+	p->mFlipSpeed = BufferReader_ReadI32(br);
+	p->mIsAnimation = BufferReader_ReadBoolean(br);
+	BufferReader_ReadString(br, p->mTextureName, EE_FILENAME_MAX);
+	BufferReader_ReadString(br, p->mTilesetFilter, EE_FILENAME_MAX);
 }
-void Prop_Read(Prop* p, BufferReader* reader)
+void Prop_Write(Prop* p, DynamicByteBuffer* dbb)
 {
-	p->mIsAdditive = BufferReader_ReadBoolean(reader);
-	p->mScaler = BufferReader_ReadI32(reader);
-	p->mFlipSpeed = BufferReader_ReadI32(reader);
-	p->mIsAnimation = BufferReader_ReadBoolean(reader);
-	BufferReader_ReadString(reader, p->mTextureName, EE_FILENAME_MAX);
-	BufferReader_ReadString(reader, p->mTilesetFilter, EE_FILENAME_MAX);
+	DynamicByteBuffer_WriteMagicNumber(dbb);
+	DynamicByteBuffer_WriteVersionNumber(dbb, VERSION_PROP);
+
+	DynamicByteBuffer_WriteBoolean(dbb, p->mIsAdditive);
+	DynamicByteBuffer_WriteI32(dbb, p->mScaler);
+	DynamicByteBuffer_WriteI32(dbb, p->mFlipSpeed);
+	DynamicByteBuffer_WriteBoolean(dbb, p->mIsAnimation);
+	DynamicByteBuffer_WriteString(dbb, p->mTextureName, EE_FILENAME_MAX);
+	DynamicByteBuffer_WriteString(dbb, p->mTilesetFilter, EE_FILENAME_MAX);
 }
 IStringArray* Prop_GetDirectories(void)
 {

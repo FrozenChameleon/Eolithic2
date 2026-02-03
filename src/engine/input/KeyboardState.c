@@ -6,7 +6,6 @@
 
 #include "KeyboardState.h"
 
-#include "KeyList.h"
 #include "SDL3/SDL.h"
 #include "../utils/Utils.h"
 #include "../utils/Cvars.h"
@@ -19,7 +18,7 @@ static KeyboardData _mThisFrame;
 static KeyboardData _mLastFrame;
 static bool _mHasInit;
 
-static SDL_Scancode GetScanCode(int32_t key)
+static SDL_Scancode GetScanCode(Key key)
 {
 	//Mapped from FNA
 	switch (key)
@@ -96,37 +95,37 @@ static SDL_Scancode GetScanCode(int32_t key)
 		return SDL_SCANCODE_8;
 	case KEYS_D9:
 		return SDL_SCANCODE_9;
-	case KEYS_NumPad0:
+	case KEYS_NUMPAD0:
 		return SDL_SCANCODE_KP_0;
-	case KEYS_NumPad1:
+	case KEYS_NUMPAD1:
 		return SDL_SCANCODE_KP_1;
-	case KEYS_NumPad2:
+	case KEYS_NUMPAD2:
 		return SDL_SCANCODE_KP_2;
-	case KEYS_NumPad3:
+	case KEYS_NUMPAD3:
 		return SDL_SCANCODE_KP_3;
-	case KEYS_NumPad4:
+	case KEYS_NUMPAD4:
 		return SDL_SCANCODE_KP_4;
-	case KEYS_NumPad5:
+	case KEYS_NUMPAD5:
 		return SDL_SCANCODE_KP_5;
-	case KEYS_NumPad6:
+	case KEYS_NUMPAD6:
 		return SDL_SCANCODE_KP_6;
-	case KEYS_NumPad7:
+	case KEYS_NUMPAD7:
 		return SDL_SCANCODE_KP_7;
-	case KEYS_NumPad8:
+	case KEYS_NUMPAD8:
 		return SDL_SCANCODE_KP_8;
-	case KEYS_NumPad9:
+	case KEYS_NUMPAD9:
 		return SDL_SCANCODE_KP_9;
-	case KEYS_OemClear:
+	case KEYS_OEMCLEAR:
 		return SDL_SCANCODE_KP_CLEAR;
-	case KEYS_Decimal:
+	case KEYS_DECIMAL:
 		return SDL_SCANCODE_KP_DECIMAL;
-	case KEYS_Divide:
+	case KEYS_DIVIDE:
 		return SDL_SCANCODE_KP_DIVIDE;
-	case KEYS_Multiply:
+	case KEYS_MULTIPLY:
 		return SDL_SCANCODE_KP_MULTIPLY;
-	case KEYS_Subtract:
+	case KEYS_SUBTRACT:
 		return SDL_SCANCODE_KP_MINUS;
-	case KEYS_Add:
+	case KEYS_ADD:
 		return SDL_SCANCODE_KP_PLUS;
 	case KEYS_F1:
 		return SDL_SCANCODE_F1;
@@ -176,103 +175,103 @@ static SDL_Scancode GetScanCode(int32_t key)
 		return SDL_SCANCODE_F23;
 	case KEYS_F24:
 		return SDL_SCANCODE_F24;
-	case KEYS_Space:
+	case KEYS_SPACE:
 		return SDL_SCANCODE_SPACE;
-	case KEYS_Up:
+	case KEYS_UP:
 		return SDL_SCANCODE_UP;
-	case KEYS_Down:
+	case KEYS_DOWN:
 		return SDL_SCANCODE_DOWN;
-	case KEYS_Left:
+	case KEYS_LEFT:
 		return SDL_SCANCODE_LEFT;
-	case KEYS_Right:
+	case KEYS_RIGHT:
 		return SDL_SCANCODE_RIGHT;
-	case KEYS_LeftAlt:
+	case KEYS_LEFTALT:
 		return SDL_SCANCODE_LALT;
-	case KEYS_RightAlt:
+	case KEYS_RIGHTALT:
 		return SDL_SCANCODE_RALT;
-	case KEYS_LeftControl:
+	case KEYS_LEFTCONTROL:
 		return SDL_SCANCODE_LCTRL;
-	case KEYS_RightControl:
+	case KEYS_RIGHTCONTROL:
 		return SDL_SCANCODE_RCTRL;
-	case KEYS_LeftWindows:
+	case KEYS_LEFTWINDOWS:
 		return SDL_SCANCODE_LGUI;
-	case KEYS_RightWindows:
+	case KEYS_RIGHTWINDOWS:
 		return SDL_SCANCODE_RGUI;
-	case KEYS_LeftShift:
+	case KEYS_LEFTSHIFT:
 		return SDL_SCANCODE_LSHIFT;
-	case KEYS_RightShift:
+	case KEYS_RIGHTSHIFT:
 		return SDL_SCANCODE_RSHIFT;
-	case KEYS_Apps:
+	case KEYS_APPS:
 		return SDL_SCANCODE_APPLICATION;
-	case KEYS_OemQuestion:
+	case KEYS_OEMQUESTION:
 		return SDL_SCANCODE_SLASH;
-	case KEYS_OemPipe:
+	case KEYS_OEMPIPE:
 		return SDL_SCANCODE_BACKSLASH;
-	case KEYS_OemOpenBrackets:
+	case KEYS_OEMOPENBRACKETS:
 		return SDL_SCANCODE_LEFTBRACKET;
-	case KEYS_OemCloseBrackets:
+	case KEYS_OEMCLOSEBRACKETS:
 		return SDL_SCANCODE_RIGHTBRACKET;
-	case KEYS_CapsLock:
+	case KEYS_CAPSLOCK:
 		return SDL_SCANCODE_CAPSLOCK;
-	case KEYS_OemComma:
+	case KEYS_OEMCOMMA:
 		return SDL_SCANCODE_COMMA;
-	case KEYS_Delete:
+	case KEYS_DELETE:
 		return SDL_SCANCODE_DELETE;
-	case KEYS_End:
+	case KEYS_END:
 		return SDL_SCANCODE_END;
-	case KEYS_Back:
+	case KEYS_BACK:
 		return SDL_SCANCODE_BACKSPACE;
-	case KEYS_Enter:
+	case KEYS_ENTER:
 		return SDL_SCANCODE_RETURN;
-	case KEYS_Escape:
+	case KEYS_ESCAPE:
 		return SDL_SCANCODE_ESCAPE;
-	case KEYS_Home:
+	case KEYS_HOME:
 		return SDL_SCANCODE_HOME;
-	case KEYS_Insert:
+	case KEYS_INSERT:
 		return SDL_SCANCODE_INSERT;
-	case KEYS_OemMinus:
+	case KEYS_OEMMINUS:
 		return SDL_SCANCODE_MINUS;
-	case KEYS_NumLock:
+	case KEYS_NUMLOCK:
 		return SDL_SCANCODE_NUMLOCKCLEAR;
-	case KEYS_PageUp:
+	case KEYS_PAGEUP:
 		return SDL_SCANCODE_PAGEUP;
-	case KEYS_PageDown:
+	case KEYS_PAGEDOWN:
 		return SDL_SCANCODE_PAGEDOWN;
-	case KEYS_Pause:
+	case KEYS_PAUSE:
 		return SDL_SCANCODE_PAUSE;
-	case KEYS_OemPeriod:
+	case KEYS_OEMPERIOD:
 		return SDL_SCANCODE_PERIOD;
-	case KEYS_OemPlus:
+	case KEYS_OEMPLUS:
 		return SDL_SCANCODE_EQUALS;
-	case KEYS_PrintScreen:
+	case KEYS_PRINTSCREEN:
 		return SDL_SCANCODE_PRINTSCREEN;
-	case KEYS_OemQuotes:
+	case KEYS_OEMQUOTES:
 		return SDL_SCANCODE_APOSTROPHE;
-	case KEYS_Scroll:
+	case KEYS_SCROLL:
 		return SDL_SCANCODE_SCROLLLOCK;
-	case KEYS_OemSemicolon:
+	case KEYS_OEMSEMICOLON:
 		return SDL_SCANCODE_SEMICOLON;
-	case KEYS_Sleep:
+	case KEYS_SLEEP:
 		return SDL_SCANCODE_SLEEP;
-	case KEYS_Tab:
+	case KEYS_TAB:
 		return SDL_SCANCODE_TAB;
-	case KEYS_OemTilde:
+	case KEYS_OEMTILDE:
 		return SDL_SCANCODE_GRAVE;
-	case KEYS_VolumeUp:
+	case KEYS_VOLUMEUP:
 		return SDL_SCANCODE_VOLUMEUP;
-	case KEYS_VolumeDown:
+	case KEYS_VOLUMEDOWN:
 		return SDL_SCANCODE_VOLUMEDOWN;
-	case KEYS_None:
+	case KEYS_NONE:
 		return SDL_SCANCODE_UNKNOWN;
 	}
 
 	return SDL_SCANCODE_UNKNOWN;
 }
 
-int32_t KeyboardData_GetLoc(int32_t key)
+int32_t KeyboardData_GetLoc(Key key)
 {
-	const int32_t* keyArray = KeyList_GetArray();
-	int32_t keyArrayLength = KeyList_GetArrayLength();
+	const Key* keyArray = Keys_GetArray();
+	int32_t keyArrayLength = Keys_GetArrayLength();
 	for (int32_t i = 0; i < keyArrayLength; i += 1)
 	{
 		if (key == keyArray[i])
@@ -286,7 +285,7 @@ bool KeyboardData_IsKeyPressedAtLoc(const KeyboardData* kd, int32_t loc)
 {
 	return kd->_mIsKeyDown[loc];
 }
-bool KeyboardData_IsKeyPressed(const KeyboardData* kd, int32_t key)
+bool KeyboardData_IsKeyPressed(const KeyboardData* kd, Key key)
 {
 	int32_t loc = KeyboardData_GetLoc(key);
 	if (loc != -1)
@@ -298,7 +297,7 @@ bool KeyboardData_IsKeyPressed(const KeyboardData* kd, int32_t key)
 		return false;
 	}
 }
-int32_t KeyboardData_GetTimeHeld(int32_t key)
+int32_t KeyboardData_GetTimeHeld(Key key)
 {
 	int32_t loc = KeyboardData_GetLoc(key);
 	if (loc != -1)
@@ -316,8 +315,8 @@ void KeyboardData_Clear(KeyboardData* kd)
 }
 void KeyboardData_Poll(KeyboardData* kd)
 {
-	const int32_t* keyArray = KeyList_GetArray();
-	int32_t keyArrayLength = KeyList_GetArrayLength();
+	const Key* keyArray = Keys_GetArray();
+	int32_t keyArrayLength = Keys_GetArrayLength();
 
 	const bool* currentKeyStates = SDL_GetKeyboardState(NULL);
 
@@ -391,19 +390,19 @@ void KeyboardState_Poll(void)
 
 	KeyboardData_Poll(&_mThisFrame);
 }
-int32_t KeyboardState_GetTimeHeld(int32_t key)
+int32_t KeyboardState_GetTimeHeld(Key key)
 {
 	return KeyboardData_GetTimeHeld(key);
 }
-bool KeyboardState_IsKeyPressed(int32_t key)
+bool KeyboardState_IsKeyPressed(Key key)
 {
 	return KeyboardData_IsKeyPressed(&_mThisFrame, key);
 }
-bool KeyboardState_IsKeyTapped(int32_t key)
+bool KeyboardState_IsKeyTapped(Key key)
 {
 	return !KeyboardData_IsKeyPressed(&_mLastFrame, key) && KeyboardData_IsKeyPressed(&_mThisFrame, key);
 }
-bool KeyboardState_IsKeyReleased(int32_t key)
+bool KeyboardState_IsKeyReleased(Key key)
 {
 	return KeyboardData_IsKeyPressed(&_mLastFrame, key) && !KeyboardData_IsKeyPressed(&_mThisFrame, key);
 }

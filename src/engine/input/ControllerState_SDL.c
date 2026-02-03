@@ -23,7 +23,7 @@
 #include "Buttons.h"
 #include "PlayerIndex.h"
 #include "Axes.h"
-#include "ButtonList.h"
+#include "Buttons.h"
 #include "../math/Math.h"
 #include "../math/MathHelper.h"
 #include "../utils/Logger.h"
@@ -41,29 +41,29 @@ static SDL_Gamepad* GetDevice(PlayerIndex index)
 	int32_t indexToUse = index;
 	return INTERNAL_devices[indexToUse];
 }
-static SDL_GamepadButton ButtonToSDL(int32_t button)
+static SDL_GamepadButton ButtonToSDL(Button button)
 {
 	switch (button)
 	{
-	case BUTTONS_DPadUp:
+	case BUTTONS_DPADUP:
 		return SDL_GAMEPAD_BUTTON_DPAD_UP;
-	case BUTTONS_DPadDown:
+	case BUTTONS_DPADDOWN:
 		return SDL_GAMEPAD_BUTTON_DPAD_DOWN;
-	case BUTTONS_DPadLeft:
+	case BUTTONS_DPADLEFT:
 		return SDL_GAMEPAD_BUTTON_DPAD_LEFT;
-	case BUTTONS_DPadRight:
+	case BUTTONS_DPADRIGHT:
 		return SDL_GAMEPAD_BUTTON_DPAD_RIGHT;
-	case BUTTONS_Start:
+	case BUTTONS_START:
 		return SDL_GAMEPAD_BUTTON_START;
-	case BUTTONS_Back:
+	case BUTTONS_BACK:
 		return SDL_GAMEPAD_BUTTON_BACK;
-	case BUTTONS_LeftStick:
+	case BUTTONS_LEFTSTICK:
 		return SDL_GAMEPAD_BUTTON_LEFT_STICK;
-	case BUTTONS_RightStick:
+	case BUTTONS_RIGHTSTICK:
 		return SDL_GAMEPAD_BUTTON_RIGHT_STICK;
-	case BUTTONS_LeftShoulder:
+	case BUTTONS_LEFTSHOULDER:
 		return SDL_GAMEPAD_BUTTON_LEFT_SHOULDER;
-	case BUTTONS_RightShoulder:
+	case BUTTONS_RIGHTSHOULDER:
 		return SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER;
 	case BUTTONS_A:
 		return SDL_GAMEPAD_BUTTON_SOUTH;
@@ -102,7 +102,7 @@ void ControllerData_PollInput(ControllerData* cd, bool* isButtonMutedArray, bool
 
 	for (int32_t i = 0; i < BUTTONS_AMOUNT_OF_BUTTONS; i += 1)
 	{
-		cd->_mIsButtonPressed[i] = SDL_GetGamepadButton(device, ButtonToSDL(ButtonList_GetButton(i)));
+		cd->_mIsButtonPressed[i] = SDL_GetGamepadButton(device, ButtonToSDL(Buttons_GetButton(i)));
 		if (isButtonMutedArray[i])
 		{
 			if (cd->_mIsButtonPressed[i])

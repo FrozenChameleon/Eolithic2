@@ -13,6 +13,7 @@ typedef struct FixedByteBuffer FixedByteBuffer;
 typedef struct BufferReader BufferReader;
 typedef struct IStringArray IStringArray;
 
+void File_GetFiles(IStringArray* addToThis, const char* path, const char* pattern);
 void File_AppendPathSeparator(MString** str);
 FixedByteBuffer* File_ReadAll(const char* path);
 void File_WriteAll(const char* path, FixedByteBuffer* fbb);

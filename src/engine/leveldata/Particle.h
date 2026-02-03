@@ -9,7 +9,9 @@
 #include "../utils/Macros.h"
 #include "../math/Vector2.h"
 #include "../utils/MString.h"
-#include "../io/BufferReader.h"
+
+typedef struct DynamicByteBuffer DynamicByteBuffer;
+typedef struct BufferReader BufferReader;
 
 typedef struct Particle
 {
@@ -67,5 +69,6 @@ typedef struct Particle
 } Particle;
 
 void Particle_Read(Particle* p, BufferReader* br);
+void Particle_Write(Particle* p, DynamicByteBuffer* dbb);
 Particle* Particle_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);
 void Particle_Dispose(Particle* p);

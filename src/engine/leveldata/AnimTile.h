@@ -9,17 +9,19 @@
 #include "../utils/Macros.h"
 #include "../render/Animation.h"
 #include "../render/Sheet.h"
-#include "../io/BufferReader.h"
 #include "../utils/MString.h"
+
+typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
+
+typedef struct AnimTileGraphicsState
+{
+	bool mIsSetup;
+	Animation mAnimation;
+} AnimTileGraphicsState;
 
 typedef struct AnimTile
 {
-	bool _mIsSetup;
-	int32_t _mWrapSpeedCounter;
-	Point _mWrapOffset;
-	Animation _mAnimation;
-	Sheet* _mWrapSheet;
-
 	bool mIsAdditive;
 	int32_t mScaler;
 	bool mIsFlipX;
@@ -28,16 +30,11 @@ typedef struct AnimTile
 	float mRotation;
 	char mTextureName[EE_FILENAME_MAX];
 	char mTilesetFilter[EE_FILENAME_MAX];
-	bool mIsWrap;
-	char mWrapTextureName[EE_FILENAME_MAX];
-	bool mIsWrapX;
-	int32_t mWrapSpeedX;
-	bool mIsWrapY;
-	int32_t mWrapSpeedY;
-	int32_t mWrapSpeedDelay;
+	AnimTileGraphicsState mGraphics;
 } AnimTile;
 
 void AnimTile_Read(AnimTile* at, BufferReader* br);
+void AnimTile_Write(AnimTile* at, DynamicByteBuffer* dbb);
 AnimTile* AnimTile_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);
 void AnimTile_Dispose(AnimTile* at);
 Animation* AnimTile_GetAnimation(AnimTile* at);

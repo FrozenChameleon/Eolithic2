@@ -12,6 +12,7 @@
 #include "../math/Rectangle.h"
 #include "../math/Point.h"
 #include "../components/Camera.h"
+#include "Keys.h"
 
 typedef struct InputPlayer InputPlayer;
 typedef struct ControllerState ControllerState;
@@ -126,8 +127,8 @@ bool Input_IsPlayingMasterRecording(void);
 bool Input_IsRecordingOrPlayingMasterRecording(void);
 void Input_SetMasterRecordingState(int32_t state);
 #ifdef EDITOR_MODE
-bool Input_IsKeyTapped(int32_t key);
-bool Input_IsKeyReleased(int32_t key);
-bool Input_IsKeyPressed(int32_t key);
-int32_t Input_GetKeyTimeHeld(int32_t key);
+bool Input_IsKeyTapped(Key key);
+bool Input_IsKeyReleased(Key key);
+bool Input_IsKeyPressed(Key key);
+int32_t Input_GetKeyTimeHeld(Key key);
 #endif

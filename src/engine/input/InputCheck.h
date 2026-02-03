@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include "stdint.h"
-#include "stdbool.h"
+#include "../utils/Macros.h"
+#include "Keys.h"
+#include "Buttons.h"
 
 typedef struct InputPlayer InputPlayer;
 typedef struct BufferReader BufferReader;
@@ -20,8 +21,8 @@ typedef struct InputCheck
 	int32_t mAxis;
 	int32_t mAxisDirection;
 	float mAnalogValue;
-	int32_t mKey;
-	int32_t mButton;
+	Key mKey;
+	Button mButton;
 } InputCheck;
 
 enum InputCheckType

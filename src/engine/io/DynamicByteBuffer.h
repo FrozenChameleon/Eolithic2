@@ -24,6 +24,8 @@ void DynamicByteBuffer_WriteI64(DynamicByteBuffer* dbb, int64_t value);
 void DynamicByteBuffer_WriteFloat(DynamicByteBuffer* dbb, float value);
 void DynamicByteBuffer_WriteDouble(DynamicByteBuffer* dbb, double value);
 void DynamicByteBuffer_WriteBoolean(DynamicByteBuffer* dbb, bool value);
+void DynamicByteBuffer_WriteMagicNumber(DynamicByteBuffer* dbb);
+void DynamicByteBuffer_WriteVersionNumber(DynamicByteBuffer* dbb, int16_t versionNumber);
 void DynamicByteBuffer_WriteString(DynamicByteBuffer* dbb, const char* str, size_t maxlen);
 void DynamicByteBuffer_WriteEOF(DynamicByteBuffer* dbb);
 void DynamicByteBuffer_WriteNewline(DynamicByteBuffer* dbb);

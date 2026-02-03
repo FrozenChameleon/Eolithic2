@@ -22,8 +22,8 @@
 #include "../render/DrawTool.h"
 #include "../core/Window.h"
 #include "../input/InputBindings.h"
-#include "../input/KeyList.h"
-#include "../input/ButtonList.h"
+#include "../input/Keys.h"
+#include "../input/Buttons.h"
 #include "../input/MouseState.h"
 #include "../input/KeyboardState.h"
 #include "MString.h"
@@ -1305,7 +1305,7 @@ bool Utils_GetInputCheckForBind(InputCheck* inputCheck, bool isController, bool 
 		int32_t keyBind = Utils_GetKeyboardForBind();
 		if (keyBind != -1)
 		{
-			*inputCheck = InputCheck_CreateCheckKey(KeyList_GetArray()[keyBind]);
+			*inputCheck = InputCheck_CreateCheckKey(Keys_GetArray()[keyBind]);
 			return true;
 		}
 		if (!blockMouse)
@@ -1335,11 +1335,11 @@ bool Utils_GetInputCheckForBind(InputCheck* inputCheck, bool isController, bool 
 				}
 			}
 
-			const int32_t* buttons = ButtonList_GetArray();
-			int32_t buttonsLength = ButtonList_GetArrayLength();
+			const Button* buttons = Buttons_GetArray();
+			int32_t buttonsLength = Buttons_GetArrayLength();
 			for (int32_t j = 0; j < buttonsLength; j += 1)
 			{
-				int32_t button = buttons[j];
+				Button button = buttons[j];
 				if (ControllerState_IsButtonReleased(controllerState, button))
 				{
 					*inputCheck = InputCheck_CreateCheckButton(button);
@@ -1354,8 +1354,8 @@ bool Utils_GetInputCheckForBind(InputCheck* inputCheck, bool isController, bool 
 }
 int32_t Utils_GetKeyboardForBind(void)
 {
-	int32_t keysLength = KeyList_GetArrayLength();
-	const int32_t* keys = KeyList_GetArray();
+	int32_t keysLength = Keys_GetArrayLength();
+	const Key* keys = Keys_GetArray();
 	for (int32_t i = 0; i < keysLength; i += 1) //Keys
 	{
 		if (KeyboardState_IsKeyReleased(keys[i]))

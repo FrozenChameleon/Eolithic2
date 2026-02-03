@@ -202,12 +202,12 @@ void GameHelper_CreateDefaultBindings(IStringArray* strings, InputAction* input)
 		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_RB, KEYS_Q);
 		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_RT, KEYS_W);
 		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_RS, KEYS_E);
-		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_START, KEYS_Enter);
-		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_SELECT, KEYS_Back);
-		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_LS_UP, KEYS_Up);
-		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_LS_RIGHT, KEYS_Right);
-		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_LS_DOWN, KEYS_Down);
-		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_LS_LEFT, KEYS_Left);
+		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_START, KEYS_ENTER);
+		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_SELECT, KEYS_BACK);
+		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_LS_UP, KEYS_UP);
+		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_LS_RIGHT, KEYS_RIGHT);
+		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_LS_DOWN, KEYS_DOWN);
+		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_LS_LEFT, KEYS_LEFT);
 		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_DIGITAL_UP, KEYS_T);
 		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_DIGITAL_RIGHT, KEYS_H);
 		InputBindings_SetupKey(data, 0, s, ACTIONLIST_GAME_DIGITAL_DOWN, KEYS_G);
@@ -223,14 +223,14 @@ void GameHelper_CreateDefaultBindings(IStringArray* strings, InputAction* input)
 		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_X, BUTTONS_X);
 		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_B, BUTTONS_B);
 		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_Y, BUTTONS_Y);
-		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_LB, BUTTONS_LeftShoulder);
-		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_RB, BUTTONS_RightShoulder);
+		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_LB, BUTTONS_LEFTSHOULDER);
+		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_RB, BUTTONS_RIGHTSHOULDER);
 		InputBindings_SetupAxis(data, 1, s, ACTIONLIST_GAME_LT, INPUTCHECK_AXIS_LEFT_TRIGGER, 1);
 		InputBindings_SetupAxis(data, 1, s, ACTIONLIST_GAME_RT, INPUTCHECK_AXIS_RIGHT_TRIGGER, -1);
-		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_LS, BUTTONS_LeftStick);
-		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_RS, BUTTONS_RightStick);
-		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_START, BUTTONS_Start);
-		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_SELECT, BUTTONS_Back);
+		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_LS, BUTTONS_LEFTSTICK);
+		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_RS, BUTTONS_RIGHTSTICK);
+		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_START, BUTTONS_START);
+		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_SELECT, BUTTONS_BACK);
 
 		InputBindings_SetupAxis(data, 1, s, ACTIONLIST_GAME_LS_LEFT, INPUTCHECK_AXIS_LEFT_STICK_X, -1);
 		InputBindings_SetupAxis(data, 1, s, ACTIONLIST_GAME_LS_RIGHT, INPUTCHECK_AXIS_LEFT_STICK_X, 1);
@@ -242,10 +242,10 @@ void GameHelper_CreateDefaultBindings(IStringArray* strings, InputAction* input)
 		InputBindings_SetupAxis(data, 1, s, ACTIONLIST_GAME_RS_UP, INPUTCHECK_AXIS_RIGHT_STICK_Y, -1);
 		InputBindings_SetupAxis(data, 1, s, ACTIONLIST_GAME_RS_DOWN, INPUTCHECK_AXIS_RIGHT_STICK_Y, 1);
 
-		InputBindings_SetupButton(data, 2, s, ACTIONLIST_GAME_DIGITAL_LEFT, BUTTONS_DPadLeft);
-		InputBindings_SetupButton(data, 2, s, ACTIONLIST_GAME_DIGITAL_RIGHT, BUTTONS_DPadRight);
-		InputBindings_SetupButton(data, 2, s, ACTIONLIST_GAME_DIGITAL_UP, BUTTONS_DPadUp);
-		InputBindings_SetupButton(data, 2, s, ACTIONLIST_GAME_DIGITAL_DOWN, BUTTONS_DPadDown);
+		InputBindings_SetupButton(data, 2, s, ACTIONLIST_GAME_DIGITAL_LEFT, BUTTONS_DPADLEFT);
+		InputBindings_SetupButton(data, 2, s, ACTIONLIST_GAME_DIGITAL_RIGHT, BUTTONS_DPADRIGHT);
+		InputBindings_SetupButton(data, 2, s, ACTIONLIST_GAME_DIGITAL_UP, BUTTONS_DPADUP);
+		InputBindings_SetupButton(data, 2, s, ACTIONLIST_GAME_DIGITAL_DOWN, BUTTONS_DPADDOWN);
 
 		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_MENU_SELECT, BUTTONS_A);
 		InputBindings_SetupButton(data, 1, s, ACTIONLIST_GAME_MENU_BACK, BUTTONS_B);

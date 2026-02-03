@@ -14,6 +14,7 @@
 #include "FixedByteBuffer.h"
 #include "BufferReader.h"
 #include "../utils/IStringArray.h"
+#include "../utils/Logger.h"
 
 #ifdef _WIN32
 #define PATH_SEPARATOR '\\'
@@ -27,6 +28,49 @@ static const char* _mPrefPath;
 #define LARGE_CHAR_BUFFER_LEN 8192
 static char _mLargeCharBuffer[LARGE_CHAR_BUFFER_LEN];
 
+void File_GetFiles(IStringArray* addToThis, const char* path, const char* pattern)
+{
+	int32_t count = 0;
+	char** files = NULL;
+
+	{
+		MString* tempString = NULL;
+		File_PathCombine2(&tempString, File_GetBasePath(), path);
+		files = SDL_GlobDirectory(MString_Text(tempString), pattern, 0, &count);
+		MString_Dispose(&tempString);
+	}
+
+	if (files == NULL)
+	{
+		Logger_LogWarning(SDL_GetError());
+	}
+	else
+	{
+		for (int i = 0; i < count; i += 1)
+		{
+			char* filename = files[i];
+			IStringArray_Add(addToThis, filename);
+		}
+		SDL_free(files);
+		files = NULL;
+	}
+}
+void File_EnumerationTest(void)
+{
+	MString* tempString = NULL;
+	File_PathCombine3(&tempString, File_GetBasePath(), "data", "tester");
+	int32_t count = 0;
+	char** files = SDL_GlobDirectory(MString_Text(tempString), "*", 0, &count);
+	for (int i = 0; i < count; i += 1)
+	{
+		char* file = files[i];
+		Logger_LogInformation(file);
+
+		int tester = 0;
+		tester += 1;
+	}
+	MString_Dispose(&tempString);
+}
 FixedByteBuffer* File_ReadAll(const char* path)
 {
 	SDL_IOStream* rwops = NULL;
@@ -110,6 +154,7 @@ const char* File_GetPrefPath(void)
 
 	return _mPrefPath;
 }
+
 void File_AppendPathSeparator(MString** str)
 {
 	MString_AddAssignChar(str, PATH_SEPARATOR);

@@ -702,32 +702,21 @@ void Renderer_DrawTiles(RenderCommandTileLayer* draw)
 				bool flippingY = drawTile->mFlipY ? !animTile->mIsFlipY : animTile->mIsFlipY;
 
 				SpriteEffects effects = Renderer_GetEffects(flippingX, flippingY);
-
-				if (animTile->mIsWrap)
+				Sheet* sheet = AnimTile_GetAnimationSheet(animTile);
+				Rectangle rect = sheet->mRectangle;
+				Vector2 halfRect = Vector2_Create((float)(rect.Width / 2), (float)(rect.Height / 2));
+				Rectangle source = Rectangle_Create(rect.X, rect.Y, rect.Width, rect.Height);
+				BlendState oldBlendState = _mCurrentBlendState;
+				if (animTile->mIsAdditive)
 				{
-					/*Rectangle source = Rectangle_Create(0 + animTile->_mWrapOffset.X, 0 + animTile->_mWrapOffset.Y, TILE_SIZE, TILE_SIZE); //UNUSED
-					Vector2 halfRect = Vector2_Create(TILE_SIZE / 2, TILE_SIZE / 2);
-					Draw(OeSheet_GetTexture(animTile->_mWrapSheet), position + origin - halfRect + halfRect, source, draw->mColor,
-						OeMath_ToRadians(animTile->mRotation + drawTile->mRotation), halfRect, animTile->mScaler, effects, depth);*/
+					_mCurrentBlendState = BLENDSTATE_ADDITIVE;
 				}
-				else
+				Renderer_Draw5(Sheet_GetTexture(sheet), Vector2_Add(position, origin), source, draw->mColor,
+					Math_ToRadians(animTile->mRotation + drawTile->mRotation),
+					halfRect, (float)animTile->mScaler, effects, (float)depth);
+				if (animTile->mIsAdditive)
 				{
-					Sheet* sheet = AnimTile_GetAnimationSheet(animTile);
-					Rectangle rect = sheet->mRectangle;
-					Vector2 halfRect = Vector2_Create((float)(rect.Width / 2), (float)(rect.Height / 2));
-					Rectangle source = Rectangle_Create(rect.X, rect.Y, rect.Width, rect.Height);
-					BlendState oldBlendState = _mCurrentBlendState;
-					if (animTile->mIsAdditive)
-					{
-						_mCurrentBlendState = BLENDSTATE_ADDITIVE;
-					}
-					Renderer_Draw5(Sheet_GetTexture(sheet), Vector2_Add(position, origin), source, draw->mColor,
-						Math_ToRadians(animTile->mRotation + drawTile->mRotation),
-						halfRect, (float)animTile->mScaler, effects, (float)depth);
-					if (animTile->mIsAdditive)
-					{
-						_mCurrentBlendState = oldBlendState;
-					}
+					_mCurrentBlendState = oldBlendState;
 				}
 			}
 		}

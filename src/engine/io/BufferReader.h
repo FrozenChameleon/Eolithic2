@@ -37,6 +37,8 @@ int32_t BufferReader_ReadI32(BufferReader* br);
 int64_t BufferReader_ReadI64(BufferReader* br);
 float BufferReader_ReadFloat(BufferReader* br);
 double BufferReader_ReadDouble(BufferReader* br);
+bool BufferReader_ReadMagicNumber(BufferReader* br);
+int16_t BufferReader_ReadVersionNumber(BufferReader* br);
 int32_t* BufferReader_ReadIntArray2D(BufferReader* br, int32_t width, int32_t height);
 uint8_t BufferReader_ReadJustTheStringLength(BufferReader* br);
 void BufferReader_ReadJustTheStringData(BufferReader* br, uint8_t stringLength, char* dst, size_t maxlen);

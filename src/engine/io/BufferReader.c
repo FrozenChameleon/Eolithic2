@@ -10,6 +10,7 @@
 #include "../utils/Utils.h"
 #include "File.h"
 #include "../utils/MString.h"
+#include "../utils/Logger.h"
 
 static uint64_t _mRefs;
 
@@ -81,27 +82,65 @@ static double BinaryReader_ReadDouble(BufferReader* br)
 	Utils_memcpy(&dst, &source, sizeof(double));
 	return dst;
 }
+static uint8_t BinaryReader_ReadJustTheStringLength(BufferReader* br)
+{
+	return BinaryReader_ReadU8(br);
+}
+static void BinaryReader_ReadJustTheStringData(BufferReader* br, uint8_t stringLength, char* dst, size_t maxlen)
+{
+	Utils_memset(dst, 0, maxlen);
+	for (int32_t i = 0; i < stringLength; i += 1)
+	{
+		uint8_t c = BinaryReader_ReadU8(br);
+		if (i < maxlen)
+		{
+			dst[i] = c;
+		}
+	}
+	if (stringLength < maxlen)
+	{
+		dst[stringLength] = '\0';
+	}
+}
+static void BinaryReader_ReadString(BufferReader* br, char* dst, size_t maxlen)
+{
+	uint8_t stringLength = BinaryReader_ReadJustTheStringLength(br);
+	BinaryReader_ReadJustTheStringData(br, stringLength, dst, maxlen);
+}
 
 static void TextReader_ReadToNextString(BufferReader* br)
 {
 	MString_AssignEmptyString(&_mNextString);
 
+	bool wasEscaped = false;
+	bool isEscaped = false;
 	bool hasReachedText = false;
-	while (BufferReader_HasNext(br))
+	while (BufferReader_HasNext(br)) //TODO THIS ESCAPE SETUP IS NOT GOOD ENOUGH
 	{
 		uint8_t nextByte = BinaryReader_ReadU8(br);
+
 		if ((nextByte == ' ') || (nextByte == '\n') || (nextByte == '\r'))
 		{
-			if (hasReachedText)
+			if (!isEscaped && hasReachedText)
 			{
-				return;
+				break;
 			}
 		}
 		else
 		{
+			if (nextByte == '"')
+			{
+				wasEscaped = true;
+				isEscaped = !isEscaped;
+			}
 			hasReachedText = true;
 			MString_AddAssignChar(&_mNextString, nextByte);
 		}
+	}
+
+	if (wasEscaped && (MString_GetLastChar(_mNextString) == '"')) //Trim escape
+	{
+		MString_AssignSubString(&_mNextString, MString_Text(_mNextString), 1, MString_Length(_mNextString) - 2);
 	}
 }
 static bool ReadNextStringAndCheckIfEmpty(BufferReader* br)
@@ -202,6 +241,17 @@ static double TextReader_ReadDouble(BufferReader* br)
 	}
 
 	return Utils_ParseDouble(MString_Text(_mNextString));
+}
+static int32_t TextReader_ReadNextStringAndReturnIfValid(BufferReader* br)
+{
+	if (ReadNextStringAndCheckIfEmpty(br))
+	{
+		return -1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 FixedByteBuffer* BufferReader_ReadBytes(BufferReader* br, int64_t length)
@@ -358,7 +408,21 @@ double BufferReader_ReadDouble(BufferReader* br)
 		return BinaryReader_ReadDouble(br);
 	}
 }
-int32_t* BufferReader_ReadIntArray2D(BufferReader* br, int32_t width, int32_t height)
+bool BufferReader_ReadMagicNumber(BufferReader* br)
+{
+	int16_t magicNumber = BufferReader_ReadI16(br);
+	if (magicNumber != EE_MAGIC_NUMBER)
+	{
+		Logger_LogError("Magic number not found!");
+		return false;
+	}
+	return true;
+}
+int16_t BufferReader_ReadVersionNumber(BufferReader* br)
+{
+	return BufferReader_ReadI16(br);
+}
+int32_t* BufferReader_ReadIntArray2D(BufferReader* br, int32_t width, int32_t height) //TODO MEMORY LEAK
 {
 	int32_t totalArrayLen = (width * height);
 	int32_t* readToThis = (int32_t*)Utils_calloc(totalArrayLen, sizeof(int32_t));
@@ -373,32 +437,52 @@ int32_t* BufferReader_ReadIntArray2D(BufferReader* br, int32_t width, int32_t he
 }
 uint8_t BufferReader_ReadJustTheStringLength(BufferReader* br)
 {
-	return BufferReader_ReadU8(br);
+	if (br->mIsReadingText)
+	{
+		return 0;
+	}
+	else
+	{
+		return BinaryReader_ReadJustTheStringLength(br);
+	}
 }
 void BufferReader_ReadJustTheStringData(BufferReader* br, uint8_t stringLength, char* dst, size_t maxlen)
 {
-	memset(dst, 0, maxlen);
-	for (int32_t i = 0; i < stringLength; i += 1)
+	if (br->mIsReadingText)
 	{
-		uint8_t c = BufferReader_ReadU8(br);
-		if (i < maxlen)
-		{
-			dst[i] = c;
-		}
 	}
-	if (stringLength < maxlen)
+	else
 	{
-		dst[stringLength] = '\0';
+		BinaryReader_ReadJustTheStringData(br, stringLength, dst, maxlen);
 	}
 }
 void BufferReader_ReadString(BufferReader* br, char* dst, size_t maxlen)
 {
-	uint8_t stringLength = BufferReader_ReadJustTheStringLength(br);
-	BufferReader_ReadJustTheStringData(br, stringLength, dst, maxlen);
+	if (br->mIsReadingText)
+	{
+		if (TextReader_ReadNextStringAndReturnIfValid(br) >= 0)
+		{
+			Utils_strlcpy(dst, MString_Text(_mNextString), maxlen);
+		}
+	}
+	else
+	{
+		BinaryReader_ReadString(br, dst, maxlen);
+	}
 }
 void BufferReader_ReadMString(MString** assignToThis, BufferReader* br)
 {
-	MString_Read(assignToThis, br);
+	if (br->mIsReadingText)
+	{
+		if (TextReader_ReadNextStringAndReturnIfValid(br) >= 0)
+		{
+			MString_AssignMString(assignToThis, _mNextString);
+		}
+	}
+	else
+	{
+		MString_Read(assignToThis, br);
+	}
 }
 bool BufferReader_HasNext(BufferReader* br)
 {

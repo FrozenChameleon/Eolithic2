@@ -36,7 +36,7 @@ float ControllerData_GetTriggerLeft(const ControllerData* cd);
 void ControllerData_Clear(ControllerData* cd);
 void ControllerData_CopyFrom(ControllerData* cd, const ControllerData* otherData);
 bool ControllerData_IsButtonPressedAtLoc(const ControllerData* cd, int32_t loc);
-bool ControllerData_IsButtonPressed(const ControllerData* cd, int32_t button);
+bool ControllerData_IsButtonPressed(const ControllerData* cd, Button button);
 
 typedef struct ControllerState
 {
@@ -60,9 +60,9 @@ float ControllerState_GetTriggerRight(const ControllerState* cs);
 float ControllerState_GetTriggerLeft(const ControllerState* cs);
 float ControllerState_GetAnalogData(const ControllerState* cs, int32_t loc);
 void ControllerState_SetVibration(ControllerState* cs, float leftMotor, float rightMotor);
-bool ControllerState_IsButtonPressed(const ControllerState* cs, int32_t button);
-bool ControllerState_IsButtonTapped(const ControllerState* cs, int32_t button);
-bool ControllerState_IsButtonReleased(const ControllerState* cs, int32_t button);
+bool ControllerState_IsButtonPressed(const ControllerState* cs, Button button);
+bool ControllerState_IsButtonTapped(const ControllerState* cs, Button button);
+bool ControllerState_IsButtonReleased(const ControllerState* cs, Button button);
 int32_t ControllerState_IsAnalogTapped(const ControllerState* cs, int32_t loc, float threshold);
 int32_t ControllerState_IsAnalogReleased(const ControllerState* cs, int32_t loc, float threshold);
 bool ControllerState_IsAnyButtonReleased(const ControllerState* cs);
