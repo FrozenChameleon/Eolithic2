@@ -103,6 +103,12 @@ void* ResourceManager_GetResourceData(ResourceManager* rm, const char* filenameW
 }
 Resource* ResourceManager_LoadAssetFromStreamAndCreateResource(ResourceManager* rm, BufferReader* br, const char* filenameWithoutExtension, const char* path)
 {
+	{
+		MString* tempString = NULL;
+		MString_Combine4(&tempString, "Loading ", rm->_mResourceType, " from: ", path);
+		Logger_LogInformation(MString_Text(tempString));
+		MString_Dispose(&tempString);
+	}
 	Resource* resource = (Resource*)Utils_calloc(1, sizeof(Resource));
 	Utils_memset(resource, 0, sizeof(Resource));
 	MString_AssignString(&resource->mPath, path);
@@ -124,7 +130,7 @@ void ResourceManager_LoadAllFromDat(ResourceManager* rm)
 {
 	if (rm->_mReadFromDirectory)
 	{
-		ResourceManager_LoadAllFromDirectory(rm, rm->_mIsReadingText);
+		ResourceManager_LoadAllFromDirectories(rm, rm->_mIsReadingText);
 		return;
 	}
 
@@ -280,28 +286,22 @@ void ResourceManager_ReadAll(ResourceManager* rm, bool isReadingText)
 		ResourceManager_Read(rm, rm->sh_resources[i].key, isReadingText);
 	}
 }
-void ResourceManager_LoadAllFromDirectory(ResourceManager* rm, bool isReadingText)
+static void LoadAllFromDirectoriesHelper(ResourceManager* rm, bool isReadingText, const char* directory)
 {
-	if (Utils_StringEqualTo(rm->_mDirectory, EE_STR_EMPTY))
+	if (Utils_StringEqualTo(directory, EE_STR_EMPTY))
 	{
-		Logger_LogError("Directory missing for resource manager");
 		return;
 	}
 
-	IStringArray* files = IStringArray_Create();
-	{
-		MString* tempString = NULL;
-		MString_Combine2(&tempString, "*", rm->_mFileExtension);
-		File_GetFiles(files, rm->_mDirectory, MString_Text(tempString), false);
-		MString_Dispose(&tempString);
-	}
+	IStringArray* filePaths = IStringArray_Create();
+	File_GetFilePaths(filePaths, directory, rm->_mFileExtension);
 
-	for (int i = 0; i < IStringArray_Length(files); i += 1)
+	for (int i = 0; i < IStringArray_Length(filePaths); i += 1)
 	{
 		MString* nextPath = NULL;
-		const char* filename = IStringArray_Get(files, i);
+		const char* filePath = IStringArray_Get(filePaths, i);
 		MString* fileNameWithoutExtension = NULL;
-		File_PathCombine2(&nextPath, rm->_mDirectory, filename);
+		File_PathCombine2(&nextPath, directory, filePath);
 		File_GetFileNameWithoutExtension(&fileNameWithoutExtension, MString_Text(nextPath));
 		BufferReader* br = BufferReader_CreateFromPath(MString_Text(nextPath));
 		BufferReader_SetIsReadingText(br, isReadingText);
@@ -309,5 +309,14 @@ void ResourceManager_LoadAllFromDirectory(ResourceManager* rm, bool isReadingTex
 		BufferReader_Dispose(br);
 		MString_Dispose(&nextPath);
 		MString_Dispose(&fileNameWithoutExtension);
+	}
+
+	IStringArray_Dispose(filePaths);
+}
+void ResourceManager_LoadAllFromDirectories(ResourceManager* rm, bool isReadingText)
+{
+	for (int i = 0; i < RESOURCEMANAGER_DIRECTORIES_LEN; i += 1)
+	{
+		LoadAllFromDirectoriesHelper(rm, isReadingText, rm->_mDirectories[i]);
 	}
 }

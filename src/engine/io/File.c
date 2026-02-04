@@ -25,10 +25,10 @@
 static const char* _mBasePath;
 static const char* _mPrefPath;
 
-#define LARGE_CHAR_BUFFER_LEN 8192
+#define LARGE_CHAR_BUFFER_LEN EE_PATH_MAX
 static char _mLargeCharBuffer[LARGE_CHAR_BUFFER_LEN];
 
-void File_GetFiles(IStringArray* addToThis, const char* path, const char* pattern, bool removeExtension)
+void File_GetFilenames(IStringArray* addToThis, const char* path, const char* pattern, bool removeTheExtension)
 {
 	int32_t count = 0;
 	char** files = NULL;
@@ -43,43 +43,57 @@ void File_GetFiles(IStringArray* addToThis, const char* path, const char* patter
 	if (files == NULL)
 	{
 		Logger_LogWarning(SDL_GetError());
+		return;
 	}
-	else
-	{
-		for (int i = 0; i < count; i += 1)
-		{
-			char* filename = files[i];
-			if (removeExtension)
-			{
-				MString* filenameWithoutExtension = NULL;
-				File_GetFileNameWithoutExtension(&filenameWithoutExtension, filename);
-				IStringArray_Add(addToThis, MString_Text(filenameWithoutExtension));
-				MString_Dispose(&filenameWithoutExtension);
-			}
-			else
-			{
-				IStringArray_Add(addToThis, filename);
-			}
-		}
-		SDL_free(files);
-		files = NULL;
-	}
-}
-void File_EnumerationTest(void)
-{
-	MString* tempString = NULL;
-	File_PathCombine3(&tempString, File_GetBasePath(), "data", "tester");
-	int32_t count = 0;
-	char** files = SDL_GlobDirectory(MString_Text(tempString), "*", 0, &count);
+
 	for (int i = 0; i < count; i += 1)
 	{
-		char* file = files[i];
-		Logger_LogInformation(file);
-
-		int tester = 0;
-		tester += 1;
+		char* filename = files[i];
+		if (removeTheExtension)
+		{
+			MString* filenameWithoutExtension = NULL;
+			File_GetFileNameWithoutExtension(&filenameWithoutExtension, filename);
+			IStringArray_Add(addToThis, MString_Text(filenameWithoutExtension));
+			MString_Dispose(&filenameWithoutExtension);
+		}
+		else
+		{
+			IStringArray_Add(addToThis, filename);
+		}
 	}
-	MString_Dispose(&tempString);
+	SDL_free(files);
+}
+void File_GetFilePaths(IStringArray* addToThis, const char* path, const char* onlyWithThisExtension)
+{
+	int32_t count = 0;
+	char** files = NULL;
+
+	{
+		MString* tempString = NULL;
+		File_PathCombine2(&tempString, File_GetBasePath(), path);
+		files = SDL_GlobDirectory(MString_Text(tempString), NULL, 0, &count);
+		MString_Dispose(&tempString);
+	}
+
+	if (files == NULL)
+	{
+		Logger_LogWarning(SDL_GetError());
+		return;
+	}
+
+	for (int i = 0; i < count; i += 1)
+	{
+		char* filename = files[i];
+		if (onlyWithThisExtension != NULL)
+		{
+			if (!Utils_StringEndsWith(filename, onlyWithThisExtension))
+			{
+				continue;
+			}
+		}
+		IStringArray_Add(addToThis, filename);
+	}
+	SDL_free(files);
 }
 FixedByteBuffer* File_ReadAll(const char* path)
 {

@@ -271,26 +271,27 @@ void Animation_CheckForAnimation(const char* textureName)
 }
 void Animation_BuildAnimations(void)
 {
+	arrsetlen(arr_animation_info, 0);
 	shfree(sh_animation_string_map);
 	shfree(sh_conversion_map);
 	shfree(sh_animation_sheet_map);
-	arrsetlen(arr_animation_info, 0);
 
 	sh_new_arena(sh_animation_string_map);
 	sh_new_arena(sh_conversion_map);
 	sh_new_arena(sh_animation_sheet_map);
 
-	IStringArray* sheets = Sheet_CreateListOfSheetNames();
-	int64_t sheetsLen = IStringArray_Length(sheets);
-	for (int32_t i = 0; i < sheetsLen; i += 1)
 	{
-		const char* sheetName = IStringArray_Get(sheets, i);
-		Animation_CheckForAnimation(sheetName);
+		IStringArray* sheets = IStringArray_Create();
+		Sheet_GetListOfSheetNames(sheets);
+		for (int32_t i = 0; i < IStringArray_Length(sheets); i += 1)
+		{
+			const char* sheetName = IStringArray_Get(sheets, i);
+			Animation_CheckForAnimation(sheetName);
+		}
+		IStringArray_Dispose(sheets);
 	}
-	IStringArray_Dispose(sheets);
 
-	int64_t animationInfoLen = arrlen(arr_animation_info);
-	for (int32_t i = 0; i < animationInfoLen; i += 1)
+	for (int32_t i = 0; i < arrlen(arr_animation_info); i += 1)
 	{
 		AnimationInfo* info = &arr_animation_info[i];
 		if (info->mHasStart)
@@ -299,8 +300,10 @@ void Animation_BuildAnimations(void)
 		}
 		else
 		{
-			Logger_LogWarning("Animation is incorrectly setup:");
-			Logger_LogWarning(info->mSheetName);
+			MString* tempString = NULL;
+			MString_Combine2(&tempString, "Animation is incorrectly setup: ", info->mSheetName);
+			Logger_LogWarning(MString_Text(tempString));
+			MString_Dispose(&tempString);
 		}
 	}
 }

@@ -10,6 +10,8 @@
 #include "../utils/Macros.h"
 #include "../io/BufferReader.h"
 
+#define RESOURCEMANAGER_DIRECTORIES_LEN 5
+
 typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 typedef void* (*ResourceManager_FromStreamFunc)(const char* path, const char* filenameWithoutExtension, BufferReader* br);
@@ -30,7 +32,7 @@ typedef struct ResourceManager
 	char _mResourceType[EE_FILENAME_MAX];
 	char _mDefaultResource[EE_FILENAME_MAX];
 	char _mFileExtension[EE_FILENAME_MAX];
-	char _mDirectory[EE_PATH_MAX];
+	char _mDirectories[RESOURCEMANAGER_DIRECTORIES_LEN][EE_PATH_MAX];
 	bool _mReadFromDirectory;
 	bool _mIsReadingText;
 } ResourceManager;
@@ -54,4 +56,4 @@ void ResourceManager_Write(ResourceManager* rm, const char* filenameWithoutExten
 void ResourceManager_WriteAll(ResourceManager* rm, bool isWritingText);
 void ResourceManager_Read(ResourceManager* rm, const char* filenameWithoutExtension, bool isReadingText);
 void ResourceManager_ReadAll(ResourceManager* rm, bool isReadingText);
-void ResourceManager_LoadAllFromDirectory(ResourceManager* rm, bool isReadingText);
+void ResourceManager_LoadAllFromDirectories(ResourceManager* rm, bool isReadingText);

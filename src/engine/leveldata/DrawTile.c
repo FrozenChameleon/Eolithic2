@@ -80,6 +80,8 @@ void DrawTile_Draw(DrawTile* drawTile, SpriteBatch* spriteBatch, Texture* textur
 }
 Point DrawTile_GetCorrectPoint(DrawTile* drawTile)
 {
+	return drawTile->mPoint;
+	/* //DEBUG ONLY FOR NOW TODO
 	if (!Globals_IsDebugFileMode() || GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS)
 	{
 		return drawTile->mOffsetPoint;
@@ -87,7 +89,7 @@ Point DrawTile_GetCorrectPoint(DrawTile* drawTile)
 	else
 	{
 		return drawTile->mPoint;
-	}
+	}*/
 }
 bool DrawTile_IsZero(DrawTile* drawTile)
 {

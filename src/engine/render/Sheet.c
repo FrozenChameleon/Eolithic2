@@ -16,7 +16,7 @@
 
 #define DEBUG_SHEET_NAME "DEBUG_ERROR_777"
 
-static Sheet* _mDummy;
+static Sheet _mDummy;
 static struct { const char* key; Sheet* value; } *sh_sheet_map;
 static Sheet** arr_sheet_list;
 static bool _mHasInit;
@@ -53,7 +53,7 @@ Sheet* Sheet_GetDefaultSheet(void)
 	}
 	else
 	{
-		return _mDummy;
+		return &_mDummy;
 	}
 }
 Sheet* Sheet_GetSheet(const char* name)
@@ -74,6 +74,7 @@ void Sheet_BuildSheets(void)
 {
 	arrsetlen(arr_sheet_list, 0);
 	shfree(sh_sheet_map);
+	_mHasInit = false;
 
 	Init();
 
@@ -93,9 +94,10 @@ void Sheet_BuildSheets(void)
 		sheet->mTextureResource = resource;
 		sheet->mRectangle = ((Texture*)sheet->mTextureResource->mData)->mBounds;
 		arrput(arr_sheet_list, sheet);
-		shput(sh_sheet_map, resource->mPath, sheet);
+		shput(sh_sheet_map, resource->mFileNameWithoutExtension, sheet);
 	}
 
+	/* //DEBUG ONLY FOR NOW
 	if (!Globals_IsDebugFileMode() || GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS)
 	{
 		ResourceManager* textureOffsetMan = ResourceManagerList_TextureOffset();
@@ -124,6 +126,7 @@ void Sheet_BuildSheets(void)
 
 		}
 	}
+	*/
 }
 bool Sheet_HasSheet(const char* name)
 {
@@ -136,16 +139,14 @@ bool Sheet_HasSheet(const char* name)
 	}
 	return true;
 }
-IStringArray* Sheet_CreateListOfSheetNames(void)
+void Sheet_GetListOfSheetNames(IStringArray* addToThis)
 {
-	IStringArray* sa = IStringArray_Create();
 	ptrdiff_t len = shlen(sh_sheet_map);
 	for (int32_t i = 0; i < len; i += 1)
 	{
 		const char* sheetName = sh_sheet_map[i].value->mSheetName;
-		IStringArray_Add(sa, sheetName);
+		IStringArray_Add(addToThis, sheetName);
 	}
-	return sa;
 }
 Resource* Sheet_GetTextureResource(Sheet* sheet)
 {

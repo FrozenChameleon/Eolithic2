@@ -64,7 +64,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(animTileMan->_mDatFileName, "animtile.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(animTileMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "animtile");
-		Utils_strlcpy(animTileMan->_mDirectory, MString_Text(tempString), EE_PATH_MAX);
+		Utils_strlcpy(animTileMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		animTileMan->_mFromStream = (ResourceManager_FromStreamFunc)AnimTile_FromStream;
 		animTileMan->_mDispose = (ResourceManager_DisposeFunc)AnimTile_Dispose;
 		animTileMan->_mRead = (ResourceManager_ReadFunc)AnimTile_Read;
@@ -80,7 +80,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(propMan->_mDatFileName, "props.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(propMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "props");
-		Utils_strlcpy(propMan->_mDirectory, MString_Text(tempString), EE_PATH_MAX);
+		Utils_strlcpy(propMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		propMan->_mFromStream = (ResourceManager_FromStreamFunc)Prop_FromStream;
 		propMan->_mDispose = (ResourceManager_DisposeFunc)Prop_Dispose;
 		propMan->_mRead = (ResourceManager_ReadFunc)Prop_Read;
@@ -89,14 +89,32 @@ void ResourceManagerList_Init(void)
 		propMan->_mIsReadingText = true;
 	}
 
+	/*
+	  public static readonly string[] DEBUG_TEXTURE_DIRECTORIES = { OeFile.Combine("data", "gfx", "game"), OeFile.Combine("data", "gfx", "tilesets"), OeFile.Combine("data", "gfx", "special") };
+		public static readonly string[] USER_TEXTURE_DIRECTORIES = { OeFile.Combine("data", "gfx", "generated_game"), OeFile.Combine("data", "gfx", "generated_tilesets"), OeFile.Combine("data", "gfx", "special") };
+		/*
+		*/
+
 	{
 		ResourceManager* textureMan = ResourceManagerList_Texture();
 		ResourceManager_Init(textureMan);
 		Utils_strlcpy(textureMan->_mResourceType, "Texture", EE_FILENAME_MAX);
 		Utils_strlcpy(textureMan->_mDatFileName, "gfx.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(textureMan->_mDefaultResource, "DEBUG_ERROR_777", EE_FILENAME_MAX);
+		Utils_strlcpy(textureMan->_mFileExtension, ".png", EE_FILENAME_MAX);
+
+		File_PathCombine3(&tempString, "data", "gfx", "game");
+		Utils_strlcpy(textureMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
+
+		File_PathCombine3(&tempString, "data", "gfx", "tilesets");
+		Utils_strlcpy(textureMan->_mDirectories[1], MString_Text(tempString), EE_PATH_MAX);
+
+		File_PathCombine3(&tempString, "data", "gfx", "special");
+		Utils_strlcpy(textureMan->_mDirectories[2], MString_Text(tempString), EE_PATH_MAX);
+
 		textureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
 		textureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
+		textureMan->_mReadFromDirectory = true;
 	}
 
 	{
@@ -106,7 +124,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(fontTextureMan->_mDatFileName, "fontsgfx.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(fontTextureMan->_mFileExtension, ".png", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "fonts");
-		Utils_strlcpy(fontTextureMan->_mDirectory, MString_Text(tempString), EE_PATH_MAX);
+		Utils_strlcpy(fontTextureMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		fontTextureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
 		fontTextureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
 		fontTextureMan->_mReadFromDirectory = true;
@@ -117,8 +135,12 @@ void ResourceManagerList_Init(void)
 		ResourceManager_Init(movieTextureMan);
 		Utils_strlcpy(movieTextureMan->_mResourceType, "Movie Texture", EE_FILENAME_MAX);
 		Utils_strlcpy(movieTextureMan->_mDatFileName, "moviegfx.dat", EE_FILENAME_MAX);
+		Utils_strlcpy(movieTextureMan->_mFileExtension, ".png", EE_FILENAME_MAX);
+		File_PathCombine3(&tempString, "data", "gfx", "movies");
+		Utils_strlcpy(movieTextureMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		movieTextureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
 		movieTextureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
+		movieTextureMan->_mReadFromDirectory = true;
 	}
 
 	{
@@ -129,7 +151,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(soundEffectMan->_mDefaultResource, "editorSave", EE_FILENAME_MAX);
 		Utils_strlcpy(soundEffectMan->_mFileExtension, ".wav", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "sfx");
-		Utils_strlcpy(soundEffectMan->_mDirectory, MString_Text(tempString), EE_PATH_MAX);
+		Utils_strlcpy(soundEffectMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		soundEffectMan->_mFromStream = (ResourceManager_FromStreamFunc)SoundEffect_FromStream;
 		soundEffectMan->_mDispose = (ResourceManager_DisposeFunc)SoundEffect_Dispose;
 		soundEffectMan->_mReadFromDirectory = true;
@@ -143,7 +165,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(musicMan->_mDefaultResource, "default", EE_FILENAME_MAX);
 		Utils_strlcpy(musicMan->_mFileExtension, ".wav", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "music");
-		Utils_strlcpy(musicMan->_mDirectory, MString_Text(tempString), EE_PATH_MAX);
+		Utils_strlcpy(musicMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		musicMan->_mFromStream = (ResourceManager_FromStreamFunc)Music_FromStream;
 		musicMan->_mDispose = (ResourceManager_DisposeFunc)Music_Dispose;
 		musicMan->_mReadFromDirectory = true;
@@ -156,7 +178,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(levelDataMan->_mDatFileName, "lvl.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(levelDataMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "lvl");
-		Utils_strlcpy(levelDataMan->_mDirectory, MString_Text(tempString), EE_PATH_MAX);
+		Utils_strlcpy(levelDataMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		levelDataMan->_mFromStream = (ResourceManager_FromStreamFunc)LevelData_FromStream;
 		levelDataMan->_mDispose = (ResourceManager_DisposeFunc)LevelData_Dispose;
 		levelDataMan->_mWrite = (ResourceManager_WriteFunc)LevelData_Write;
@@ -171,7 +193,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(tilesetOffsetMan->_mDatFileName, "offsetstile.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(tilesetOffsetMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine3(&tempString, "data", "gfx", "generated_tilesets");
-		Utils_strlcpy(tilesetOffsetMan->_mDirectory, MString_Text(tempString), EE_PATH_MAX);
+		Utils_strlcpy(tilesetOffsetMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		tilesetOffsetMan->_mFromStream = (ResourceManager_FromStreamFunc)TilesetOffset_FromStream;
 		tilesetOffsetMan->_mDispose = (ResourceManager_DisposeFunc)TilesetOffset_Dispose;
 		tilesetOffsetMan->_mReadFromDirectory = true;
@@ -184,7 +206,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(textureOffsetMan->_mDatFileName, "offsetstex.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(textureOffsetMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine3(&tempString, "data", "gfx", "generated_game");
-		Utils_strlcpy(textureOffsetMan->_mDirectory, MString_Text(tempString), EE_PATH_MAX);
+		Utils_strlcpy(textureOffsetMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		textureOffsetMan->_mFromStream = (ResourceManager_FromStreamFunc)TextureOffset_FromStream;
 		textureOffsetMan->_mDispose = (ResourceManager_DisposeFunc)TextureOffset_Dispose;
 		textureOffsetMan->_mReadFromDirectory = true;
@@ -197,7 +219,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(fontMan->_mDatFileName, "fonts.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(fontMan->_mFileExtension, ".fnt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "fonts");
-		Utils_strlcpy(fontMan->_mDirectory, MString_Text(tempString), EE_FILENAME_MAX);
+		Utils_strlcpy(fontMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
 		fontMan->_mFromStream = (ResourceManager_FromStreamFunc)BmFont_FromStream;
 		fontMan->_mDispose = (ResourceManager_DisposeFunc)BmFont_Dispose;
 		fontMan->_mReadFromDirectory = true;
@@ -210,7 +232,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(particleMan->_mDatFileName, "particles.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(particleMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "particles");
-		Utils_strlcpy(particleMan->_mDirectory, MString_Text(tempString), EE_FILENAME_MAX);
+		Utils_strlcpy(particleMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
 		particleMan->_mFromStream = (ResourceManager_FromStreamFunc)Particle_FromStream;
 		particleMan->_mDispose = (ResourceManager_DisposeFunc)Particle_Dispose;
 		particleMan->_mRead = (ResourceManager_ReadFunc)Particle_Read;
@@ -226,7 +248,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(movieTimingMan->_mDatFileName, "timings.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(movieTimingMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "timings");
-		Utils_strlcpy(movieTimingMan->_mDirectory, MString_Text(tempString), EE_FILENAME_MAX);
+		Utils_strlcpy(movieTimingMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
 		movieTimingMan->_mFromStream = (ResourceManager_FromStreamFunc)MovieTiming_FromStream;
 		movieTimingMan->_mDispose = (ResourceManager_DisposeFunc)MovieTiming_Dispose;
 		movieTimingMan->_mReadFromDirectory = true;
@@ -239,7 +261,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(movieMan->_mDatFileName, "movies.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(movieMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "movies");
-		Utils_strlcpy(movieMan->_mDirectory, MString_Text(tempString), EE_FILENAME_MAX);
+		Utils_strlcpy(movieMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
 		movieMan->_mFromStream = (ResourceManager_FromStreamFunc)Movie_FromStream;
 		movieMan->_mDispose = (ResourceManager_DisposeFunc)Movie_Dispose;
 		movieMan->_mReadFromDirectory = true;
@@ -252,7 +274,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(ttFontMan->_mDatFileName, "ttfonts.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(ttFontMan->_mFileExtension, ".ttf", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "ttfonts");
-		Utils_strlcpy(ttFontMan->_mDirectory, MString_Text(tempString), EE_FILENAME_MAX);
+		Utils_strlcpy(ttFontMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
 		ttFontMan->_mFromStream = (ResourceManager_FromStreamFunc)TTFont_FromStream;
 		ttFontMan->_mDispose = (ResourceManager_DisposeFunc)TTFont_Dispose;
 		ttFontMan->_mReadFromDirectory = true;
@@ -265,7 +287,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(thingSettingsMan->_mDatFileName, "things.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(thingSettingsMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "things");
-		Utils_strlcpy(thingSettingsMan->_mDirectory, MString_Text(tempString), EE_FILENAME_MAX);
+		Utils_strlcpy(thingSettingsMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
 		thingSettingsMan->_mFromStream = (ResourceManager_FromStreamFunc)ThingSettings_FromStream;
 		thingSettingsMan->_mDispose = (ResourceManager_DisposeFunc)ThingSettings_Dispose;
 		thingSettingsMan->_mWrite = (ResourceManager_WriteFunc)ThingSettings_Write;

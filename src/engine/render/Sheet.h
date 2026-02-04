@@ -29,7 +29,7 @@ Sheet* Sheet_GetDefaultSheet(void);
 Sheet* Sheet_GetSheet(const char* name);
 void Sheet_BuildSheets(void);
 bool Sheet_HasSheet(const char* name);
-IStringArray* Sheet_CreateListOfSheetNames(void);
+void Sheet_GetListOfSheetNames(IStringArray* addToThis);
 Resource* Sheet_GetTextureResource(Sheet* sheet);
 Texture* Sheet_GetTexture(Sheet* sheet);
 

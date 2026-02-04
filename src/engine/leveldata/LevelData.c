@@ -218,7 +218,8 @@ void LevelData_WriteData(LevelData* ld, DynamicByteBuffer* dbb)
 }
 void LevelData_LoadSetupOffsets(LevelData* ld)
 {
-	if (Globals_IsDebugFileMode() && !GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS)
+	/*
+	if (Globals_IsDebugFileMode() && !GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS) //DEBUG ONLY FOR NOW TODO
 	{
 		return;
 	}
@@ -230,7 +231,7 @@ void LevelData_LoadSetupOffsets(LevelData* ld)
 		{
 			TilesetOffset_LoadOffsetPoint(&t->mDrawTiles[j], ld->mTilesetName);
 		}
-	}
+	}*/
 }
 bool LevelData_LoadSetupTileData(LevelData* ld)
 {

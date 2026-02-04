@@ -657,28 +657,19 @@ bool Utils_StringContains(const char* str, const char* containsThis)
 }
 bool Utils_StringEndsWith(const char* str, const char* endsWithThis)
 {
-	int32_t strLen = (int32_t)Utils_strlen(str);
-	int32_t endsWithThisLen = (int32_t)Utils_strlen(endsWithThis);
+	size_t strLen = Utils_strlen(str);
+	size_t endsWithThisLen = Utils_strlen(endsWithThis);
 
 	if (strLen < endsWithThisLen)
 	{
 		return false;
 	}
 
-	int32_t targetCounter = 0;
-	for (int32_t i = (strLen - endsWithThisLen); i < strLen; i += 1)
+	if (Utils_memcmp(str + (strLen - endsWithThisLen), endsWithThis, endsWithThisLen) == 0)
 	{
-		if (str[i] != endsWithThis[targetCounter])
-		{
-			return false;
-		}
-		else
-		{
-			targetCounter += 1;
-		}
+		return true;
 	}
-
-	return true;
+	return false;
 }
 bool Utils_StringStartsWith(const char* str, const char* startsWithThis)
 {
@@ -690,15 +681,11 @@ bool Utils_StringStartsWith(const char* str, const char* startsWithThis)
 		return false;
 	}
 
-	for (int32_t i = 0; i < startsWithThisLen; i += 1)
+	if (Utils_memcmp(str, startsWithThis, startsWithThisLen) == 0)
 	{
-		if (str[i] != startsWithThis[i])
-		{
-			return false;
-		}
+		return true;
 	}
-
-	return true;
+	return false;
 }
 int32_t Utils_ParseDirection(const char* s)
 {

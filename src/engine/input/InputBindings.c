@@ -23,7 +23,7 @@
 #define CONTAINER_DISPLAY_NAME "GameBindings"
 #define CONTAINER_NAME "GameBindingsContainer"
 
-#define CURRENT_DATA_VERSION 0
+#define VERSION_INPUT_BINDINGS 7
 #define data_version "data_version"
 #define data_count "data_count"
 
@@ -39,7 +39,7 @@ const char* PlayerBindingData_GetFilePlayerPath(PlayerBindingData* pbd)
 {
 	MString_AssignString(&_mTempString, "player");
 	MString_AddAssignString(&_mTempString, Utils_IntToStringGlobalBuffer(pbd->_mPlayerNumber));
-	MString_AddAssignString(&_mTempString, ".bin");
+	MString_AddAssignString(&_mTempString, ".txt");
 	return MString_Text(_mTempString);
 }
 void PlayerBindingData_LogLoadSuccess(PlayerBindingData* pbd)
@@ -56,7 +56,12 @@ void PlayerBindingData_LogLoadFailure(PlayerBindingData* pbd)
 }
 void PlayerBindingData_LoadFromStream(PlayerBindingData* pbd, BufferReader* reader)
 {
-	BufferReader_ReadI32(reader); //VERSION
+	if (!BufferReader_ReadMagicNumber(reader))
+	{
+		return;
+	}
+	BufferReader_ReadVersionNumber(reader);
+
 	int32_t count = BufferReader_ReadI32(reader);
 	for (int32_t i = 0; i < count; i += 1)
 	{
@@ -69,10 +74,20 @@ void PlayerBindingData_LoadFromStream(PlayerBindingData* pbd, BufferReader* read
 FixedByteBuffer* PlayerBindingData_CreateBufferFromBindings(PlayerBindingData* pbd)
 {
 	DynamicByteBuffer* writer = DynamicByteBuffer_Create();
-	DynamicByteBuffer_WriteI32(writer, CURRENT_DATA_VERSION);
+	DynamicByteBuffer_SetIsWritingText(writer, true);
+
+	DynamicByteBuffer_WriteMagicNumber(writer);
+
+	DynamicByteBuffer_WriteNewline(writer);
+
+	DynamicByteBuffer_WriteVersionNumber(writer, VERSION_INPUT_BINDINGS);
+
+	DynamicByteBuffer_WriteNewline(writer);
+
 	DynamicByteBuffer_WriteI32(writer, PLAYERBINDINGDATA_BINDINGS_LEN);
 	for (int32_t i = 0; i < PLAYERBINDINGDATA_BINDINGS_LEN; i += 1)
 	{
+		DynamicByteBuffer_WriteNewline(writer);
 		InputAction_Write(&pbd->_mBindings[i], writer);
 	}
 
@@ -189,6 +204,7 @@ void PlayerBindingData_Load(PlayerBindingData* pbd)
 			//{
 			
 			BufferReader* reader = BufferReader_Create(request.mBuffer);
+			BufferReader_SetIsReadingText(reader, true);
 			PlayerBindingData_LoadFromStream(pbd, reader);
 			PlayerBindingData_LogLoadSuccess(pbd);
 			return;
