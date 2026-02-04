@@ -11,6 +11,7 @@
 
 typedef struct MString MString;
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 enum
 {
@@ -45,6 +46,8 @@ typedef struct ThingSettings
 } ThingSettings;
 
 void ThingSettings_Init(ThingSettings* ts);
+
 void ThingSettings_Read(ThingSettings* ts, BufferReader* br);
+void ThingSettings_Write(ThingSettings* ts, DynamicByteBuffer* dbb);
 ThingSettings* ThingSettings_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);
 void ThingSettings_Dispose(ThingSettings* ts);

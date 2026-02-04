@@ -33,12 +33,19 @@ void PointRectangle_CorrectPoints(PointRectangle* prect)
 		prect->mPointTwo.Y = tempY;
 	}
 }
-void PointRectangle_Read(PointRectangle* prect, BufferReader* reader)
+void PointRectangle_Read(PointRectangle* prect, BufferReader* br)
 {
-	Points_Read(&prect->mPointOne, reader);
-	Points_Read(&prect->mPointTwo, reader);
+	Points_Read(&prect->mPointOne, br);
+	Points_Read(&prect->mPointTwo, br);
 	Rectangle dummy = { 0 }; //To maintain compatibility
-	RectangleTools_Read(&dummy, reader);
+	RectangleTools_Read(&dummy, br);
+}
+void PointRectangle_Write(PointRectangle* prect, DynamicByteBuffer* dbb)
+{
+	Points_Write(&prect->mPointOne, dbb);
+	Points_Write(&prect->mPointTwo, dbb);
+	Rectangle dummy = { 0 }; //To maintain compatibility
+	RectangleTools_Write(&dummy, dbb);
 }
 Rectangle PointRectangle_GetRectangle(PointRectangle* prect)
 {

@@ -9,45 +9,32 @@
 #include "../utils/Macros.h"
 #include "Keys.h"
 #include "Buttons.h"
+#include "Axes.h"
+#include "MouseButtons.h"
 
 typedef struct InputPlayer InputPlayer;
 typedef struct BufferReader BufferReader;
 typedef struct DynamicByteBuffer DynamicByteBuffer;
 
-typedef struct InputCheck
-{
-	int32_t mType;
-	int32_t mMouseButton;
-	int32_t mAxis;
-	int32_t mAxisDirection;
-	float mAnalogValue;
-	Key mKey;
-	Button mButton;
-} InputCheck;
-
-enum InputCheckType
+typedef enum InputCheckType
 {
 	INPUTCHECK_TYPE_DUMMY = 0,
 	INPUTCHECK_TYPE_AXIS = 1,
 	INPUTCHECK_TYPE_BUTTON = 2,
 	INPUTCHECK_TYPE_KEY = 3,
 	INPUTCHECK_TYPE_MOUSEBUTTON = 4
-};
+} InputCheckType;
 
-enum
+typedef struct InputCheck
 {
-	INPUTCHECK_AXIS_AMOUNT = 6
-};
-
-enum InputCheckAxisInfo
-{
-	INPUTCHECK_AXIS_LEFT_STICK_X = 0,
-	INPUTCHECK_AXIS_LEFT_STICK_Y = 1,
-	INPUTCHECK_AXIS_RIGHT_STICK_X = 2,
-	INPUTCHECK_AXIS_RIGHT_STICK_Y = 3,
-	INPUTCHECK_AXIS_LEFT_TRIGGER = 4,
-	INPUTCHECK_AXIS_RIGHT_TRIGGER = 5
-};
+	InputCheckType mType;
+	MouseButton mMouseButton;
+	Axis mAxis;
+	int32_t mAxisDirection;
+	float mAnalogValue;
+	Key mKey;
+	Button mButton;
+} InputCheck;
 
 float InputCheck_CorrectAnalogForDirection(int32_t direction, float value);
 bool InputCheck_CheckTypeAxis(InputCheck* data);
@@ -70,7 +57,7 @@ bool InputCheck_IsGlyphImage(InputCheck* data);
 bool InputCheck_IsController(InputCheck* data);
 const char* InputCheck_GetGlyphString(InputCheck* data);
 const char* InputCheck_GetGlyphStringForController(const char* value);
-InputCheck InputCheck_CreateCheckKey(int32_t key);
-InputCheck InputCheck_CreateCheckMouseButton(int32_t mouseButton);
-InputCheck InputCheck_CreateCheckButton(int32_t button);
-InputCheck InputCheck_CreateCheckAxis(int32_t axis, int32_t direction);
+InputCheck InputCheck_CreateCheckKey(Key key);
+InputCheck InputCheck_CreateCheckMouseButton(MouseButton mouseButton);
+InputCheck InputCheck_CreateCheckButton(Button button);
+InputCheck InputCheck_CreateCheckAxis(Axis axis, int32_t direction);

@@ -18,7 +18,7 @@ void ControllerStates_Poll(void);
 ControllerState* ControllerStates_GetController(int32_t number);
 bool ControllerStates_IsAnyButtonPressedOnAnyController(void);
 bool ControllerStates_IsAnyButtonTappedOnAnyController(void);
-bool ControllerStates_IsButtonPressedOnAnyController(int32_t button);
+bool ControllerStates_IsButtonPressedOnAnyController(Button button);
 int32_t ControllerStates_GetControllerNumberIfAnyButtonReleased(void);
 int32_t ControllerStates_GetControllerNumberIfAnyButtonTapped(void);
 void ControllerStates_MuteInput(void);

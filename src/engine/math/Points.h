@@ -10,6 +10,7 @@
 #include "Vector2.h"
 
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 enum EightWay
 {
@@ -81,4 +82,5 @@ bool Points_IsLeft(Point point);
 bool Points_IsUpLeft(Point point);
 int32_t Points_GetEightWayInt(Point point);
 void Points_SetFromDegree(Point* point, int32_t degree);
-void Points_Read(Point* point, BufferReader* reader);
+void Points_Read(Point* point, BufferReader* br);
+void Points_Write(Point* point, DynamicByteBuffer* dbb);

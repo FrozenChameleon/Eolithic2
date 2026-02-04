@@ -25,11 +25,11 @@ float ControllerData_GetAnalogData(const ControllerData* cd, int32_t loc)
 }
 float ControllerData_GetLeftStickX(const ControllerData* cd)
 {
-	return cd->_mAnalogData[AXES_ANALOG_LEFT_STICK_X];
+	return cd->_mAnalogData[AXES_LEFT_STICK_X];
 }
 float ControllerData_GetLeftStickY(const ControllerData* cd)
 {
-	return cd->_mAnalogData[AXES_ANALOG_LEFT_STICK_Y];
+	return cd->_mAnalogData[AXES_LEFT_STICK_Y];
 }
 Vector2 ControllerData_GetLeftStick(const ControllerData* cd)
 {
@@ -40,11 +40,11 @@ Vector2 ControllerData_GetLeftStick(const ControllerData* cd)
 }
 float ControllerData_GetRightStickX(const ControllerData* cd)
 {
-	return cd->_mAnalogData[AXES_ANALOG_RIGHT_STICK_X];
+	return cd->_mAnalogData[AXES_RIGHT_STICK_X];
 }
 float ControllerData_GetRightStickY(const ControllerData* cd)
 {
-	return cd->_mAnalogData[AXES_ANALOG_RIGHT_STICK_Y];
+	return cd->_mAnalogData[AXES_RIGHT_STICK_Y];
 }
 Vector2 ControllerData_GetRightStick(const ControllerData* cd)
 {
@@ -55,11 +55,11 @@ Vector2 ControllerData_GetRightStick(const ControllerData* cd)
 }
 float ControllerData_GetTriggerRight(const ControllerData* cd)
 {
-	return cd->_mAnalogData[AXES_ANALOG_RIGHT_TRIGGER];
+	return cd->_mAnalogData[AXES_RIGHT_TRIGGER];
 }
 float ControllerData_GetTriggerLeft(const ControllerData* cd)
 {
-	return cd->_mAnalogData[AXES_ANALOG_LEFT_TRIGGER];
+	return cd->_mAnalogData[AXES_LEFT_TRIGGER];
 }
 void ControllerData_Clear(ControllerData* cd)
 {

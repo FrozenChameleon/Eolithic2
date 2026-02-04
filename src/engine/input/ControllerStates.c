@@ -79,7 +79,7 @@ bool ControllerStates_IsAnyButtonTappedOnAnyController(void)
 	}
 	return false;
 }
-bool ControllerStates_IsButtonPressedOnAnyController(int32_t button)
+bool ControllerStates_IsButtonPressedOnAnyController(Button button)
 {
 	for (int32_t i = 0; i < INPUT_MAXIMUM_PLAYER_COUNT; i += 1)
 	{

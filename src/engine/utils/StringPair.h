@@ -8,14 +8,16 @@
 
 #include "../utils/Macros.h"
 
+typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
+
 typedef struct StringPair
 {
 	char mKey[EE_FILENAME_MAX];
 	char mValue[EE_FILENAME_MAX];
 } StringPair;
 
-typedef struct BufferReader BufferReader;
-
 extern const StringPair StringPair_Empty;
 
-void StringPair_Read(StringPair* pair, BufferReader* reader);
+void StringPair_Read(StringPair* pair, BufferReader* br);
+void StringPair_Write(StringPair* pair, DynamicByteBuffer* dbb);

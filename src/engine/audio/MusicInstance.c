@@ -106,10 +106,15 @@ void MusicInstance_Play(MusicInstance* mi, const char* nextTrack, bool isLooping
 	MusicInstance_Stop(mi);
 
 	Music* data = (Music*)ResourceManager_GetResourceData(ResourceManagerList_Music(), mi->_mCurrentTrack);
+	if (data == NULL)
+	{
+		return; //TODO LOGGING
+	}
+
 	bool success = SoundEffectInstance_Setup(&mi->_mCurrentMusicInstance, nextTrack, data->_mWaveFileData);
 	if (!success)
 	{
-		return;
+		return; //TODO LOGGING
 	}
 
 	SoundEffectInstance_SetIsLooped(&mi->_mCurrentMusicInstance, isLooping);

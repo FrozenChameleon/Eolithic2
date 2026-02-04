@@ -28,7 +28,7 @@ static const char* _mPrefPath;
 #define LARGE_CHAR_BUFFER_LEN 8192
 static char _mLargeCharBuffer[LARGE_CHAR_BUFFER_LEN];
 
-void File_GetFiles(IStringArray* addToThis, const char* path, const char* pattern)
+void File_GetFiles(IStringArray* addToThis, const char* path, const char* pattern, bool removeExtension)
 {
 	int32_t count = 0;
 	char** files = NULL;
@@ -49,7 +49,17 @@ void File_GetFiles(IStringArray* addToThis, const char* path, const char* patter
 		for (int i = 0; i < count; i += 1)
 		{
 			char* filename = files[i];
-			IStringArray_Add(addToThis, filename);
+			if (removeExtension)
+			{
+				MString* filenameWithoutExtension = NULL;
+				File_GetFileNameWithoutExtension(&filenameWithoutExtension, filename);
+				IStringArray_Add(addToThis, MString_Text(filenameWithoutExtension));
+				MString_Dispose(&filenameWithoutExtension);
+			}
+			else
+			{
+				IStringArray_Add(addToThis, filename);
+			}
 		}
 		SDL_free(files);
 		files = NULL;
@@ -163,30 +173,44 @@ void File_AppendPathSeparator(MString** str)
 static void File_GetFileNameHelper(MString** assignToThis, const char* path, bool removeTheExtension)
 {
 	int32_t len = (int32_t)Utils_strlen(path);
-	int32_t loc = Utils_StringIndexOf(PATH_SEPARATOR, path, len + 1, true);
-	if (loc == -1)
+	
+	int32_t begin;
 	{
-		return;
+		int32_t lastPathLoc = Utils_StringIndexOf(PATH_SEPARATOR, path, len, true);
+		if (lastPathLoc < 0)
+		{
+			begin = 0;
+		}
+		else
+		{
+			begin = lastPathLoc + 1;
+		}
 	}
 
-	MString_AssignEmpty(assignToThis, len + 1);
+	int32_t end;
+	{
+		int32_t lastPeriodLoc = Utils_StringIndexOf('.', path, len, true);
+		if (!removeTheExtension || (lastPeriodLoc < 0))
+		{
+			end = len;
+		}
+		else
+		{
+			end = lastPeriodLoc;
+		}
+	}
+
+	MString_AssignEmpty(assignToThis, end - begin + 1);
 	char* returnStrText = MString_Text(*assignToThis);
 
 	int32_t counter = 0;
-	for (int32_t i = (loc + 1); i < len; i += 1)
+	for (int32_t i = begin; i < end; i += 1)
 	{
-		if (removeTheExtension)
-		{
-			if (path[i] == '.')
-			{
-				break;
-			}
-		}
 		returnStrText[counter] = path[i];
 		counter += 1;
 	}
 
-	returnStrText[counter + 1] = '\0';
+	returnStrText[counter] = '\0';
 }
 void File_GetFileName(MString** assignToThis, const char* path)
 {

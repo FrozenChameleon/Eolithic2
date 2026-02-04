@@ -14,8 +14,8 @@
 
 typedef struct Texture Texture;
 typedef struct SpriteBatch SpriteBatch;
-typedef struct BufferWriter BufferWriter;
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 enum
 {
@@ -35,7 +35,8 @@ typedef struct DrawTile
 } DrawTile;
 
 void DrawTile_Init(DrawTile* drawTile);
-void DrawTile_Read(DrawTile* drawTile, int32_t version, BufferReader* reader);
+void DrawTile_Read(int32_t version, DrawTile* drawTile, BufferReader* reader);
+void DrawTile_Write(DrawTile* drawTile, DynamicByteBuffer* dbb);
 void DrawTile_LoadSheet(DrawTile* drawTile, int32_t x, int32_t y);
 void DrawTile_LoadAnimation(DrawTile* drawTile, const char* animation);
 void DrawTile_Draw(DrawTile* drawTile, SpriteBatch* spriteBatch, Texture* texture, Color color, int32_t depth, int32_t x, int32_t y);

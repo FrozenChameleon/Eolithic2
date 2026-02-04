@@ -224,50 +224,41 @@ Point Line_GetRealEnd(Line* line)
 {
 	return Line_GetRealPoint(line->mEnd);
 }
-/*void Line_Write(Line* line, std_shared_ptr<OeIniWriter> writer) //UNUSED
+void Line_Read(int32_t version, Line* line, BufferReader* br)
 {
-	OePoints_Write(line->mBegin, writer);
-	OePoints_Write(line->mEnd, writer);
-	writer->WriteBoolean(line->mEnterDownOnly);
-	writer->WriteBoolean(line->mEnterLeftOnly);
-	writer->WriteBoolean(line->mEnterUpOnly);
-	writer->WriteBoolean(line->mEnterRightOnly);
-	writer->WriteBoolean(line->mIsGap);
-	writer->WriteBoolean(line->mIsFirstLine);
-	writer->WriteBoolean(line->mIsLastLine);
-	writer->WriteBoolean(line->mOneWayUp);
-	writer->WriteBoolean(line->mOneWayRight);
-	writer->WriteBoolean(line->mOneWayDown);
-	writer->WriteBoolean(line->mOneWayLeft);
-	writer->WriteInt32(line->mOverrideSpeedFromPlayer);
-	writer->WriteInt32(line->mOverrideSpeedFromMinecart);
-}*/
-void Line_Read(int32_t version, Line* line, BufferReader* reader)
+	Points_Read(&line->mBegin, br);
+	Points_Read(&line->mEnd, br);
+	line->mEnterDownOnly = BufferReader_ReadBoolean(br);
+	line->mEnterLeftOnly = BufferReader_ReadBoolean(br);
+	line->mEnterUpOnly = BufferReader_ReadBoolean(br);
+	line->mEnterRightOnly = BufferReader_ReadBoolean(br);
+	line->mIsGap = BufferReader_ReadBoolean(br);
+	line->mIsFirstLine = BufferReader_ReadBoolean(br);
+	line->mIsLastLine = BufferReader_ReadBoolean(br);
+	line->mOneWayUp = BufferReader_ReadBoolean(br);
+	line->mOneWayRight = BufferReader_ReadBoolean(br);
+	line->mOneWayDown = BufferReader_ReadBoolean(br);
+	line->mOneWayLeft = BufferReader_ReadBoolean(br);
+	line->mOverrideSpeedFromPlayer = BufferReader_ReadI32(br);
+	line->mOverrideSpeedFromMinecart = BufferReader_ReadI32(br);
+}
+void Line_Write(Line* line, DynamicByteBuffer* dbb)
 {
-	Points_Read(&line->mBegin, reader);
-	Points_Read(&line->mEnd, reader);
-	line->mEnterDownOnly = BufferReader_ReadBoolean(reader);
-	line->mEnterLeftOnly = BufferReader_ReadBoolean(reader);
-	line->mEnterUpOnly = BufferReader_ReadBoolean(reader);
-	line->mEnterRightOnly = BufferReader_ReadBoolean(reader);
-	line->mIsGap = BufferReader_ReadBoolean(reader);
-	if (version >= 6)
-	{
-		line->mIsFirstLine = BufferReader_ReadBoolean(reader);
-		line->mIsLastLine = BufferReader_ReadBoolean(reader);
-	}
-	if (version >= 7)
-	{
-		line->mOneWayUp = BufferReader_ReadBoolean(reader);
-		line->mOneWayRight = BufferReader_ReadBoolean(reader);
-		line->mOneWayDown = BufferReader_ReadBoolean(reader);
-		line->mOneWayLeft = BufferReader_ReadBoolean(reader);
-	}
-	if (version >= 8)
-	{
-		line->mOverrideSpeedFromPlayer = BufferReader_ReadI32(reader);
-		line->mOverrideSpeedFromMinecart = BufferReader_ReadI32(reader);
-	}
+	Points_Write(&line->mBegin, dbb);
+	Points_Write(&line->mEnd, dbb);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mEnterDownOnly);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mEnterLeftOnly);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mEnterUpOnly);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mEnterRightOnly);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mIsGap);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mIsFirstLine);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mIsLastLine);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mOneWayUp);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mOneWayRight);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mOneWayDown);
+	DynamicByteBuffer_WriteBoolean(dbb, line->mOneWayLeft);
+	DynamicByteBuffer_WriteI32(dbb, line->mOverrideSpeedFromPlayer);
+	DynamicByteBuffer_WriteI32(dbb, line->mOverrideSpeedFromMinecart);
 }
 Rectangle Line_GetTouchBounds(Line* line, int32_t inflation)
 {

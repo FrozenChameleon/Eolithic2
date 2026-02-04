@@ -36,5 +36,4 @@ bool Cvars_LoadSaveCvarsFromBlob(void);
 bool Cvars_HasLoadedSaveDataCvars(void);
 void Cvars_ClearCvars(void);
 void Cvars_LoadDataDirCvars(void);
-void Cvars_Write(bool isBinary, DynamicByteBuffer* writer);
-void Cvars_Write2(bool isBinary, DynamicByteBuffer* writer, IStringArray* includePrefixes, IStringArray* excludePrefixes);
+void Cvars_Write(bool isBinary, DynamicByteBuffer* dbb, IStringArray* includePrefixes, IStringArray* excludePrefixes);

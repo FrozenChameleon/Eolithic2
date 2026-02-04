@@ -419,15 +419,15 @@ bool Input_MouseHasChangedPosition(void)
 }
 bool Input_IsLeftMousePressed(void)
 {
-	return MouseState_IsButtonPressed(MOUSEBUTTONS_MOUSE_LEFTBUTTON);
+	return MouseState_IsButtonPressed(MOUSEBUTTONS_LEFTBUTTON);
 }
 bool Input_IsLeftMouseTapped(void)
 {
-	return MouseState_IsButtonTapped(MOUSEBUTTONS_MOUSE_LEFTBUTTON);
+	return MouseState_IsButtonTapped(MOUSEBUTTONS_LEFTBUTTON);
 }
 bool Input_IsLeftMouseReleased(void)
 {
-	return MouseState_IsButtonReleased(MOUSEBUTTONS_MOUSE_LEFTBUTTON);
+	return MouseState_IsButtonReleased(MOUSEBUTTONS_LEFTBUTTON);
 }
 bool Input_IsLeftMouseDoubleClicked(void)
 {
@@ -435,27 +435,27 @@ bool Input_IsLeftMouseDoubleClicked(void)
 }
 bool Input_IsRightMousePressed(void)
 {
-	return MouseState_IsButtonPressed(MOUSEBUTTONS_MOUSE_RIGHTBUTTON);
+	return MouseState_IsButtonPressed(MOUSEBUTTONS_RIGHTBUTTON);
 }
 bool Input_IsRightMouseTapped(void)
 {
-	return MouseState_IsButtonTapped(MOUSEBUTTONS_MOUSE_RIGHTBUTTON);
+	return MouseState_IsButtonTapped(MOUSEBUTTONS_RIGHTBUTTON);
 }
 bool Input_IsRightMouseReleased(void)
 {
-	return MouseState_IsButtonReleased(MOUSEBUTTONS_MOUSE_RIGHTBUTTON);
+	return MouseState_IsButtonReleased(MOUSEBUTTONS_RIGHTBUTTON);
 }
 bool Input_IsMiddleMousePressed(void)
 {
-	return MouseState_IsButtonPressed(MOUSEBUTTONS_MOUSE_MIDDLEBUTTON);
+	return MouseState_IsButtonPressed(MOUSEBUTTONS_MIDDLEBUTTON);
 }
 bool Input_IsMiddleMouseTapped(void)
 {
-	return MouseState_IsButtonTapped(MOUSEBUTTONS_MOUSE_MIDDLEBUTTON);
+	return MouseState_IsButtonTapped(MOUSEBUTTONS_MIDDLEBUTTON);
 }
 bool Input_IsMiddleMouseReleased(void)
 {
-	return MouseState_IsButtonReleased(MOUSEBUTTONS_MOUSE_MIDDLEBUTTON);
+	return MouseState_IsButtonReleased(MOUSEBUTTONS_MIDDLEBUTTON);
 }
 bool Input_IsCtrlPressed(void)
 {

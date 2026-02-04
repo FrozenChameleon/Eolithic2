@@ -65,7 +65,7 @@ bool InputCheck_CheckTypeAxis(InputCheck* data)
 }
 bool InputCheck_IsAxisTriggers(InputCheck* data)
 {
-	return (data->mAxis == INPUTCHECK_AXIS_LEFT_TRIGGER) || (data->mAxis == INPUTCHECK_AXIS_RIGHT_TRIGGER);
+	return (data->mAxis == AXES_LEFT_TRIGGER) || (data->mAxis == AXES_RIGHT_TRIGGER);
 }
 bool InputCheck_CheckTypeButton(InputPlayer* playerInput, InputCheck* data)
 {
@@ -149,7 +149,7 @@ const char* InputCheck_GetNameTypeAxis(InputCheck* data)
 {
 	switch (data->mAxis)
 	{
-	case INPUTCHECK_AXIS_LEFT_STICK_X:
+	case AXES_LEFT_STICK_X:
 		if (data->mAxisDirection >= 0)
 		{
 			return "LS_RIGHT";
@@ -158,7 +158,7 @@ const char* InputCheck_GetNameTypeAxis(InputCheck* data)
 		{
 			return "LS_LEFT";
 		}
-	case INPUTCHECK_AXIS_LEFT_STICK_Y:
+	case AXES_LEFT_STICK_Y:
 		if (data->mAxisDirection >= 0)
 		{
 			return "LS_UP";
@@ -167,7 +167,7 @@ const char* InputCheck_GetNameTypeAxis(InputCheck* data)
 		{
 			return "LS_DOWN";
 		}
-	case INPUTCHECK_AXIS_RIGHT_STICK_X:
+	case AXES_RIGHT_STICK_X:
 		if (data->mAxisDirection >= 0)
 		{
 			return "RS_RIGHT";
@@ -176,7 +176,7 @@ const char* InputCheck_GetNameTypeAxis(InputCheck* data)
 		{
 			return "RS_LEFT";
 		}
-	case INPUTCHECK_AXIS_RIGHT_STICK_Y:
+	case AXES_RIGHT_STICK_Y:
 		if (data->mAxisDirection >= 0)
 		{
 			return "RS_UP";
@@ -185,9 +185,9 @@ const char* InputCheck_GetNameTypeAxis(InputCheck* data)
 		{
 			return "RS_DOWN";
 		}
-	case INPUTCHECK_AXIS_LEFT_TRIGGER:
+	case AXES_LEFT_TRIGGER:
 		return "LT";
-	case INPUTCHECK_AXIS_RIGHT_TRIGGER:
+	case AXES_RIGHT_TRIGGER:
 		return "RT";
 	}
 	return "";
@@ -251,15 +251,15 @@ const char* InputCheck_GetNameTypeMouseButton(InputCheck* data)
 {
 	switch (data->mMouseButton)
 	{
-	case MOUSEBUTTONS_MOUSE_LEFTBUTTON:
+	case MOUSEBUTTONS_LEFTBUTTON:
 		return "LMB";
-	case MOUSEBUTTONS_MOUSE_RIGHTBUTTON:
+	case MOUSEBUTTONS_RIGHTBUTTON:
 		return "RMB";
-	case MOUSEBUTTONS_MOUSE_MIDDLEBUTTON:
+	case MOUSEBUTTONS_MIDDLEBUTTON:
 		return "MMB";
-	case MOUSEBUTTONS_MOUSE_XBUTTON1:
+	case MOUSEBUTTONS_XBUTTON1:
 		return "MXB1";
-	case MOUSEBUTTONS_MOUSE_XBUTTON2:
+	case MOUSEBUTTONS_XBUTTON2:
 		return "MXB2";
 	}
 	return "";
@@ -400,11 +400,11 @@ void InputCheck_Write(InputCheck* data, DynamicByteBuffer* writer)
 }
 void InputCheck_Read(InputCheck* data, BufferReader* reader)
 {
-	data->mType = BufferReader_ReadI32(reader);
-	data->mKey = BufferReader_ReadI32(reader);
-	data->mMouseButton = BufferReader_ReadI32(reader);
-	data->mButton = BufferReader_ReadI32(reader);
-	data->mAxis = BufferReader_ReadI32(reader);
+	data->mType = (InputCheckType)BufferReader_ReadI32(reader);
+	data->mKey = (Key)BufferReader_ReadI32(reader);
+	data->mMouseButton = (MouseButton)BufferReader_ReadI32(reader);
+	data->mButton = (Button)BufferReader_ReadI32(reader);
+	data->mAxis = (Axis)BufferReader_ReadI32(reader);
 	data->mAxisDirection = BufferReader_ReadI32(reader);
 }
 bool InputCheck_IsGlyphImage(InputCheck* data)
@@ -443,30 +443,30 @@ const char* InputCheck_GetGlyphStringForController(const char* value)
 	MString_Combine4(&_mTempString, "GLYPH_", Utils_GetGlyphType(), "_", value);
 	return MString_Text(_mTempString);
 }
-InputCheck InputCheck_CreateCheckKey(int32_t key)
+InputCheck InputCheck_CreateCheckKey(Key key)
 {
-	InputCheck tempCheck = { 0 };
+	InputCheck tempCheck = { INPUTCHECK_TYPE_DUMMY };
 	tempCheck.mType = INPUTCHECK_TYPE_KEY;
 	tempCheck.mKey = key;
 	return tempCheck;
 }
-InputCheck InputCheck_CreateCheckMouseButton(int32_t mouseButton)
+InputCheck InputCheck_CreateCheckMouseButton(MouseButton mouseButton)
 {
-	InputCheck tempCheck = { 0 };
+	InputCheck tempCheck = { INPUTCHECK_TYPE_DUMMY };
 	tempCheck.mType = INPUTCHECK_TYPE_MOUSEBUTTON;
 	tempCheck.mMouseButton = mouseButton;
 	return tempCheck;
 }
-InputCheck InputCheck_CreateCheckButton(int32_t button)
+InputCheck InputCheck_CreateCheckButton(Button button)
 {
-	InputCheck tempCheck = { 0 };
+	InputCheck tempCheck = { INPUTCHECK_TYPE_DUMMY };
 	tempCheck.mType = INPUTCHECK_TYPE_BUTTON;
 	tempCheck.mButton = button;
 	return tempCheck;
 }
-InputCheck InputCheck_CreateCheckAxis(int32_t axis, int32_t direction)
+InputCheck InputCheck_CreateCheckAxis(Axis axis, int32_t direction)
 {
-	InputCheck tempCheck = { 0 };
+	InputCheck tempCheck = { INPUTCHECK_TYPE_DUMMY };
 	tempCheck.mType = INPUTCHECK_TYPE_AXIS;
 	tempCheck.mAxis = axis;
 	tempCheck.mAxisDirection = direction;

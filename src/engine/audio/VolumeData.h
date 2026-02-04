@@ -15,11 +15,11 @@ typedef struct VolumeData VolumeData;
 typedef struct VolumeData
 {
 	struct { char* key; int32_t value; }* sh_volume_map;
-	bool _mIsMusic;
 } VolumeData;
 #endif
 
-void VolumeData_Init(VolumeData* vd, bool isMusic);
+void VolumeData_Init(VolumeData* vd);
 int32_t VolumeData_GetVolume(VolumeData* vd, const char* name);
 //void VolumeData_SetVolume(VolumeData* vd, const char* name, int32_t volume); //UNUSED
-void VolumeData_Load(VolumeData* vd);
+void VolumeData_Load(VolumeData* vd, bool isMusic);
+void VolumeData_Save(VolumeData* vd, bool isMusic);

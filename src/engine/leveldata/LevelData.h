@@ -19,13 +19,8 @@
 typedef struct BufferReader BufferReader;
 typedef struct SpriteBatch SpriteBatch;
 
-enum
-{
-	LEVELDATA_CURRENT_HEADER_VERSION = 0,
-	LEVELDATA_CURRENT_DATA_VERSION = 8,
-	LEVELDATA_STRING_DATA_LENGTH = 20,
-	LEVELDATA_LAYER_DATA_LENGTH = 10
-};
+#define LEVELDATA_STRING_DATA_LENGTH 20
+#define LEVELDATA_LAYER_DATA_LENGTH 10
 
 typedef struct LevelData
 {
@@ -46,9 +41,12 @@ typedef struct LevelData
 
 LevelData* LevelData_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);
 void LevelData_Dispose(LevelData* ld);
-void LevelData_ReadIni(LevelData* ld, BufferReader* reader);
-void LevelData_ReadHeader(LevelData* ld, BufferReader* reader);
-void LevelData_ReadData(LevelData* ld, BufferReader* reader);
+void LevelData_Read(LevelData* ld, BufferReader* reader);
+void LevelData_ReadHeader(int32_t version, LevelData* ld, BufferReader* reader);
+void LevelData_ReadData(int32_t version, LevelData* ld, BufferReader* reader);
+void LevelData_Write(LevelData* ld, DynamicByteBuffer* dbb);
+void LevelData_WriteHeader(LevelData* ld, DynamicByteBuffer* dbb);
+void LevelData_WriteData(LevelData* ld, DynamicByteBuffer* dbb);
 void LevelData_LoadSetupOffsets(LevelData* ld);
 bool LevelData_LoadSetupTileData(LevelData* ld);
 int32_t LevelData_GetGridSizeWidth(LevelData* ld);

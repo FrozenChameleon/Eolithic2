@@ -8,9 +8,10 @@
 
 #include "Rectangle.h"
 
-typedef struct BufferWriter BufferWriter;
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 extern const Rectangle RectangleTools_NegativeOne;
 
-void RectangleTools_Read(Rectangle* rectangle, BufferReader* reader);
+void RectangleTools_Read(Rectangle* rectangle, BufferReader* br);
+void RectangleTools_Write(Rectangle* rectangle, DynamicByteBuffer* dbb);

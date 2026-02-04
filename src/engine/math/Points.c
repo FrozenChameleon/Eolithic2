@@ -11,6 +11,7 @@
 #include "Math.h"
 #include "../utils/Utils.h"
 #include "../io/BufferReader.h"
+#include "../io/DynamicByteBuffer.h"
 
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
 #define HALF_TILE_SIZE GLOBAL_DEF_HALF_TILE_SIZE
@@ -458,8 +459,13 @@ void Points_Write(Point point, std::shared_ptr<OeIniWriter> writer)
 }
 
 */
-void Points_Read(Point* point, BufferReader* reader)
+void Points_Read(Point* point, BufferReader* br)
 {
-	point->X = BufferReader_ReadI32(reader);
-	point->Y = BufferReader_ReadI32(reader);
+	point->X = BufferReader_ReadI32(br);
+	point->Y = BufferReader_ReadI32(br);
+}
+void Points_Write(Point* point, DynamicByteBuffer* dbb)
+{
+	DynamicByteBuffer_WriteI32(dbb, point->X);
+	DynamicByteBuffer_WriteI32(dbb, point->Y);
 }

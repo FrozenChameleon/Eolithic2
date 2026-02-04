@@ -10,10 +10,11 @@
 #include "../math/PointRectangle.h"
 #include "../utils/MString.h"
 
-enum { LEVELCAMERADATA_STRING_DATA_LIMIT = 10 };
+#define LEVELCAMERADATA_STRING_DATA_LIMIT 10
 
 typedef struct SpriteBatch SpriteBatch;
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 typedef struct LevelCameraData
 {
@@ -41,4 +42,5 @@ typedef struct LevelCameraData
 
 bool LevelCameraData_HasBounds(LevelCameraData* lcd);
 PointRectangle* LevelCameraData_GetActiveBoundsPointRectangle(LevelCameraData* lcd);
-void LevelCameraData_Read(LevelCameraData* lcd, int32_t version, BufferReader* reader);
+void LevelCameraData_Read(int32_t version, LevelCameraData* lcd, BufferReader* br);
+void LevelCameraData_Write(LevelCameraData* lcd, DynamicByteBuffer* dbb);

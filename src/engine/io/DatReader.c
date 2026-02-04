@@ -62,7 +62,7 @@ void DatReader_NextFilePath(MString** assignToThis, DatReader* dr)
 #ifdef TEMP_REPLACE_INI_WITH_TXT
 		MString* replacedTempString = NULL;
 		BufferReader_ReadMString(&tempString, dr->_mReader);
-		Utils_StringReplaceStr(&replacedTempString, MString_Text(tempString), ".ini", ".txt");
+		Utils_StringReplaceStr(&replacedTempString, MString_Text(tempString), ".bin", ".txt");
 		MString_AddAssignString(assignToThis, MString_Text(replacedTempString));
 #else
 		BufferReader_ReadMString(&tempString, dr->_mReader);

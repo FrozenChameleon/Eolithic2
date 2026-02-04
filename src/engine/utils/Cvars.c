@@ -24,7 +24,7 @@
 #define STR_ZERO "0"
 #define STR_ONE "1"
 
-#define USER_CONFIG_FILENAME "userconfig.bin"
+#define USER_CONFIG_FILENAME "userconfig.txt"
 #define CONTAINER_DISPLAY_NAME "GameConfig"
 #define CONTAINER_NAME "GameConfigContainer"
 
@@ -97,7 +97,8 @@ static void CopyToUserDefaults(void)
 }
 static bool ReadDataCvars2(const char* pathWithoutExtension, const char* debugName, bool isBinary)
 {
-	const char* extension = Utils_GetExtension(isBinary);
+	const char* extension = Utils_GetExtension(isBinary); //TODO BINARY STUFF
+	extension = ".txt";
 	MString* path = NULL;
 	MString_Combine2(&path, pathWithoutExtension, extension);
 	bool successfullyReadTheFile = false;
@@ -105,6 +106,7 @@ static bool ReadDataCvars2(const char* pathWithoutExtension, const char* debugNa
 	if (File_Exists(MString_Text(path)))
 	{
 		BufferReader* reader = BufferReader_CreateFromPath(MString_Text(path));
+		BufferReader_SetIsReadingText(reader, true);
 		Cvars_Read(isBinary, reader);
 		BufferReader_Dispose(reader);
 		{
@@ -258,8 +260,13 @@ void Cvars_Read(bool isBinary, BufferReader* br)
 	Init();
 	//
 
+	if (!BufferReader_ReadMagicNumber(br))
+	{
+		return;
+	}
+
 	IStringMap* sm = IStringMap_Create();
-	IStringMap_Load(sm, br);
+	IStringMap_Read(sm, br);
 	for (int32_t i = 0; i < IStringMap_Length(sm); i += 1)
 	{
 		const char* key = IStringMap_GetKeyByIndex(sm, i);
@@ -313,12 +320,13 @@ FixedByteBuffer* Cvars_CreateBufferFromUserConfigs(void)
 	Init();
 	//
 
-	DynamicByteBuffer* writer = DynamicByteBuffer_Create();
+	DynamicByteBuffer* dbb = DynamicByteBuffer_Create();
+	DynamicByteBuffer_SetIsWritingText(dbb, true);
 	IStringArray* prefixes = IStringArray_Create();
 	IStringArray_Add(prefixes, CVARS_PREFIX_USER_CONFIG);
-	Cvars_Write2(true, writer, prefixes, NULL);
-	FixedByteBuffer* fbb = DynamicByteBuffer_ConvertToFixedByteBufferAndDisposeDBB(writer);
-	writer = NULL;
+	Cvars_Write(true, dbb, prefixes, NULL);
+	FixedByteBuffer* fbb = DynamicByteBuffer_ConvertToFixedByteBufferAndDisposeDBB(dbb);
+	dbb = NULL;
 	IStringArray_Dispose(prefixes);
 	return fbb;
 }
@@ -428,6 +436,7 @@ bool Cvars_LoadSaveCvarsFromBlob(void)
 			//try
 			//{
 			BufferReader* reader = BufferReader_Create(request.mBuffer);
+			BufferReader_SetIsReadingText(reader, true);
 			Cvars_Read(true, reader);
 			BufferReader_Dispose(reader);
 			return true;
@@ -485,15 +494,7 @@ void Cvars_LoadDataDirCvars(void)
 	}
 #endif
 }
-void Cvars_Write(bool isBinary, DynamicByteBuffer* writer)
-{
-	//
-	Init();
-	//
-
-	Cvars_Write2(isBinary, writer, NULL, NULL);
-}
-void Cvars_Write2(bool isBinary, DynamicByteBuffer* writer, IStringArray* includePrefixes, IStringArray* excludePrefixes)
+void Cvars_Write(bool isBinary, DynamicByteBuffer* dbb, IStringArray* includePrefixes, IStringArray* excludePrefixes)
 {
 	//
 	Init();
@@ -505,6 +506,10 @@ void Cvars_Write2(bool isBinary, DynamicByteBuffer* writer, IStringArray* includ
 		return;
 	}
 
+	DynamicByteBuffer_WriteMagicNumber(dbb);
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	IStringMap* sm = IStringMap_Create();
 	for (int32_t i = 0; i < shlen(sh_cvars); i += 1)
 	{
 		CvarData* cvar = &sh_cvars[i].value;
@@ -533,10 +538,10 @@ void Cvars_Write2(bool isBinary, DynamicByteBuffer* writer, IStringArray* includ
 		}
 		if (write)
 		{
-			DynamicByteBuffer_WriteString(writer, cvar->mKey, EE_FILENAME_MAX);
-			DynamicByteBuffer_WriteString(writer, cvar->mValue, EE_FILENAME_MAX);
+			IStringMap_Add(sm, cvar->mKey, cvar->mValue);
+		
 		}
 	}
-
-	DynamicByteBuffer_WriteEOF(writer);
+	IStringMap_Write(sm, dbb);
+	IStringMap_Dispose(sm);
 }

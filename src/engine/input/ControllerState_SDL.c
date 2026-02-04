@@ -116,19 +116,19 @@ void ControllerData_PollInput(ControllerData* cd, bool* isButtonMutedArray, bool
 		}
 	}
 
-	cd->_mAnalogData[AXES_ANALOG_LEFT_STICK_X] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_LEFTX)) / 32767.0f;
-	cd->_mAnalogData[AXES_ANALOG_LEFT_STICK_Y] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_LEFTY)) / -32767.0f;
-	cd->_mAnalogData[AXES_ANALOG_RIGHT_STICK_X] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_RIGHTX)) / 32767.0f;
-	cd->_mAnalogData[AXES_ANALOG_RIGHT_STICK_Y] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_RIGHTY)) / -32767.0f;
-	cd->_mAnalogData[AXES_ANALOG_LEFT_TRIGGER] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_LEFT_TRIGGER)) / 32767.0f;
-	cd->_mAnalogData[AXES_ANALOG_RIGHT_TRIGGER] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER)) / 32767.0f;
+	cd->_mAnalogData[AXES_LEFT_STICK_X] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_LEFTX)) / 32767.0f;
+	cd->_mAnalogData[AXES_LEFT_STICK_Y] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_LEFTY)) / -32767.0f;
+	cd->_mAnalogData[AXES_RIGHT_STICK_X] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_RIGHTX)) / 32767.0f;
+	cd->_mAnalogData[AXES_RIGHT_STICK_Y] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_RIGHTY)) / -32767.0f;
+	cd->_mAnalogData[AXES_LEFT_TRIGGER] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_LEFT_TRIGGER)) / 32767.0f;
+	cd->_mAnalogData[AXES_RIGHT_TRIGGER] = (float)(SDL_GetGamepadAxis(device, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER)) / 32767.0f;
 
 	for (int32_t i = 0; i < AXES_AMOUNT_OF_AXIS; i += 1)
 	{
 		if (isAnalogMutedArray[i])
 		{
 			float val = Math_fabsf(cd->_mAnalogData[i]);
-			if (val > AXES_ANALOG_MUTE_DEADZONE)
+			if (val > AXES_MUTE_DEADZONE)
 			{
 				cd->_mAnalogData[i] = 0;
 			}

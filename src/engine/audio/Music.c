@@ -51,8 +51,8 @@ void Music_Init(void)
 	}
 
 	MusicInstance_Init(&_mCurrentMusic);
-	VolumeData_Init(&_mVolumeData, true);
-	VolumeData_Load(&_mVolumeData);
+	VolumeData_Init(&_mVolumeData);
+	VolumeData_Load(&_mVolumeData, true);
 
 	_mHasInit = true;
 }

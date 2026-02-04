@@ -288,28 +288,28 @@ void InputBindings_ResetAllPlayerBindingsToDefaultAndSave(void)
 	ResetAllPlayerBindingsToDefault();
 	InputBindings_SaveAllBindings();
 }
-void InputBindings_SetupKey(InputAction* data, int32_t place, const char* s, const char* check, int32_t key)
+void InputBindings_SetupKey(InputAction* data, int32_t place, const char* s, const char* check, Key key)
 {
 	if (Utils_StringEqualTo(s, check))
 	{
 		InputChecks_Set(&data->mChecks, place, InputCheck_CreateCheckKey(key));
 	}
 }
-void InputBindings_SetupMouseButton(InputAction* data, int32_t place, const char* s, const char* check, int32_t mouseButton)
+void InputBindings_SetupMouseButton(InputAction* data, int32_t place, const char* s, const char* check, MouseButton mouseButton)
 {
 	if (Utils_StringEqualTo(s, check))
 	{
 		InputChecks_Set(&data->mChecks, place, InputCheck_CreateCheckMouseButton(mouseButton));
 	}
 }
-void InputBindings_SetupButton(InputAction* data, int32_t place, const char* s, const char* check, int32_t button)
+void InputBindings_SetupButton(InputAction* data, int32_t place, const char* s, const char* check, Button button)
 {
 	if (Utils_StringEqualTo(s, check))
 	{
 		InputChecks_Set(&data->mChecks, place, InputCheck_CreateCheckButton(button));
 	}
 }
-void InputBindings_SetupAxis(InputAction* data, int32_t place, const char* s, const char* check, int32_t axis, int32_t direction)
+void InputBindings_SetupAxis(InputAction* data, int32_t place, const char* s, const char* check, Axis axis, int32_t direction)
 {
 	if (Utils_StringEqualTo(s, check))
 	{

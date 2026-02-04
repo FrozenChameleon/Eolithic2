@@ -10,6 +10,7 @@
 #include "Rectangle.h"
 
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 typedef struct PointRectangle
 {
@@ -19,7 +20,8 @@ typedef struct PointRectangle
 
 bool PointRectangle_IsEmpty(PointRectangle* prect);
 void PointRectangle_CorrectPoints(PointRectangle* prect);
-void PointRectangle_Read(PointRectangle* prect, BufferReader* reader);
+void PointRectangle_Read(PointRectangle* prect, BufferReader* br);
+void PointRectangle_Write(PointRectangle* prect, DynamicByteBuffer* dbb);
 Rectangle PointRectangle_GetRectangle(PointRectangle* prect);
 Rectangle PointRectangle_GetRectanglePoint(Point pointOne, Point pointTwo);
 void PointRectangle_Add(PointRectangle* prect, int32_t amountX, int32_t amountY);

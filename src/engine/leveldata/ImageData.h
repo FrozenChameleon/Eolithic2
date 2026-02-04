@@ -12,6 +12,7 @@
 #include "../utils/MString.h"
 
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 typedef struct ImageData
 {
@@ -31,6 +32,7 @@ typedef struct ImageData
 
 void ImageData_Init(ImageData* id);
 
-void ImageData_Read(ImageData* id, BufferReader* reader);
+void ImageData_Read(ImageData* id, BufferReader* br);
+void ImageData_Write(ImageData* id, DynamicByteBuffer* dbb);
 const char* ImageData_ToString(ImageData* id);
 bool ImageData_IsOriginSet(ImageData* id);

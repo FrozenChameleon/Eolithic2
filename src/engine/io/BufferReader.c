@@ -422,18 +422,18 @@ int16_t BufferReader_ReadVersionNumber(BufferReader* br)
 {
 	return BufferReader_ReadI16(br);
 }
-int32_t* BufferReader_ReadIntArray2D(BufferReader* br, int32_t width, int32_t height) //TODO MEMORY LEAK
+int32_t* BufferReader_ReadIntArray2D(BufferReader* br, int32_t width, int32_t height)
 {
 	int32_t totalArrayLen = (width * height);
-	int32_t* readToThis = (int32_t*)Utils_calloc(totalArrayLen, sizeof(int32_t));
-	for (int32_t i = 0; i < width; i += 1)
+	int32_t* array2D = (int32_t*)Utils_calloc(totalArrayLen, sizeof(int32_t));
+	for (int32_t j = 0; j < height; j += 1)
 	{
-		for (int32_t j = 0; j < height; j += 1)
+		for (int32_t i = 0; i < width; i += 1)
 		{
-			readToThis[i + (j * width)] = BufferReader_ReadI32(br);
+			array2D[i + (j * width)] = BufferReader_ReadI32(br);
 		}
 	}
-	return readToThis;
+	return array2D;
 }
 uint8_t BufferReader_ReadJustTheStringLength(BufferReader* br)
 {

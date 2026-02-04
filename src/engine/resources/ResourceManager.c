@@ -75,9 +75,18 @@ Resource* ResourceManager_GetResource(ResourceManager* rm, const char* filenameW
 	Resource* resource = shget(rm->sh_resources, filenameWithoutExtension);
 	if (resource == NULL)
 	{
-		PrintHelper("Unable to get resource: ", filenameWithoutExtension);
-		PrintResourceType(rm);
-		return ResourceManager_GetDefaultResource(rm);
+		if (Utils_StringEqualTo(filenameWithoutExtension, rm->_mDefaultResource))
+		{
+			PrintHelper("Unable to get default resource!", filenameWithoutExtension);
+			PrintResourceType(rm);
+			return NULL;
+		}
+		else
+		{
+			PrintHelper("Unable to get resource: ", filenameWithoutExtension);
+			PrintResourceType(rm);
+			return ResourceManager_GetDefaultResource(rm);
+		}
 	}
 	return resource;
 }
@@ -283,7 +292,7 @@ void ResourceManager_LoadAllFromDirectory(ResourceManager* rm, bool isReadingTex
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "*", rm->_mFileExtension);
-		File_GetFiles(files, rm->_mDirectory, MString_Text(tempString));
+		File_GetFiles(files, rm->_mDirectory, MString_Text(tempString), false);
 		MString_Dispose(&tempString);
 	}
 

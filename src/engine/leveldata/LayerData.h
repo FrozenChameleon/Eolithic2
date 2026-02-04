@@ -8,8 +8,8 @@
 
 #include "stdint.h"
 
-typedef struct BufferWriter BufferWriter;
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 typedef struct LayerData
 {
@@ -18,4 +18,5 @@ typedef struct LayerData
 	int32_t mDepth;
 } LayerData;
 
-void LayerData_ReadIni(LayerData* layer, int32_t i, BufferReader* reader);
+void LayerData_Read(LayerData* layer, BufferReader* br);
+void LayerData_Write(LayerData* layer, DynamicByteBuffer* dbb);

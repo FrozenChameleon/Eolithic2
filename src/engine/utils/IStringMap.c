@@ -11,6 +11,7 @@
 #include "../utils/Utils.h"
 #include "../../third_party/stb_ds.h"
 #include "IStrings.h"
+#include "../io/DynamicByteBuffer.h"
 
 static uint64_t _mRefs;
 
@@ -74,9 +75,10 @@ uint64_t IStringMap_GetRefs(void)
 {
 	return _mRefs;
 }
-void IStringMap_Load(IStringMap* sm, BufferReader* br)
+void IStringMap_Read(IStringMap* sm, BufferReader* br)
 {
-	while (BufferReader_HasNext(br))
+	int32_t count = BufferReader_ReadI32(br);
+	for (int i = 0; i < count; i += 1)
 	{
 		MString* key = NULL;
 		MString* value = NULL;
@@ -85,5 +87,19 @@ void IStringMap_Load(IStringMap* sm, BufferReader* br)
 		IStringMap_Add(sm, MString_Text(key), MString_Text(value));
 		MString_Dispose(&key);
 		MString_Dispose(&value);
+	}
+}
+void IStringMap_Write(IStringMap* sm, DynamicByteBuffer* dbb)
+{
+	DynamicByteBuffer_WriteI32(dbb, (int32_t)shlen(sm->sh_values));
+	for (int i = 0; i < shlen(sm->sh_values); i += 1)
+	{
+		DynamicByteBuffer_WriteNewline(dbb);
+
+		const char* key = sm->sh_values[i].key;
+		DynamicByteBuffer_WriteString(dbb, key, Utils_strlen(key));
+
+		const char* value = sm->sh_values[i].value;
+		DynamicByteBuffer_WriteString(dbb, value, Utils_strlen(value));
 	}
 }

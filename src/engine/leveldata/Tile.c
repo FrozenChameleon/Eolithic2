@@ -14,6 +14,7 @@
 #include "../io/BufferReader.h"
 #include "../utils/Utils.h"
 #include "../../third_party/stb_ds.h"
+#include "../io/DynamicByteBuffer.h"
 
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
 #define HALF_TILE_SIZE GLOBAL_DEF_HALF_TILE_SIZE
@@ -21,38 +22,70 @@
 void Tile_Init(Tile* t)
 {
 	Utils_memset(t, 0, sizeof(Tile));
-	for (int32_t i = 0; i < DRAW_LAYER_LENGTH; i += 1)
+	for (int32_t i = 0; i < TILE_DRAW_LAYER_LENGTH; i += 1)
 	{
 		DrawTile_Init(&t->mDrawTiles[i]);
 	}
 }
-void Tile_Read(Tile* t, int32_t version, BufferReader* reader)
+void Tile_Read(int32_t version, Tile* t, BufferReader* br)
 {
-	BufferReader_ReadI32(reader); //
-	BufferReader_ReadI32(reader); //Unused - Multi Array Collision
-	t->mCollisionType = BufferReader_ReadI32(reader);
+	//BufferReader_ReadI32(br); //
+	//BufferReader_ReadI32(br); //Unused - Multi Array Collision
+	t->mCollisionType = BufferReader_ReadI32(br);
 
-	int32_t arrayDrawTilesSize = BufferReader_ReadI32(reader);
+	int32_t arrayDrawTilesSize = BufferReader_ReadI32(br);
 	for (int32_t i = 0; i < arrayDrawTilesSize; i += 1)
 	{
-		DrawTile_Read(&t->mDrawTiles[i], version, reader);
+		DrawTile_Read(version, &t->mDrawTiles[i], br);
 	}
 
-	int32_t arrayThingDataSize = BufferReader_ReadI32(reader);
+	int32_t arrayThingDataSize = BufferReader_ReadI32(br);
 	for (int32_t i = 0; i < arrayThingDataSize; i += 1)
 	{
 		ThingInstance instance = { 0 };
-		ThingInstance_Read(&instance, version, reader);
+		ThingInstance_Read(version, &instance, br);
 		arrput(t->arr_instances, instance);
 	}
 
-	int32_t arrayPropDataSize = BufferReader_ReadI32(reader);
+	int32_t arrayPropDataSize = BufferReader_ReadI32(br);
 	for (int32_t i = 0; i < arrayPropDataSize; i += 1)
 	{
 		PropInstance instance = { 0 };
 		PropInstance_Init(&instance);
-		PropInstance_Read(&instance, version, reader);
+		PropInstance_Read(version, &instance, br);
 		arrput(t->arr_props, instance);
+	}
+}
+
+void Tile_Write(Tile* t, DynamicByteBuffer* dbb)
+{
+	DynamicByteBuffer_WriteI32(dbb, t->mCollisionType);
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, TILE_DRAW_LAYER_LENGTH);
+	for (int32_t i = 0; i < TILE_DRAW_LAYER_LENGTH; i += 1)
+	{
+		DynamicByteBuffer_WriteNewline(dbb);
+		DrawTile_Write(&t->mDrawTiles[i], dbb);
+	}
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, (int32_t)arrlen(t->arr_instances));
+	for (int32_t i = 0; i < arrlen(t->arr_instances); i += 1)
+	{
+		DynamicByteBuffer_WriteNewline(dbb);
+		ThingInstance_Write(&t->arr_instances[i], dbb);
+	}
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, (int32_t)arrlen(t->arr_props));
+	for (int32_t i = 0; i < arrlen(t->arr_props); i += 1)
+	{
+		DynamicByteBuffer_WriteNewline(dbb);
+		PropInstance_Write(&t->arr_props[i], dbb);
 	}
 }
 
@@ -126,7 +159,7 @@ void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const  Camera* camera, i
 		}
 		else
 		{
-			PropInstance_Draw4(propInstance, spriteBatch, OVERRIDE_DEPTH, position, drawInfo);
+			PropInstance_Draw4(propInstance, spriteBatch, TILE_OVERRIDE_DEPTH, position, drawInfo);
 		}
 
 		//Debug stuff to draw the camera check rectangle

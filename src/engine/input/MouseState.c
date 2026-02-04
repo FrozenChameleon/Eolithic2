@@ -43,11 +43,11 @@ void MouseData_Poll(MouseData* md)
 
 	md->_mScrollWheelValue = _mGlobalScrollWheelValue;
 
-	md->_mIsButtonDown[MOUSEBUTTONS_MOUSE_LEFTBUTTON] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_LEFT));
-	md->_mIsButtonDown[MOUSEBUTTONS_MOUSE_RIGHTBUTTON] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT));
-	md->_mIsButtonDown[MOUSEBUTTONS_MOUSE_MIDDLEBUTTON] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_MIDDLE));
-	md->_mIsButtonDown[MOUSEBUTTONS_MOUSE_XBUTTON1] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_X1));
-	md->_mIsButtonDown[MOUSEBUTTONS_MOUSE_XBUTTON2] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_X2));
+	md->_mIsButtonDown[MOUSEBUTTONS_LEFTBUTTON] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_LEFT));
+	md->_mIsButtonDown[MOUSEBUTTONS_RIGHTBUTTON] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT));
+	md->_mIsButtonDown[MOUSEBUTTONS_MIDDLEBUTTON] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_MIDDLE));
+	md->_mIsButtonDown[MOUSEBUTTONS_XBUTTON1] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_X1));
+	md->_mIsButtonDown[MOUSEBUTTONS_XBUTTON2] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_X2));
 
 	for (int32_t i = 0; i < MOUSEBUTTONS_AMOUNT_OF_MOUSE_BUTTONS; i += 1)
 	{

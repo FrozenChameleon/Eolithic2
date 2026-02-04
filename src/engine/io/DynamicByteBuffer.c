@@ -244,8 +244,7 @@ static void TextWriter_WriteBool(DynamicByteBuffer* dbb, bool value)
 static void TextWriter_WriteNewline(DynamicByteBuffer* dbb)
 {
 	MString_AssignString(&_mTempString, "\r");
-	TextWriter_WriteTempString(dbb);
-	MString_AssignString(&_mTempString, " \n");
+	MString_AddAssignString(&_mTempString, "\n");
 	TextWriter_WriteTempString(dbb);
 	dbb->mNeedToWriteSpace = false;
 }
@@ -421,6 +420,17 @@ void DynamicByteBuffer_WriteNewline(DynamicByteBuffer* dbb)
 	if (dbb->mIsWritingText)
 	{
 		TextWriter_WriteNewline(dbb);
+	}
+}
+void DynamicByteBuffer_WriteIntArray2D(DynamicByteBuffer* dbb, int32_t* array2D, int32_t width, int32_t height)
+{
+	for (int32_t j = 0; j < height; j += 1)
+	{
+		DynamicByteBuffer_WriteNewline(dbb);
+		for (int32_t i = 0; i < width; i += 1)
+		{
+			DynamicByteBuffer_WriteI32(dbb, array2D[i + (j * width)]);
+		}
 	}
 }
 uint8_t* DynamicByteBuffer_GetBuffer(const DynamicByteBuffer* dbb)

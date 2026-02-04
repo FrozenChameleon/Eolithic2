@@ -94,36 +94,36 @@ void ThingInstance_SetSetting(ThingInstance* ti, const char* key, const char* va
 		}
 	}*/
 }
-void ThingInstance_Write(ThingInstance* ti, BufferWriter* writer)
+void ThingInstance_Write(ThingInstance* ti, DynamicByteBuffer* dbb)
 {
-	//UNUSED
-	/*writer->WriteInt32(0); //V3 //Unused - Thing Instance ID
-	writer->WriteString(mName);
+	DynamicByteBuffer_WriteString(dbb, ti->mName, EE_FILENAME_MAX);
 
-	writer->WriteSingle(0); //Unused - Offset X
-	writer->WriteSingle(0); //Unused - Offset Y
+	DynamicByteBuffer_WriteNewline(dbb);
 
-	writer->WriteInt32(mNodes.size());
-	for (int32_t i = 0; i < mNodes.size(); i += 1)
+	DynamicByteBuffer_WriteI32(dbb, (int32_t)arrlen(ti->arr_nodes));
+	for (int32_t i = 0; i < arrlen(ti->arr_nodes); i += 1)
 	{
-		OePoints_Write(mNodes[i], writer);
+		DynamicByteBuffer_WriteNewline(dbb);
+		Points_Write(&ti->arr_nodes[i], dbb);
 	}
 
-	writer->WriteInt32(mSettings.size());
-	for (int32_t i = 0; i < mSettings.size(); i += 1)
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, (int32_t)arrlen(ti->arr_settings));
+	for (int32_t i = 0; i < arrlen(ti->arr_settings); i += 1)
 	{
-		OeStringPair_Write(&mSettings[i], writer);
-	}*/
+		DynamicByteBuffer_WriteNewline(dbb);
+		StringPair_Write(&ti->arr_settings[i], dbb);
+	}
 }
-void ThingInstance_Read(ThingInstance* ti, int32_t version, BufferReader* reader)
+void ThingInstance_Read(int32_t version, ThingInstance* ti, BufferReader* reader)
 {
-	if (version >= 3)
-	{
-		BufferReader_ReadI32(reader); //Unused - Thing Instance ID
-	}
+	//BufferReader_ReadI32(reader);//UNUSED
+
 	BufferReader_ReadString(reader, ti->mName, EE_FILENAME_MAX);
-	BufferReader_ReadFloat(reader); //Unused - Offset X
-	BufferReader_ReadFloat(reader); //Unused - Offset Y
+
+	//BufferReader_ReadFloat(reader);//UNUSED
+	//BufferReader_ReadFloat(reader);//UNUSED
 
 	int32_t sizeNode = BufferReader_ReadI32(reader);
 	for (int32_t i = 0; i < sizeNode; i += 1)

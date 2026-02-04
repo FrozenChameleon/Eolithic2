@@ -11,8 +11,8 @@
 #include "../render/Color.h"
 
 typedef struct MString MString;
-typedef struct BufferWriter BufferWriter;
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 typedef struct ThingSettings ThingSettings;
 typedef struct SpriteBatch SpriteBatch;
 
@@ -35,8 +35,8 @@ void ThingInstance_Init(ThingInstance* ti);
 
 StringPair ThingInstance_GetSetting(ThingInstance* ti, const char* key);
 void ThingInstance_SetSetting(ThingInstance* ti, const char* key, const char* value);
-void ThingInstance_Write(ThingInstance* ti, BufferWriter* writer);
-void ThingInstance_Read(ThingInstance* ti, int32_t version, BufferReader* reader);
+void ThingInstance_Write(ThingInstance* ti, DynamicByteBuffer* dbb);
+void ThingInstance_Read(int32_t version, ThingInstance* ti, BufferReader* reader);
 void ThingInstance_SetupSettings(ThingInstance* instance, bool ignoreWarnings);
 void ThingInstance_RemoveUnrelatedPairs(ThingInstance* instance, StringPair* arr_from, StringPair* arr_to, bool ignoreWarnings);
 void ThingInstance_AddMissingPairs(StringPair* arr_from, StringPair* arr_to, bool ignoreWarnings);

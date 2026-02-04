@@ -11,19 +11,9 @@
 #include "../io/File.h"
 #include "../../third_party/stb_ds.h"
 #include "../io/BufferReader.h"
+#include "../io/DynamicByteBuffer.h"
 
-static const char* TAG_ID = "id";
-static const char* TAG_ROUTINE_ID = "routine_id";
-static const char* TAG_COLLISION_WIDTH = "collision_width";
-static const char* TAG_COLLISION_HEIGHT = "collision_height";
-static const char* TAG_DO_NOT_DISPOSE = "do_not_dispose";
-static const char* TAG_HAS_AI = "has_ai";
-static const char* TAG_HAS_DRAWING = "has_drawing";
-static const char* TAG_HAS_COLLISION = "has_collision";
-static const char* TAG_DEFAULT_STATE = "default_state";
-static const char* TAG_DEFAULT_PHASE = "default_phase";
-static const char* TAG_PREVIEW_SHEET = "preview_sheet";
-static const char* TAG_GRAPHICS_STATE_COUNT = "state_count";
+#define VERSION_THINGSETTINGS 7
 
 void ThingSettings_Init(ThingSettings* ts)
 {
@@ -38,6 +28,12 @@ void ThingSettings_Init(ThingSettings* ts)
 
 void ThingSettings_Read(ThingSettings* ts, BufferReader* br)
 {
+	if (!BufferReader_ReadMagicNumber(br))
+	{
+		return;
+	}
+	BufferReader_ReadVersionNumber(br);
+
 	BufferReader_ReadI32(br); //ID has been removed
 	ts->mRoutineId = BufferReader_ReadI32(br);
 
@@ -85,6 +81,47 @@ void ThingSettings_Read(ThingSettings* ts, BufferReader* br)
 		shput(ts->sh_graphics_data, MString_Text(key1), entry);
 
 		MString_Dispose(&key1);
+	}
+}
+
+void ThingSettings_Write(ThingSettings* ts, DynamicByteBuffer* dbb)
+{
+	DynamicByteBuffer_WriteMagicNumber(dbb);
+	DynamicByteBuffer_WriteVersionNumber(dbb, VERSION_THINGSETTINGS);
+
+	DynamicByteBuffer_WriteI32(dbb, 0); //ID has been removed
+	DynamicByteBuffer_WriteI32(dbb,  ts->mRoutineId);
+	DynamicByteBuffer_WriteI32(dbb, ts->mCollisionWidth);
+	DynamicByteBuffer_WriteI32(dbb, ts->mCollisionHeight);
+	DynamicByteBuffer_WriteBoolean(dbb, ts->mDoNotDispose);
+	DynamicByteBuffer_WriteBoolean(dbb, ts->mHasAI);
+	DynamicByteBuffer_WriteBoolean(dbb, ts->mHasDrawing);
+	DynamicByteBuffer_WriteBoolean(dbb, ts->mHasCollision);
+	DynamicByteBuffer_WriteString(dbb, ts->mDefaultState, EE_FILENAME_MAX);
+	DynamicByteBuffer_WriteString(dbb, ts->mDefaultPhase, EE_FILENAME_MAX);
+	DynamicByteBuffer_WriteString(dbb, ts->mPreviewSheet, EE_FILENAME_MAX);
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, (int32_t)shlen(ts->sh_graphics_data));
+	for (int i = 0; i < shlen(ts->sh_graphics_data); i += 1)
+	{
+		DynamicByteBuffer_WriteNewline(dbb);
+		DynamicByteBuffer_WriteString(dbb, ts->sh_graphics_data[i].key, EE_FILENAME_MAX);
+		ThingGraphicsEntry* innerMap = ts->sh_graphics_data[i].value;
+		DynamicByteBuffer_WriteI32(dbb, (int32_t)shlen(innerMap));
+		for (int j = 0; j < shlen(innerMap); j += 1)
+		{
+			DynamicByteBuffer_WriteNewline(dbb);
+			DynamicByteBuffer_WriteString(dbb, innerMap[j].key, EE_FILENAME_MAX);
+			ImageData* arr_image_data = innerMap[j].value;
+			DynamicByteBuffer_WriteI32(dbb, (int32_t)arrlen(arr_image_data));
+			for (int k = 0; k < arrlen(arr_image_data); k += 1)
+			{
+				DynamicByteBuffer_WriteNewline(dbb);
+				ImageData_Write(&arr_image_data[k], dbb);
+			}
+		}
 	}
 }
 

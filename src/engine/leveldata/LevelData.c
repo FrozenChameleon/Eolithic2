@@ -19,25 +19,32 @@
 #include "../render/TilesetOffset.h"
 #include "../utils/Utils.h"
 
+#define VERSION_LEVELDATA 12
+
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
 
 LevelData* LevelData_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br)
 {
 	LevelData* levelData = (LevelData*)Utils_calloc(1, sizeof(LevelData));
-	LevelData_ReadIni(levelData, br);
+	LevelData_Read(levelData, br);
 	return levelData;
 }
 void LevelData_Dispose(LevelData* ld)
 {
 	Utils_free(ld);
 }
-void LevelData_ReadIni(LevelData* ld, BufferReader* reader)
+void LevelData_Read(LevelData* ld, BufferReader* reader)
 {
-	LevelData_ReadHeader(ld, reader);
-
-	if (Globals_IsDebugFileMode())
+	if (!BufferReader_ReadMagicNumber(reader))
 	{
-		// UNUSED
+		return;
+	}
+	int16_t versionNumber = BufferReader_ReadVersionNumber(reader);
+
+	LevelData_ReadHeader(versionNumber, ld, reader);
+
+	/*if (Globals_IsDebugFileMode())// UNUSED
+	{
 		//if (mStringData.Length < STRING_DATA_LENGTH) //if debug then correct custom data if wrong size...
 		//{
 		//	OeLogger_LogInformation("Correcting custom data amount...");
@@ -54,7 +61,7 @@ void LevelData_ReadIni(LevelData* ld, BufferReader* reader)
 
 		//	mStringData = newCustom;
 		//}
-	}
+	}*/
 
 	if (Utils_StringEqualTo(ld->mLevelName, EE_STR_EMPTY))
 	{
@@ -76,15 +83,26 @@ void LevelData_ReadIni(LevelData* ld, BufferReader* reader)
 		return;
 	}*/
 
-	LevelData_ReadData(ld, reader);
+	LevelData_ReadData(versionNumber, ld, reader);
 	LevelData_LoadSetupOffsets(ld);
 	LevelData_LoadSetupTileData(ld);
 }
-void LevelData_ReadHeader(LevelData* ld, BufferReader* reader)
+void LevelData_Write(LevelData* ld, DynamicByteBuffer* dbb)
 {
-	BufferReader_ReadI32(reader); //VERSION <-
+	DynamicByteBuffer_WriteMagicNumber(dbb);
+	DynamicByteBuffer_WriteVersionNumber(dbb, VERSION_LEVELDATA);
 
-	ld->_mIsMetaMap = BufferReader_ReadBoolean(reader); // <- Add these two to CometStriker/Mute Crimson+ for parity
+	LevelData_WriteHeader(ld, dbb);
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	LevelData_WriteData(ld, dbb);
+}
+void LevelData_ReadHeader(int32_t version, LevelData* ld, BufferReader* reader)
+{
+	//version = BufferReader_ReadI32(reader); // <- //UNSUED
+
+	ld->_mIsMetaMap = BufferReader_ReadBoolean(reader);
 
 	BufferReader_ReadString(reader, ld->mLevelName, EE_FILENAME_MAX);
 	BufferReader_ReadString(reader, ld->mTilesetName, EE_FILENAME_MAX);
@@ -95,22 +113,45 @@ void LevelData_ReadHeader(LevelData* ld, BufferReader* reader)
 		BufferReader_ReadString(reader, ld->mStringData[i], EE_FILENAME_MAX);
 	}
 
-	BufferReader_ReadFloat(reader); //Unused - Player Position X
-	BufferReader_ReadFloat(reader); //Unused - Player Position Y
+	//BufferReader_ReadFloat(reader); //Unused - Player Position X
+	//BufferReader_ReadFloat(reader); //Unused - Player Position Y
 
 	int32_t layerDataSize = BufferReader_ReadI32(reader);
 	for (int32_t i = 0; i < layerDataSize; i += 1)
 	{
-		LayerData_ReadIni(&ld->mLayerData[i], i, reader);
+		LayerData_Read(&ld->mLayerData[i], reader);
 	}
 }
-void LevelData_ReadData(LevelData* ld, BufferReader* reader)
+void LevelData_WriteHeader(LevelData* ld, DynamicByteBuffer* dbb)
 {
-	int32_t version = BufferReader_ReadI32(reader);
+	DynamicByteBuffer_WriteBoolean(dbb, ld->_mIsMetaMap);
+
+	DynamicByteBuffer_WriteString(dbb, ld->mLevelName, EE_FILENAME_MAX);
+	DynamicByteBuffer_WriteString(dbb, ld->mTilesetName, EE_FILENAME_MAX);
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, LEVELDATA_STRING_DATA_LENGTH);
+	for (int32_t i = 0; i < LEVELDATA_STRING_DATA_LENGTH; i += 1)
+	{
+		DynamicByteBuffer_WriteString(dbb, ld->mStringData[i], EE_FILENAME_MAX);
+	}
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, LEVELDATA_LAYER_DATA_LENGTH);
+	for (int32_t i = 0; i < LEVELDATA_LAYER_DATA_LENGTH; i += 1)
+	{
+		LayerData_Write(&ld->mLayerData[i], dbb);
+	}
+}
+void LevelData_ReadData(int32_t version, LevelData* ld, BufferReader* reader)
+{
+	//version = BufferReader_ReadI32(reader); //UNSUED
 
 	if (version >= 3)
 	{
-		BufferReader_ReadI32(reader); //Unused - Thing Instance ID Counter
+		//BufferReader_ReadI32(reader); //Unused - Thing Instance ID Counter
 	}
 
 	int32_t saveTileSize = BufferReader_ReadI32(reader);
@@ -118,34 +159,61 @@ void LevelData_ReadData(LevelData* ld, BufferReader* reader)
 	{
 		Tile* tile = (Tile*)Utils_calloc(1, sizeof(Tile));
 		Tile_Init(tile);
-		Tile_Read(tile, version, reader);
+		Tile_Read(version, tile, reader);
 		arrput(ld->arr_save_tiles, tile);
 	}
 
-	int32_t gridWidth = BufferReader_ReadI32(reader);
-	int32_t gridHeight = BufferReader_ReadI32(reader);
-
-	ld->_mGridSize.Width = gridWidth;
-	ld->_mGridSize.Height = gridHeight;
-	ld->_mSaveTileMap = BufferReader_ReadIntArray2D(reader, gridWidth, gridHeight);
+	ld->_mGridSize.Width = BufferReader_ReadI32(reader);
+	ld->_mGridSize.Height = BufferReader_ReadI32(reader);
+	ld->_mSaveTileMap = BufferReader_ReadIntArray2D(reader, ld->_mGridSize.Width, ld->_mGridSize.Height);
 
 	int32_t cameraDataSize = BufferReader_ReadI32(reader);
 	for (int32_t i = 0; i < cameraDataSize; i += 1)
 	{
 		LevelCameraData cameraData = { 0 };
-		LevelCameraData_Read(&cameraData, version, reader);
+		LevelCameraData_Read(version, &cameraData, reader);
 		arrput(ld->arr_camera_data, cameraData);
 	}
 
-	if (version >= 5)
+	int32_t lineInfoSize = BufferReader_ReadI32(reader);
+	for (int32_t i = 0; i < lineInfoSize; i += 1)
 	{
-		int32_t lineInfoSize = BufferReader_ReadI32(reader);
-		for (int32_t i = 0; i < lineInfoSize; i += 1)
-		{
-			Line line = { 0 };
-			Line_Read(version, &line, reader);
-			arrput(ld->arr_lines, line);
-		}
+		Line line = { 0 };
+		Line_Read(version, &line, reader);
+		arrput(ld->arr_lines, line);
+	}
+}
+void LevelData_WriteData(LevelData* ld, DynamicByteBuffer* dbb)
+{
+	DynamicByteBuffer_WriteI32(dbb, (int32_t)arrlen(ld->arr_save_tiles));
+	for (int32_t i = 0; i < arrlen(ld->arr_save_tiles); i += 1)
+	{
+		DynamicByteBuffer_WriteNewline(dbb);
+		Tile_Write(ld->arr_save_tiles[i], dbb);
+	}
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, ld->_mGridSize.Width);
+	DynamicByteBuffer_WriteI32(dbb, ld->_mGridSize.Height);
+	DynamicByteBuffer_WriteIntArray2D(dbb, ld->_mSaveTileMap, ld->_mGridSize.Width, ld->_mGridSize.Height);
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, (int32_t)arrlen(ld->arr_camera_data));
+	for (int32_t i = 0; i < arrlen(ld->arr_camera_data); i += 1)
+	{
+		DynamicByteBuffer_WriteNewline(dbb);
+		LevelCameraData_Write(&ld->arr_camera_data[i], dbb);
+	}
+
+	DynamicByteBuffer_WriteNewline(dbb);
+
+	DynamicByteBuffer_WriteI32(dbb, (int32_t)arrlen(ld->arr_lines));
+	for (int32_t i = 0; i < arrlen(ld->arr_lines); i += 1)
+	{
+		DynamicByteBuffer_WriteNewline(dbb);
+		Line_Write(&ld->arr_lines[i], dbb);
 	}
 }
 void LevelData_LoadSetupOffsets(LevelData* ld)

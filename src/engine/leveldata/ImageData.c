@@ -9,6 +9,7 @@
 #include "../math/Vectors.h"
 #include "../utils/Utils.h"
 #include "../io/BufferReader.h"
+#include "../io/DynamicByteBuffer.h"
 
 void ImageData_Init(ImageData* id)
 {
@@ -35,6 +36,23 @@ void ImageData_Read(ImageData* id, BufferReader* br)
 	id->mDepth = BufferReader_ReadI32(br);
 	id->mInitialRotation = BufferReader_ReadFloat(br);
 	id->mScaler = BufferReader_ReadI32(br);
+}
+void ImageData_Write(ImageData* id, DynamicByteBuffer* dbb)
+{
+	DynamicByteBuffer_WriteString(dbb, id->mImage, EE_FILENAME_MAX);
+	DynamicByteBuffer_WriteBoolean(dbb, id->mIsAdditive);
+	DynamicByteBuffer_WriteFloat(dbb, id->mOrigin.X);
+	DynamicByteBuffer_WriteFloat(dbb, id->mOrigin.Y);
+	DynamicByteBuffer_WriteI32(dbb, id->mOffset.X);
+	DynamicByteBuffer_WriteI32(dbb, id->mOffset.Y);
+	DynamicByteBuffer_WriteI32(dbb, id->mAnimationLoopPoint);
+	DynamicByteBuffer_WriteBoolean(dbb, id->mCanAnimate);
+	DynamicByteBuffer_WriteBoolean(dbb, id->mAnimationStops);
+	DynamicByteBuffer_WriteBoolean(dbb, id->mAnimationBlanks);
+	DynamicByteBuffer_WriteI32(dbb, id->mFlipSpeed);
+	DynamicByteBuffer_WriteI32(dbb, id->mDepth);
+	DynamicByteBuffer_WriteFloat(dbb, id->mInitialRotation);
+	DynamicByteBuffer_WriteI32(dbb, id->mScaler);
 }
 const char* ImageData_ToString(ImageData* id)
 {

@@ -45,8 +45,8 @@ void SoundEffect_Init(void)
 		return;
 	}
 
-	VolumeData_Init(&_mVolumeData, false);
-	VolumeData_Load(&_mVolumeData);
+	VolumeData_Init(&_mVolumeData);
+	VolumeData_Load(&_mVolumeData, false);
 
 	_mHasInit = true;
 }

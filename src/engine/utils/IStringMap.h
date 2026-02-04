@@ -11,6 +11,7 @@
 
 typedef struct IStringMap IStringMap;
 typedef struct BufferReader BufferReader;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 IStringMap* IStringMap_Create(void);
 void IStringMap_Clear(IStringMap* sm);
@@ -22,4 +23,5 @@ int64_t IStringMap_Length(IStringMap* sm);
 const char* IStringMap_GetKeyByIndex(IStringMap* sm, int32_t index);
 const char* IStringMap_GetValueByIndex(IStringMap* sm, int32_t index);
 uint64_t IStringMap_GetRefs(void);
-void IStringMap_Load(IStringMap* sm, BufferReader* br);
+void IStringMap_Read(IStringMap* sm, BufferReader* br);
+void IStringMap_Write(IStringMap* sm, DynamicByteBuffer* dbb);

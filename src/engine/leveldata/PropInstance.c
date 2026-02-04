@@ -40,20 +40,20 @@ void PropInstance_Init(PropInstance* prop)
 	prop->mScale = 1;
 	prop->mDrawOffset = Vector2_Zero;
 }
-void PropInstance_Write(PropInstance* prop, BufferWriter* writer)
+void PropInstance_Write(PropInstance* prop, DynamicByteBuffer* dbb)
 {
-	/*writer->WriteSingle(prop->mOffset.X); //UNUSED
-	writer->WriteSingle(prop->mOffset.Y);
-	writer->WriteSingle(prop->mScale);
-	writer->WriteInt32(prop->mDepth);
-	writer->WriteSingle(prop->mRotation);
-	writer->WriteSingle(prop->mDrawOffset.X);
-	writer->WriteSingle(prop->mDrawOffset.Y);
-	writer->WriteBoolean(prop->mFlipX);
-	writer->WriteBoolean(prop->mFlipY);
-	writer->WriteString(prop->mName);*/
+	DynamicByteBuffer_WriteFloat(dbb, prop->mOffset.X);
+	DynamicByteBuffer_WriteFloat(dbb, prop->mOffset.Y);
+	DynamicByteBuffer_WriteFloat(dbb, prop->mScale);
+	DynamicByteBuffer_WriteI32(dbb, prop->mDepth);
+	DynamicByteBuffer_WriteFloat(dbb, prop->mRotation);
+	DynamicByteBuffer_WriteFloat(dbb, prop->mDrawOffset.X);
+	DynamicByteBuffer_WriteFloat(dbb, prop->mDrawOffset.Y);
+	DynamicByteBuffer_WriteBoolean(dbb, prop->mFlipX);
+	DynamicByteBuffer_WriteBoolean(dbb, prop->mFlipY);
+	DynamicByteBuffer_WriteString(dbb, prop->mName, EE_FILENAME_MAX);
 }
-void PropInstance_Read(PropInstance* prop, int32_t version, BufferReader* reader)
+void PropInstance_Read(int32_t version, PropInstance* prop, BufferReader* reader)
 {
 	prop->mOffset.X = BufferReader_ReadFloat(reader);
 	prop->mOffset.Y = BufferReader_ReadFloat(reader);

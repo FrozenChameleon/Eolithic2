@@ -27,13 +27,21 @@ void DrawTile_Init(DrawTile* drawTile)
 	drawTile->mPoint = Points_NegativeOne;
 	drawTile->mOffsetPoint = Points_NegativeOne;
 }
-void DrawTile_Read(DrawTile* drawTile, int32_t version, BufferReader* reader)
+void DrawTile_Read(int32_t version, DrawTile* drawTile, BufferReader* reader)
 {
 	BufferReader_ReadString(reader, drawTile->mAnimation, EE_FILENAME_MAX);
 	Points_Read(&drawTile->mPoint, reader);
 	drawTile->mFlipX = BufferReader_ReadBoolean(reader);
 	drawTile->mFlipY = BufferReader_ReadBoolean(reader);
 	drawTile->mRotation = BufferReader_ReadFloat(reader);
+}
+void DrawTile_Write(DrawTile* drawTile, DynamicByteBuffer* dbb)
+{
+	DynamicByteBuffer_WriteString(dbb, drawTile->mAnimation, EE_FILENAME_MAX);
+	Points_Write(&drawTile->mPoint, dbb);
+	DynamicByteBuffer_WriteBoolean(dbb, drawTile->mFlipX);
+	DynamicByteBuffer_WriteBoolean(dbb, drawTile->mFlipY);
+	DynamicByteBuffer_WriteFloat(dbb, drawTile->mRotation);
 }
 void DrawTile_LoadSheet(DrawTile* drawTile, int32_t x, int32_t y)
 {

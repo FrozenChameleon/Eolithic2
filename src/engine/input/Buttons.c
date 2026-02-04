@@ -1,7 +1,7 @@
 #include "Buttons.h"
 
 static bool _mHasInit;
-static int32_t _mArray[BUTTONS_AMOUNT_OF_BUTTONS];
+static Button _mArray[BUTTONS_AMOUNT_OF_BUTTONS];
 
 static void Init(void)
 {
@@ -28,14 +28,14 @@ static void Init(void)
 	_mHasInit = true;
 }
 
-int32_t Buttons_GetButton(int32_t index)
+Button Buttons_GetButton(int32_t index)
 {
 	Init();
 
 	return _mArray[index];
 }
 
-const int32_t* Buttons_GetArray(void)
+const Button* Buttons_GetArray(void)
 {
 	Init();
 

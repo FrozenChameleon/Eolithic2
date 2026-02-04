@@ -12,7 +12,7 @@
 #include "../utils/MString.h"
 
 typedef struct BufferReader BufferReader;
-typedef struct BufferWriter BufferWriter;
+typedef struct DynamicByteBuffer DynamicByteBuffer;
 typedef struct SpriteBatch SpriteBatch;
 
 typedef struct PropInstance
@@ -29,8 +29,8 @@ typedef struct PropInstance
 } PropInstance;
 
 void PropInstance_Init(PropInstance* prop);
-void PropInstance_Write(PropInstance* prop, BufferWriter* writer);
-void PropInstance_Read(PropInstance* prop, int32_t version, BufferReader* reader);
+void PropInstance_Write(PropInstance* prop, DynamicByteBuffer* dbb);
+void PropInstance_Read(int32_t version, PropInstance* prop, BufferReader* reader);
 void PropInstance_Draw(PropInstance* prop, SpriteBatch* spriteBatch, Vector2 position);
 void PropInstance_Draw2(PropInstance* prop, SpriteBatch* spriteBatch, Vector2 position, bool drawInfo);
 void PropInstance_Draw3(PropInstance* prop, SpriteBatch* spriteBatch, int32_t depth, Vector2 position);

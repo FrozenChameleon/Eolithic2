@@ -337,35 +337,35 @@ bool Utils_StringEqualTo(const char* str1, const char* str2)
 }
 int32_t Utils_UInt8ToString(uint8_t value, char* buffer, size_t maxlen)
 {
-	return SDL_snprintf(buffer, maxlen, "%"PRIu8, value);
+	return SDL_snprintf(buffer, maxlen, "%" PRIu8, value);
 }
 int32_t Utils_UInt16ToString(uint16_t value, char* buffer, size_t maxlen)
 {
-	return SDL_snprintf(buffer, maxlen, "%"PRIu16, value);
+	return SDL_snprintf(buffer, maxlen, "%" PRIu16, value);
 }
 int32_t Utils_UInt32ToString(uint32_t value, char* buffer, size_t maxlen)
 {
-	return SDL_snprintf(buffer, maxlen, "%"PRIu32, value);
+	return SDL_snprintf(buffer, maxlen, "%" PRIu32, value);
 }
 int32_t Utils_UInt64ToString(uint64_t value, char* buffer, size_t maxlen)
 {
-	return SDL_snprintf(buffer, maxlen, "%"PRIu64, value);
+	return SDL_snprintf(buffer, maxlen, "%" PRIu64, value);
 }
 int32_t Utils_Int8ToString(int8_t value, char* buffer, size_t maxlen)
 {
-	return SDL_snprintf(buffer, maxlen, "%"PRId8, value);
+	return SDL_snprintf(buffer, maxlen, "%" PRId8, value);
 }
 int32_t Utils_Int16ToString(int16_t value, char* buffer, size_t maxlen)
 {
-	return SDL_snprintf(buffer, maxlen, "%"PRId16, value);
+	return SDL_snprintf(buffer, maxlen, "%" PRId16, value);
 }
 int32_t Utils_IntToString(int32_t value, char* buffer, size_t maxlen)
 {
-	return SDL_snprintf(buffer, maxlen, "%"PRId32, value);
+	return SDL_snprintf(buffer, maxlen, "%" PRId32, value);
 }
 int32_t Utils_Int64ToString(int64_t value, char* buffer, size_t maxlen)
 {
-	return SDL_snprintf(buffer, maxlen, "%"PRId64, value);
+	return SDL_snprintf(buffer, maxlen, "%" PRId64, value);
 }
 int32_t Utils_FloatToString(float value, char* buffer, size_t maxlen)
 {
@@ -1313,7 +1313,7 @@ bool Utils_GetInputCheckForBind(InputCheck* inputCheck, bool isController, bool 
 			int32_t mouseButtonBind = Utils_GetMouseButtonForBind();
 			if (mouseButtonBind != -1)
 			{
-				*inputCheck = InputCheck_CreateCheckMouseButton(mouseButtonBind);
+				*inputCheck = InputCheck_CreateCheckMouseButton((MouseButton)mouseButtonBind);
 				return true;
 			}
 		}
@@ -1325,12 +1325,12 @@ bool Utils_GetInputCheckForBind(InputCheck* inputCheck, bool isController, bool 
 		{
 			ControllerState* controllerState = ControllerStates_GetController(i);
 
-			for (int32_t j = 0; j < INPUTCHECK_AXIS_AMOUNT; j += 1)
+			for (int32_t j = 0; j < AXES_AMOUNT_OF_AXIS; j += 1)
 			{
 				int32_t releaseDirection = ControllerState_IsAnalogReleased(controllerState, j, 0.5f);
 				if (releaseDirection != 0)
 				{
-					*inputCheck = InputCheck_CreateCheckAxis(j, releaseDirection);
+					*inputCheck = InputCheck_CreateCheckAxis((Axis)j, releaseDirection);
 					return true;
 				}
 			}
