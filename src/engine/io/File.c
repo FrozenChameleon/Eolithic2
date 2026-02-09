@@ -173,7 +173,7 @@ const char* File_GetPrefPath(void)
 {
 	if (_mPrefPath == NULL)
 	{
-		_mPrefPath = SDL_GetPrefPath(Cvars_Get(CVARS_ENGINE_ORGANIZATION_NAME), Cvars_Get(CVARS_ENGINE_SAVE_NAME));
+		_mPrefPath = SDL_GetPrefPath(Cvars_GetAsString(CVARS_ENGINE_ORGANIZATION_NAME), Cvars_GetAsString(CVARS_ENGINE_SAVE_NAME));
 	}
 
 	return _mPrefPath;

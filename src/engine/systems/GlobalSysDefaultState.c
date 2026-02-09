@@ -6,35 +6,40 @@
 
 #include "GlobalSysDefaultState.h"
 
+#include "../editor/Editor.h"
 #include "../globals/Globals.h"
 #include "../gamestate/GameStateManager.h"
 #include "../gamestate/GameState.h"
 
 static void Draw(void* givenData, SpriteBatch* spriteBatch)
 {
-	if (GLOBALS_DEBUG_IS_EDITOR_MODE)
-	{
 #ifdef EDITOR_MODE
-		//WILLNOTDO 06262023 (EDITOR_MODE) 2023 OeEditor.Draw(spriteBatch);
-#endif
+	if (Globals_DebugIsEditorMode())
+	{
+		Editor_Draw(spriteBatch);
 	}
 	else
 	{
 		GameState_Draw(GameStateManager_GetGameState(), spriteBatch);
 	}
+#else
+	GameState_Draw(GameStateManager_GetGameState(), spriteBatch);
+#endif
 }
 static void DrawHud(void* givenData, SpriteBatch* spriteBatch)
 {
-	if (GLOBALS_DEBUG_IS_EDITOR_MODE)
-	{
 #ifdef EDITOR_MODE
-		//WILLNOTDO 06262023 (EDITOR_MODE) 2023 OeEditor.DrawHud(spriteBatch);
-#endif
+	if (Globals_DebugIsEditorMode())
+	{
+		Editor_DrawHud(spriteBatch);
 	}
 	else
 	{
 		GameState_DrawHud(GameStateManager_GetGameState(), spriteBatch);
 	}
+#else
+	GameState_DrawHud(GameStateManager_GetGameState(), spriteBatch);
+#endif
 }
 /*void OeGlobalSysDefaultState_DrawDebugHud(OeSpriteBatch* spriteBatch)
 {
@@ -45,9 +50,9 @@ static void DrawHud(void* givenData, SpriteBatch* spriteBatch)
 static void Update(void* givenData)
 {
 #ifdef EDITOR_MODE
-	if (GLOBALS_DEBUG_IS_EDITOR_MODE)
+	if (Globals_DebugIsEditorMode())
 	{
-		//WILLNOTDO 06262023 (EDITOR_MODE) 2023 OeEditor.Update();
+		Editor_Update();
 	}
 	else
 	{

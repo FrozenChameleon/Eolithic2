@@ -741,27 +741,27 @@ void MenuFunc_VideoFullscreenToggle(void)
 }
 void MenuFunc_PlayMenuSoundSelect(void)
 {
-	MenuFunc_PlayMenuSoundHelper(Cvars_Get(CVARS_ENGINE_DEFAULT_MENU_SELECT_SOUND));
+	MenuFunc_PlayMenuSoundHelper(Cvars_GetAsString(CVARS_ENGINE_DEFAULT_MENU_SELECT_SOUND));
 }
 void MenuFunc_PlayMenuSoundDeny(void)
 {
-	MenuFunc_PlayMenuSoundHelper(Cvars_Get(CVARS_ENGINE_DEFAULT_MENU_DENY_SOUND));
+	MenuFunc_PlayMenuSoundHelper(Cvars_GetAsString(CVARS_ENGINE_DEFAULT_MENU_DENY_SOUND));
 }
 void MenuFunc_PlayMenuSoundUp(void)
 {
-	MenuFunc_PlayMenuSoundHelper(Cvars_Get(CVARS_ENGINE_DEFAULT_MENU_UP_SOUND));
+	MenuFunc_PlayMenuSoundHelper(Cvars_GetAsString(CVARS_ENGINE_DEFAULT_MENU_UP_SOUND));
 }
 void MenuFunc_PlayMenuSoundRight(void)
 {
-	MenuFunc_PlayMenuSoundHelper(Cvars_Get(CVARS_ENGINE_DEFAULT_MENU_RIGHT_SOUND));
+	MenuFunc_PlayMenuSoundHelper(Cvars_GetAsString(CVARS_ENGINE_DEFAULT_MENU_RIGHT_SOUND));
 }
 void MenuFunc_PlayMenuSoundDown(void)
 {
-	MenuFunc_PlayMenuSoundHelper(Cvars_Get(CVARS_ENGINE_DEFAULT_MENU_DOWN_SOUND));
+	MenuFunc_PlayMenuSoundHelper(Cvars_GetAsString(CVARS_ENGINE_DEFAULT_MENU_DOWN_SOUND));
 }
 void MenuFunc_PlayMenuSoundLeft(void)
 {
-	MenuFunc_PlayMenuSoundHelper(Cvars_Get(CVARS_ENGINE_DEFAULT_MENU_LEFT_SOUND));
+	MenuFunc_PlayMenuSoundHelper(Cvars_GetAsString(CVARS_ENGINE_DEFAULT_MENU_LEFT_SOUND));
 }
 void MenuFunc_PlayMenuSoundHelper(const char* soundToPlay)
 {

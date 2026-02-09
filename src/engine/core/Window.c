@@ -113,7 +113,7 @@ int32_t Window_Init(void)
 
 	_mIsWindowActive = true;
 
-	const char* gameName = Cvars_Get("name");
+	const char* gameName = Cvars_GetAsString("name");
 
 	uint32_t flags = GetWindowFlagForFullscreen();
 	flags = flags | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
@@ -247,7 +247,7 @@ void Window_LoadIcon(void)
 		return;
 	}
 
-	const char* gameName = Cvars_Get(CVARS_ENGINE_NAME);
+	const char* gameName = Cvars_GetAsString(CVARS_ENGINE_NAME);
 	SDL_Surface* icon = NULL;
 
 	{

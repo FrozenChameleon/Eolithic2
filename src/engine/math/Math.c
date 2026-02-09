@@ -113,6 +113,10 @@ double Math_floor(double value)
 {
 	return SDL_floor(value);
 }
+double Math_round(double value)
+{
+	return SDL_round(value);
+}
 double Math_atan(double x)
 {
 	return SDL_atan(x);

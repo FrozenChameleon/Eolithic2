@@ -284,6 +284,10 @@ int32_t LevelData_GetGridSizeY(LevelData* ld)
 {
 	return ld->_mGridSize.Height;
 }
+Rectangle LevelData_GetGridSize(LevelData* ld)
+{
+	return ld->_mGridSize;
+}
 int32_t LevelData_GetRealSizeWidth(LevelData* ld)
 {
 	return ld->_mGridSize.Width * TILE_SIZE;
@@ -291,6 +295,15 @@ int32_t LevelData_GetRealSizeWidth(LevelData* ld)
 int32_t LevelData_GetRealSizeHeight(LevelData* ld)
 {
 	return ld->_mGridSize.Height * TILE_SIZE;
+}
+Rectangle LevelData_GetRealSize(LevelData* ld)
+{
+	Rectangle temp;
+	temp.X = 0;
+	temp.Y = 0;
+	temp.Width = LevelData_GetRealSizeWidth(ld);
+	temp.Height = LevelData_GetRealSizeHeight(ld);
+	return temp;
 }
 int32_t LevelData_GetRealSizeX(LevelData* ld)
 {
@@ -361,9 +374,10 @@ bool LevelData_IsTilesetNameSet(LevelData* ld)
 }
 void LevelData_DrawTiles(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera)
 {
-	int32_t preferredLayer = -1;
-	float mul = 1;
-
+	LevelData_DrawTiles2(ld, spriteBatch, camera, -1, 1);
+}
+void LevelData_DrawTiles2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera, int32_t preferredLayer, float mul)
+{
 #ifdef EDITOR_MODE
 	if (!Cvars_GetAsBool(CVARS_EDITOR_SHOW_TILES))
 	{
@@ -395,7 +409,7 @@ void LevelData_DrawTiles(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera
 	{
 		Color color = COLOR_WHITE;
 		int32_t depth = ld->mLayerData[i].mDepth;
-		if (preferredLayer != -1)
+		if (preferredLayer >= 0)
 		{
 			if (preferredLayer == i)
 			{
@@ -432,8 +446,10 @@ Texture* LevelData_GetTilesetTexture(LevelData* ld)
 }
 void LevelData_DrawProps(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera)
 {
-	bool drawInfo = false;
-
+	LevelData_DrawProps2(ld, spriteBatch, camera, false);
+}
+void LevelData_DrawProps2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera, bool drawInfo)
+{
 #ifdef EDITOR_MODE
 	if (!Cvars_GetAsBool(CVARS_EDITOR_SHOW_PROPS))
 	{

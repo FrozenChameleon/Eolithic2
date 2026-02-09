@@ -41,6 +41,7 @@
 #include "MenuFunc.h"
 #include  "../audio/AudioEngine.h"
 #include "../input/MouseState.h"
+#include "../editor/Editor.h"
 
 static const double FIXED_TIME_STEP_TICK = (1.0 / 60.0);
 #define MAX_TIME_STEP_FRAMES 4
@@ -132,6 +133,7 @@ int32_t Game_SecondInit(void)
 	OeRecordingTool.Init();
 	OeTilesetOffset.Init();*/
 	
+	Editor_Init();
 	FontMap_Init();
 	Input_Init();
 	GameStateManager_Ctor();

@@ -34,6 +34,7 @@ float Math_ceilf(float value);
 double Math_ceil(double value);
 float Math_floorf(float value);
 double Math_floor(double value);
+double Math_round(double value);
 double Math_atan(double x);
 double Math_atan2(double y, double x);
 int32_t Math_MinInt(int32_t valueA, int32_t valueB);

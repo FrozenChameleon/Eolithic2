@@ -19,6 +19,9 @@
 #include "../utils/Utils.h"
 #include "../core/Func.h"
 #include "../render/SpriteBatch.h"
+#ifdef EDITOR_MODE
+#include "../editor/Editor.h"
+#endif
 
 static int32_t _mUniqueMapSeed;
 static int32_t _mCurrentGameState;
@@ -45,7 +48,7 @@ void GameStateManager_Ctor(void)
 	_mHasRunCtor = true;
 }
 
-int32_t GameStateManager_GetGlobalSystemsLen(void)
+int32_t GameStateManager_GetGlobalSystemsLength(void)
 {
 	return (int32_t)arrlen(arr_global_systems);
 }
@@ -57,7 +60,7 @@ void GameStateManager_AddGlobalSystem(System* sys)
 {
 	arrput(arr_global_systems, sys);
 }
-int32_t GameStateManager_GetStateSystemsLen(void)
+int32_t GameStateManager_GetStateSystemsLength(void)
 {
 	return (int32_t)arrlen(arr_state_systems);
 }
@@ -95,7 +98,7 @@ void GameStateManager_DrawDebugHud(SpriteBatch* spriteBatch)
 }
 void GameStateManager_InitDefaultNormalState(void)
 {
-	GameStateManager_LoadMap(Cvars_Get(CVARS_ENGINE_DEFAULT_MAP));
+	GameStateManager_LoadMap(Cvars_GetAsString(CVARS_ENGINE_DEFAULT_MAP));
 }
 void GameStateManager_SetGameState(int32_t value)
 {
@@ -118,7 +121,18 @@ void GameStateManager_DebugDrawInfoHelper(int32_t* counter, SpriteBatch* spriteB
 }
 Camera* GameStateManager_GetCurrentRenderCamera(void)
 {
+#ifdef EDITOR_MODE
+	if (Globals_DebugIsEditorMode())
+	{
+		return Editor_GetCamera();
+	}
+	else
+	{
+		return GameHelper_GetCameraForRender();
+	}
+#else
 	return GameHelper_GetCameraForRender();
+#endif
 }
 void GameStateManager_DebugForceLoadMapNow(const char* map)
 {

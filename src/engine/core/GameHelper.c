@@ -60,7 +60,7 @@ LevelData* GameHelper_GetDefaultLevelData(void)
 }
 void GameHelper_UpdateLastRenderPositionNormally(void)
 {
-	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLen();
+	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLength();
 	System** stateSystems = GameStateManager_GetStateSystems();
 	GameState* gameState = GameStateManager_GetGameState();
 
@@ -80,7 +80,7 @@ float GameHelper_GetDefaultPostGameBrightness(void)
 }
 void GameHelper_UpdateGlobalSystemsNormally(void)
 {
-	int32_t globalSystemsLen = GameStateManager_GetGlobalSystemsLen();
+	int32_t globalSystemsLen = GameStateManager_GetGlobalSystemsLength();
 	System** globalSystems = GameStateManager_GetGlobalSystems();
 	for (int32_t i = 0; i < globalSystemsLen; i += 1)
 	{
@@ -90,7 +90,7 @@ void GameHelper_UpdateGlobalSystemsNormally(void)
 }
 void GameHelper_DrawGlobalSystemsNormally(SpriteBatch* spriteBatch)
 {
-	int32_t globalSystemsLen = GameStateManager_GetGlobalSystemsLen();
+	int32_t globalSystemsLen = GameStateManager_GetGlobalSystemsLength();
 	System** globalSystems = GameStateManager_GetGlobalSystems();
 	for (int32_t i = 0; i < globalSystemsLen; i += 1)
 	{
@@ -100,7 +100,7 @@ void GameHelper_DrawGlobalSystemsNormally(SpriteBatch* spriteBatch)
 }
 void GameHelper_DrawHudGlobalSystemsNormally(SpriteBatch* spriteBatch)
 {
-	int32_t globalSystemsLen = GameStateManager_GetGlobalSystemsLen();
+	int32_t globalSystemsLen = GameStateManager_GetGlobalSystemsLength();
 	System** globalSystems = GameStateManager_GetGlobalSystems();
 	for (int32_t i = 0; i < globalSystemsLen; i += 1)
 	{
@@ -110,7 +110,7 @@ void GameHelper_DrawHudGlobalSystemsNormally(SpriteBatch* spriteBatch)
 }
 void GameHelper_DrawDebugHudGlobalSystemsNormally(SpriteBatch* spriteBatch)
 {
-	int32_t globalSystemsLen = GameStateManager_GetGlobalSystemsLen();
+	int32_t globalSystemsLen = GameStateManager_GetGlobalSystemsLength();
 	System** globalSystems = GameStateManager_GetGlobalSystems();
 	for (int32_t i = 0; i < globalSystemsLen; i += 1)
 	{
@@ -120,7 +120,7 @@ void GameHelper_DrawDebugHudGlobalSystemsNormally(SpriteBatch* spriteBatch)
 }
 void GameHelper_UpdateStateSystemsNormally(void)
 {
-	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLen();
+	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLength();
 	System** stateSystems = GameStateManager_GetStateSystems();
 	for (int32_t i = 0; i < stateSystemsLen; i += 1)
 	{
@@ -130,7 +130,7 @@ void GameHelper_UpdateStateSystemsNormally(void)
 }
 void GameHelper_DrawStateSystemsNormally(SpriteBatch* spriteBatch)
 {
-	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLen();
+	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLength();
 	System** stateSystems = GameStateManager_GetStateSystems();
 	for (int32_t i = 0; i < stateSystemsLen; i += 1)
 	{
@@ -140,7 +140,7 @@ void GameHelper_DrawStateSystemsNormally(SpriteBatch* spriteBatch)
 }
 void GameHelper_DrawHudStateSystemsNormally(SpriteBatch* spriteBatch)
 {
-	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLen();
+	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLength();
 	System** stateSystems = GameStateManager_GetStateSystems();
 	for (int32_t i = 0; i < stateSystemsLen; i += 1)
 	{
@@ -150,7 +150,7 @@ void GameHelper_DrawHudStateSystemsNormally(SpriteBatch* spriteBatch)
 }
 void GameHelper_DrawDebugHudStateSystemsNormally(SpriteBatch* spriteBatch)
 {
-	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLen();
+	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLength();
 	System** stateSystems = GameStateManager_GetStateSystems();
 	for (int32_t i = 0; i < stateSystemsLen; i += 1)
 	{

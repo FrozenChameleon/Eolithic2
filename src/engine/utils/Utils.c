@@ -44,6 +44,8 @@ static uint64_t _mMallocRefs;
 static int64_t _mSaveFrames;
 static Rectangle* arr_resolutions;
 
+#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
+
 #define MISSING_NUMBER "?"
 
 #define NUMBERS_WITH_ZEROS_HUNDREDS_LEN 1000
@@ -159,7 +161,7 @@ void Utils_memset(void* _Dst, int32_t _Val, size_t _Size)
 {
 	SDL_memset(_Dst, _Val, _Size);
 }
-static void AddToAllocationArenas(int32_t allocationArena, void* memoryAllocation)
+static void AddToAllocationArenas(UtilsAllocationArena allocationArena, void* memoryAllocation)
 {
 	if (allocationArena == UTILS_ALLOCATION_ARENA_INVALID)
 	{
@@ -208,7 +210,7 @@ void* Utils_calloc(size_t nmemb, size_t size)
 	_mMallocRefs += 1;
 	return SDL_calloc(nmemb, size);
 }
-void* Utils_CallocArena(size_t nmemb, size_t size, int32_t allocationArena)
+void* Utils_CallocArena(size_t nmemb, size_t size, UtilsAllocationArena allocationArena)
 {
 	void* callocToReturn = Utils_calloc(nmemb, size);
 
@@ -216,7 +218,7 @@ void* Utils_CallocArena(size_t nmemb, size_t size, int32_t allocationArena)
 
 	return callocToReturn;
 }
-void Utils_FreeArena(int32_t allocationArena)
+void Utils_FreeArena(UtilsAllocationArena allocationArena)
 {
 	int64_t index = hmgeti(hm_allocation_arenas, allocationArena);
 	if (index == -1)
@@ -1526,4 +1528,53 @@ bool Utils_IsStringASCII(const char* str, size_t len)
 		}
 	}
 	return true;
+}
+int32_t Utils_AlignToTileGridInt(int32_t value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates)
+{
+	double temp = value;
+	return Utils_AlignToTileGridDouble(temp, roundingMode, returnPixelCoordinates);
+}
+Point Utils_AlignToTileGridPoint(Point value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates)
+{
+	double tempX = value.X;
+	double tempY = value.Y;
+	return Point_Create(Utils_AlignToTileGridDouble(tempX, roundingMode, returnPixelCoordinates),
+		Utils_AlignToTileGridDouble(tempY, roundingMode, returnPixelCoordinates));
+}
+int32_t Utils_AlignToTileGridFloat(float value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates)
+{
+	double temp = value;
+	return Utils_AlignToTileGridDouble(temp, roundingMode, returnPixelCoordinates);
+}
+Point Utils_AlignToTileGridVector2(Vector2 value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates)
+{
+	double tempX = value.X;
+	double tempY = value.Y;
+	return Point_Create(Utils_AlignToTileGridDouble(tempX, roundingMode, returnPixelCoordinates),
+		Utils_AlignToTileGridDouble(tempY, roundingMode, returnPixelCoordinates));
+}
+int32_t Utils_AlignToTileGridDouble(double value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates)
+{
+	double tempDouble = value / TILE_SIZE;
+	switch (roundingMode)
+	{
+	case UTILS_ROUNDING_MODE_ROUND:
+		tempDouble = Math_round(tempDouble);
+		break;
+	case UTILS_ROUNDING_MODE_CEIL:
+		tempDouble = Math_ceil(tempDouble);
+		break;
+	case UTILS_ROUNDING_MODE_FLOOR:
+		tempDouble = Math_floor(tempDouble);
+		break;
+	}
+	int32_t tempInt = (int32_t)tempDouble;
+	if (returnPixelCoordinates)
+	{
+		return tempInt * TILE_SIZE;
+	}
+	else
+	{
+		return tempInt;
+	}
 }

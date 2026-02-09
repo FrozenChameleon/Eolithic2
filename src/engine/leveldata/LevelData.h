@@ -53,8 +53,10 @@ int32_t LevelData_GetGridSizeWidth(LevelData* ld);
 int32_t LevelData_GetGridSizeHeight(LevelData* ld);
 int32_t LevelData_GetGridSizeX(LevelData* ld);
 int32_t LevelData_GetGridSizeY(LevelData* ld);
+Rectangle LevelData_GetGridSize(LevelData* ld);
 int32_t LevelData_GetRealSizeWidth(LevelData* ld);
 int32_t LevelData_GetRealSizeHeight(LevelData* ld);
+Rectangle LevelData_GetRealSize(LevelData* ld);
 int32_t LevelData_GetRealSizeX(LevelData* ld);
 int32_t LevelData_GetRealSizeY(LevelData* ld);
 int32_t LevelData_GetTilePos1D(LevelData* ld, int32_t i, int32_t j);
@@ -67,5 +69,7 @@ void LevelData_ImprintToCollisionArray(LevelData* ld, int32_t x, int32_t y, int3
 Rectangle LevelData_GetLevelBoundsRectangle(LevelData* ld);
 bool LevelData_IsTilesetNameSet(LevelData* ld);
 void LevelData_DrawTiles(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera);
+void LevelData_DrawTiles2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera, int32_t preferredLayer, float mul);
 Texture* LevelData_GetTilesetTexture(LevelData* ld);
 void LevelData_DrawProps(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera);
+void LevelData_DrawProps2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera, bool drawInfo);

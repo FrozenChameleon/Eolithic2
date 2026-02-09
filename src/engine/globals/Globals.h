@@ -29,10 +29,11 @@ extern bool GLOBALS_DEBUG_IS_GOD_MODE;
 extern bool GLOBALS_DEBUG_IS_PAUSED;
 extern bool GLOBALS_DEBUG_EDITOR_JUST_RELOADED_GRAPHICS;
 extern bool GLOBALS_DEBUG_JUST_LOADED_MAP_NOTIFY_EDITOR;
-extern bool GLOBALS_DEBUG_IS_EDITOR_MODE;
 extern bool GLOBALS_DEBUG_IS_META_MAP_EDIT_TILE_MODE_AT_MAP_LOAD;
 extern bool GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS;
 
+bool Globals_DebugIsEditorMode(void);
+void Globals_SetDebugIsEditorMode(bool value);
 bool Globals_DebugIsRenderDisabled(void);
 void Globals_DebugSetRenderDisabled(bool value);
 bool Globals_IsAutoMode(void);

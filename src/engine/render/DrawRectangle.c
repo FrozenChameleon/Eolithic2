@@ -15,3 +15,9 @@ void DrawRectangle_Init(DrawRectangle* drect, Color color, Rectangle rectangle)
 	drect->mColor = color;
 	drect->mRectangle = rectangle;
 }
+DrawRectangle DrawRectangle_Create(Color color, Rectangle rectangle)
+{
+	DrawRectangle drect;
+	DrawRectangle_Init(&drect, color, rectangle);
+	return drect;
+}

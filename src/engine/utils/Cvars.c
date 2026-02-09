@@ -167,11 +167,11 @@ void Cvars_SetAsBool(const char* key, bool value)
 
 	if (!value)
 	{
-		Cvars_Set(key, STR_ZERO);
+		Cvars_SetAsString(key, STR_ZERO);
 	}
 	else
 	{
-		Cvars_Set(key, STR_ONE);
+		Cvars_SetAsString(key, STR_ONE);
 	}
 }
 void Cvars_SetAsInt(const char* key, int32_t value)
@@ -194,7 +194,7 @@ void Cvars_SetAsFloat(const char* key, float value)
 	SetupCvarForSet(cvar, key);
 	Utils_FloatToString(value, cvar->mValue, EE_FILENAME_MAX);
 }
-void Cvars_Set(const char* key, const char* value)
+void Cvars_SetAsString(const char* key, const char* value)
 {
 	//
 	Init();
@@ -204,7 +204,7 @@ void Cvars_Set(const char* key, const char* value)
 	SetupCvarForSet(cvar, key);
 	Utils_strlcpy(cvar->mValue, value, EE_FILENAME_MAX);
 }
-const char* Cvars_Get(const char* key)
+const char* Cvars_GetAsString(const char* key)
 {
 	//
 	Init();
@@ -244,7 +244,7 @@ bool Cvars_GetAsBool(const char* key)
 	Init();
 	//
 
-	const char* value = Cvars_Get(key);
+	const char* value = Cvars_GetAsString(key);
 	if (Utils_StringEqualTo(value, STR_ZERO))
 	{
 		return false;
@@ -271,7 +271,7 @@ void Cvars_Read(bool isBinary, BufferReader* br)
 	{
 		const char* key = IStringMap_GetKeyByIndex(sm, i);
 		const char* value = IStringMap_GetValueByIndex(sm, i);
-		Cvars_Set(key, value);
+		Cvars_SetAsString(key, value);
 	}
 	IStringMap_Dispose(sm);
 }
@@ -353,13 +353,13 @@ void Cvars_LoadInitialCvars(void)
 
 	MString* pathToFinalConfigInData = NULL;
 
-	Cvars_Set(CVARS_ENGINE_ORGANIZATION_NAME, GLOBAL_DEF_ORGANIZATION_NAME);
+	Cvars_SetAsString(CVARS_ENGINE_ORGANIZATION_NAME, GLOBAL_DEF_ORGANIZATION_NAME);
 
 	Cvars_LoadDataDirCvars();
 
 	{
 		MString* tempString = NULL;
-		MString_Combine2(&tempString, "Version: ", Cvars_Get(CVARS_ENGINE_VERSION));
+		MString_Combine2(&tempString, "Version: ", Cvars_GetAsString(CVARS_ENGINE_VERSION));
 		Logger_LogInformation(MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
@@ -414,7 +414,7 @@ void Cvars_CopyFromUserDefaults(void)
 
 	for (int32_t i = 0; i < shlen(sh_user_defaults); i += 1)
 	{
-		Cvars_Set(sh_user_defaults[i].key, sh_user_defaults[i].value.mValue);
+		Cvars_SetAsString(sh_user_defaults[i].key, sh_user_defaults[i].value.mValue);
 	}
 }
 bool Cvars_LoadSaveCvarsFromBlob(void)

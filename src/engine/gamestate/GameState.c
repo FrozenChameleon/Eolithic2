@@ -105,7 +105,7 @@ int32_t GameState_GetAmountOfEntitiesInPlay(GameState* gs)
 }
 void GameState_Do_SendBroadcast(GameState* gs, int32_t type, int32_t packet1, int32_t packet2, int32_t packet3)
 {
-	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLen();
+	int32_t stateSystemsLen = GameStateManager_GetStateSystemsLength();
 	System** stateSystems = GameStateManager_GetStateSystems();
 	for (int32_t i = 0; i < stateSystemsLen; i += 1)
 	{

@@ -1081,13 +1081,14 @@ void Renderer_SetupRenderState(void)
 		SpriteBatch_Clear(&_mOrangeSpriteBatch);
 		SpriteBatch_Clear(&_mOrangeSpriteBatchHud);
 		GameLoader_Draw(&_mOrangeSpriteBatchHud);
-		return;
 	}
-
-	SpriteBatch_Clear(&_mOrangeSpriteBatch);
-	GameStateManager_Draw(&_mOrangeSpriteBatch);
-	SpriteBatch_Clear(&_mOrangeSpriteBatchHud);
-	GameStateManager_DrawHud(&_mOrangeSpriteBatchHud);
+	else
+	{
+		SpriteBatch_Clear(&_mOrangeSpriteBatch);
+		GameStateManager_Draw(&_mOrangeSpriteBatch);
+		SpriteBatch_Clear(&_mOrangeSpriteBatchHud);
+		GameStateManager_DrawHud(&_mOrangeSpriteBatchHud);
+	}
 }
 int32_t Renderer_GetFPS(void)
 {

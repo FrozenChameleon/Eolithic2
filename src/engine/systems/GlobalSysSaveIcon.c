@@ -21,7 +21,7 @@ static bool HasInit(void)
 }
 static void InitAnimation(void)
 {
-	const char* spriteSheet = Cvars_Get(CVARS_ENGINE_SAVE_ICON);
+	const char* spriteSheet = Cvars_GetAsString(CVARS_ENGINE_SAVE_ICON);
 	int32_t flipTimer = Cvars_GetAsInt(CVARS_ENGINE_SAVE_ICON_FLIP_SPEED);
 	Animation_Init(&_mSaveIcon, spriteSheet, flipTimer);
 }

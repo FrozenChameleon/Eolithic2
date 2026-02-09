@@ -101,7 +101,7 @@ static void HandleCvarsFromArgList(int argc, char* args[])
 				MString_Dispose(&tempString);
 			}
 
-			Cvars_Set(MString_Text(cvarKey), MString_Text(cvarValue));
+			Cvars_SetAsString(MString_Text(cvarKey), MString_Text(cvarValue));
 
 			MString_Dispose(&cvarKey);
 			MString_Dispose(&cvarValue);

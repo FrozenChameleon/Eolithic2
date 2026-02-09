@@ -207,7 +207,7 @@ static void Cheats(void)
 		}
 		if (Input_IsKeyTapped(KEYS_NUMPAD8))
 		{
-			if (GLOBALS_DEBUG_IS_EDITOR_MODE)
+			if (Globals_DebugIsEditorMode())
 			{
 				Cvars_FlipAsBool(CVARS_EDITOR_SHOW_COLLISION);
 				DebugLogBoolHelper("Show Editor Col: ", Cvars_GetAsBool(CVARS_EDITOR_SHOW_COLLISION));
@@ -244,7 +244,7 @@ static void Cheats(void)
 		}
 		if (Input_IsKeyTapped(KEYS_F12))
 		{
-			//GameUpdater_ToggleEditor(); //UNUSED
+			GameUpdater_ToggleEditor();
 		}
 		if (Input_IsKeyTapped(KEYS_OEMCOMMA))
 		{
@@ -464,7 +464,7 @@ static void UpdateLoop(double delta)
 	}
 
 #ifdef EDITOR_MODE
-	if (!GLOBALS_DEBUG_IS_EDITOR_MODE && Globals_IsDebugGameSpeedSet())
+	if (!Globals_DebugIsEditorMode() && Globals_IsDebugGameSpeedSet())
 	{
 		delta *= Globals_GetDebugGameSpeedAsMul();
 	}
@@ -599,7 +599,7 @@ void GameUpdater_FastReset(void)
 	GLOBALS_DEBUG_QUICK_PLAYER_POSITION = Vector2_Zero;
 	GameStateManager_DebugForceReloadMapNow();
 	GameStateManager_SetGameState(GAMESTATEMANAGER_GAME_STATE_NORMAL);
-	GLOBALS_DEBUG_IS_EDITOR_MODE = false;
+	Globals_SetDebugIsEditorMode(false);
 	{
 		MString* tempString = NULL;
 		MString_Combine5(&tempString, "Map Reloaded (Fast) [", MString_Text(Get_LevelDataResource()->mPath), "][", Get_LevelData()->mLevelName, "]");
@@ -613,7 +613,8 @@ void GameUpdater_FastResetPlusMove(void)
 }
 void GameUpdater_ToggleEditor(void)
 {
-	//UNUSED
+	Globals_SetDebugIsEditorMode(!Globals_DebugIsEditorMode());
+	Logger_LogInformation("Editor Toggle");
 }
 void GameUpdater_ToggleDebugAutoSpeed(void)
 {

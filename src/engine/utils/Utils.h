@@ -6,9 +6,10 @@
 
 #pragma once
 
-#include "stdint.h"
-#include "stdbool.h"
+#include "Macros.h"
 #include "../math/Rectangle.h"
+#include "../math/Point.h"
+#include "../math/Vector2.h"
 #include "../render/Color.h"
 
 typedef struct IStringArray IStringArray;
@@ -24,13 +25,20 @@ typedef struct InputCheck InputCheck;
 #define UTILS_EXTENSION_BIN ".bin"
 #define UTILS_EXTENSION_INI ".ini"
 
-enum
+typedef enum UtilsRoundingMode
 {
-	UTILS_ALLOCATION_ARENA_INVALID = 0,
-	UTILS_ALLOCATION_ARENA_JUST_THIS_FRAME = 1,
-	UTILS_ALLOCATION_ARENA_JUST_THIS_LEVEL = 2,
-	UTILS_ALLOCATION_ARENA_MOVIE_PLAYER = 3
-};
+    UTILS_ROUNDING_MODE_FLOOR = 0,
+    UTILS_ROUNDING_MODE_CEIL = 1,
+    UTILS_ROUNDING_MODE_ROUND = 2
+} UtilsRoundingMode;
+
+typedef enum UtilsAllocationArena
+{
+    UTILS_ALLOCATION_ARENA_INVALID = 0,
+    UTILS_ALLOCATION_ARENA_JUST_THIS_FRAME = 1,
+    UTILS_ALLOCATION_ARENA_JUST_THIS_LEVEL = 2,
+    UTILS_ALLOCATION_ARENA_MOVIE_PLAYER = 3
+} UtilsAllocationArena;
 
 const char* Utils_GetCurrentUserLanguageCode(void);
 bool Utils_IsCurrentLanguageEnglish(void);
@@ -43,8 +51,8 @@ void Utils_memset(void* _Dst, int32_t _Val, size_t _Size);
 //void* Utils_malloc(size_t size); //UNUSED
 //void* Utils_MallocArena(size_t size, int32_t allocationArena); //UNUSED
 void* Utils_calloc(size_t nmemb, size_t size);
-void* Utils_CallocArena(size_t nmemb, size_t size, int32_t allocationArena);
-void Utils_FreeArena(int32_t allocationArena);
+void* Utils_CallocArena(size_t nmemb, size_t size, UtilsAllocationArena allocationArena);
+void Utils_FreeArena(UtilsAllocationArena allocationArena);
 void Utils_free(void* mem);
 //Grow mem to newSize if bigger than oldSize, or if mem is NULL. On growth, returns new zero initialized mem. 0 is not valid for newSize, it will be forced to 1.
 void* Utils_grow(void* mem, size_t oldSize, size_t newSize);
@@ -141,3 +149,8 @@ int32_t Utils_ConvertFramesToMilliseconds(int32_t val);
 void Utils_StringReplaceStr(MString** assignToThis, const char* str, const char* findThis, const char* replaceWithThis);
 uint8_t Utils_BoolToUInt8(bool value);
 bool Utils_IsStringASCII(const char* str, size_t len);
+int32_t Utils_AlignToTileGridInt(int32_t value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
+Point Utils_AlignToTileGridPoint(Point value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
+int32_t Utils_AlignToTileGridFloat(float value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
+Point Utils_AlignToTileGridVector2(Vector2 value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
+int32_t Utils_AlignToTileGridDouble(double value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);

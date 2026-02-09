@@ -27,10 +27,10 @@ enum GameStateManagerGameState
 };
 
 void GameStateManager_Ctor(void);
-int32_t GameStateManager_GetGlobalSystemsLen(void);
+int32_t GameStateManager_GetGlobalSystemsLength(void);
 System** GameStateManager_GetGlobalSystems(void);
 void GameStateManager_AddGlobalSystem(System* sys);
-int32_t GameStateManager_GetStateSystemsLen(void);
+int32_t GameStateManager_GetStateSystemsLength(void);
 System** GameStateManager_GetStateSystems(void);
 void GameStateManager_AddStateSystem(System* sys);
 GameState* GameStateManager_GetGameState(void);

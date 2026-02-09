@@ -128,7 +128,7 @@ void* GameStateData_SetAndInit(GameStateData* gsd, ComponentType ctype, Entity e
 }
 void GameStateData_Init(GameStateData* gsd, ComponentType ctype, Entity entity)
 {
-	int32_t len = GameStateManager_GetStateSystemsLen();
+	int32_t len = GameStateManager_GetStateSystemsLength();
 	System** stateSystems = GameStateManager_GetStateSystems();
 	for (int32_t i = 0; i < len; i += 1)
 	{

@@ -16,3 +16,4 @@ typedef struct DrawRectangle
 } DrawRectangle;
 
 void DrawRectangle_Init(DrawRectangle* drect, Color color, Rectangle rectangle);
+DrawRectangle DrawRectangle_Create(Color color, Rectangle rectangle);
