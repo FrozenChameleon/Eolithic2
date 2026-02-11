@@ -30,38 +30,35 @@ void Vector3_Init(Vector3* vector, float x, float y, float z)
 	vector->Y = y;
 	vector->Z = z;
 }
-Vector3 Vector3_Normalize(const Vector3* value)
+/*Vector3 Vector3_Normalize(Vector3 value)
 {
 	float factor = 1.0f / (float)Math_sqrt(
-		(value->X * value->X) +
-		(value->Y * value->Y) +
-		(value->Z * value->Z)
+		(value.X * value.X) +
+		(value.Y * value.Y) +
+		(value.Z * value.Z)
 	);
 	Vector3 temp;
-	temp.X = (value->X * factor);
-	temp.Y = (value->Y * factor);
-	temp.Z = (value->Z * factor);
+	temp.X = (value.X * factor);
+	temp.Y = (value.Y * factor);
+	temp.Z = (value.Z * factor);
 	return temp;
 }
-Vector3 Vector3_Cross(const Vector3* vector1, const Vector3* vector2)
+Vector3 Vector3_Cross(Vector3 vector1, Vector3 vector2)
 {
 	Vector3 vector3;
-	Vector3_CrossMut(vector1, vector2, &vector3);
+	Vector3_CrossMut(&vector1, &vector2, &vector3);
 	return vector3;
-}
+}*/
 void Vector3_CrossMut(const Vector3* vector1, const Vector3* vector2, Vector3* result)
 {
-	float x = (vector1->Y * vector2->Z - vector2->Y * vector1->Z);
-	float y = -(vector1->X * vector2->Z - vector2->X * vector1->Z);
-	float z = (vector1->X * vector2->Y - vector2->X * vector1->Y);
-	result->X = x;
-	result->Y = y;
-	result->Z = z;
+	result->X = (vector1->Y * vector2->Z - vector2->Y * vector1->Z);
+	result->Y = -(vector1->X * vector2->Z - vector2->X * vector1->Z);
+	result->Z = (vector1->X * vector2->Y - vector2->X * vector1->Y);
 }
-float Vector3_Dot(const Vector3* vector1, const Vector3* vector2)
+/*float Vector3_Dot(Vector3 vector1, Vector3 vector2)
 {
-	return (vector1->X * vector2->X + vector1->Y * vector2->Y + vector1->Z * vector2->Z);
-}
+	return (vector1.X * vector2.X) + (vector1.Y * vector2.Y) + (vector1.Z * vector2.Z);
+}*/
 void Vector3_DotMut(const Vector3* vector1, const Vector3* vector2, float* result)
 {
 	float dotProduct = ((vector1->X * vector2->X) +

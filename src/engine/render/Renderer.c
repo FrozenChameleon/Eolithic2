@@ -15,11 +15,11 @@
 
 #include "Renderer.h"
 
+#include "SDL3/SDL.h"
 #include "../utils/Macros.h"
 #include "../utils/Logger.h"
 #include "RenderStream.h"
 #include "RendererMacros.h"
-#include "SDL3/SDL.h"
 #include "../utils/Cvars.h"
 #include "../render/Texture.h"
 #include "../math/Math.h"
@@ -29,20 +29,13 @@
 #include "../leveldata/DrawTile.h"
 #include "../leveldata/AnimTile.h"
 #include "../leveldata/Tile.h"
-//#include "../render/SpriteBatch.h"
-//#include "../render/DrawTool.h"
 #include "../render/Sheet.h"
-//#include "../resources/ResourceManagers.h"
 #include "../core/Game.h"
 #include "../service/Service.h"
 #include "../utils/FpsTool.h"
 #include "../core/GameLoader.h"
 #include "../core/GameUpdater.h"
-//#include "../gamestate/GameStateManager.h"
 #include "../components/Camera.h"
-#define STBI_ONLY_PNG
-#define STB_IMAGE_IMPLEMENTATION
-#include "../../third_party/stb_image.h"
 #include "../font/FontMap.h"
 #include "../render/RenderTTFont.h"
 #include "../../third_party/stb_ds.h"
@@ -50,7 +43,6 @@
 #include "../core/Func.h"
 #include "../gamestate/GameStateManager.h"
 #include "../render/DrawTool.h"
-#include "../leveldata/AnimTile.h"
 #include "../resources/ResourceManagerList.h"
 
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
@@ -877,48 +869,6 @@ SpriteEffects Renderer_GetEffects(bool flipX, bool flipY)
 
 	return effects;
 }
-int32_t Renderer_ImageRead(void* context, char* data, int32_t size)
-{
-	SDL_IOStream* rwop = (SDL_IOStream*)(context);
-	return (int32_t)SDL_ReadIO(rwop, data, size);
-}
-void Renderer_ImageSkip(void* context, int32_t n)
-{
-	SDL_IOStream* rwop = (SDL_IOStream*)(context);
-	SDL_SeekIO(rwop, n, SDL_IO_SEEK_CUR);
-}
-int32_t Renderer_ImageEndOfFile(void* context)
-{
-	SDL_IOStream* rwop = (SDL_IOStream*)(context);
-	int64_t size = SDL_GetIOSize(rwop);
-	int64_t loc = SDL_TellIO(rwop);
-	return size == loc ? 1 : 0;
-}
-ImagePixelData Renderer_CreateImagePixelData(FixedByteBuffer* blob)
-{
-	SDL_IOStream* rwops = SDL_IOFromMem(FixedByteBuffer_GetBuffer(blob), FixedByteBuffer_GetLength(blob));
-
-	stbi_io_callbacks cb;
-	cb.eof = Renderer_ImageEndOfFile;
-	cb.read = Renderer_ImageRead;
-	cb.skip = Renderer_ImageSkip;
-
-	int32_t imageWidth;
-	int32_t imageHeight;
-	int32_t imageFormat;
-	uint8_t* imageData;
-
-	imageData = stbi_load_from_callbacks(&cb, rwops, &imageWidth, &imageHeight, &imageFormat, STBI_rgb_alpha);
-
-	SDL_CloseIO(rwops);
-
-	ImagePixelData pixelImageData;
-	pixelImageData.mData = imageData;
-	pixelImageData.mWidth = imageWidth;
-	pixelImageData.mHeight = imageHeight;
-
-	return pixelImageData;
-}
 void* Renderer_CreateSurface(FixedByteBuffer* blob)
 {
 	return NULL;
@@ -1044,7 +994,6 @@ Rectangle Renderer_GetScreenBounds(void)
 {
 	return _mScreenBounds;
 }
-
 void Renderer_SetupCommit(double delta)
 {
 	FPSTool_Update(&_mFpsToolDraw, delta);
@@ -1071,7 +1020,6 @@ void Renderer_SetupCommit(double delta)
 	Renderer_Commit(&_mOrangeSpriteBatch, cam, drawDelta);
 	Renderer_Commit(&_mOrangeSpriteBatchHud, hud, drawDelta);
 }
-
 void Renderer_SetupRenderState(void)
 {
 	SpriteBatch_DisposePinnedStrings();

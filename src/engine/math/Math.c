@@ -32,6 +32,10 @@ double Math_sqrt(double x)
 {
 	return SDL_sqrt(x);
 }
+float Math_sqrtf(float x)
+{
+	return SDL_sqrtf(x);
+}
 int32_t Math_SignumInt(int32_t value)
 {
 	if (value > 0)

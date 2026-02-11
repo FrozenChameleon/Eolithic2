@@ -22,6 +22,7 @@ extern const double MATH_TWOPI;
 double Math_cos(double x);
 double Math_sin(double x);
 double Math_sqrt(double x);
+float Math_sqrtf(float x);
 int32_t Math_SignumInt(int32_t value);
 int32_t Math_SignumFloat(float value);
 int32_t Math_SignumDouble(double value);

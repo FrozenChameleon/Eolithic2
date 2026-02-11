@@ -40,13 +40,6 @@ typedef struct TTFontState
 	float mScaleFactor;
 } TTFontState;
 
-typedef struct ImagePixelData
-{
-	uint8_t* mData;
-	int32_t mWidth;
-	int32_t mHeight;
-} ImagePixelData;
-
 typedef struct PositionFloat3
 {
 	float X;
@@ -134,10 +127,6 @@ Texture* Renderer_GetTextureData(const char* path, FixedByteBuffer* blob);
 Texture* Renderer_GetNewTextureData(const char* path, int32_t width, int32_t height, bool clearTexture);
 void Renderer_UpdateTextureData(Texture* texture, int32_t x, int32_t y, int32_t w, int32_t h, int32_t level, void* data, int32_t dataLength);
 SpriteEffects Renderer_GetEffects(bool flipX, bool flipY);
-int32_t Renderer_ImageRead(void* context, char* data, int32_t size);
-void Renderer_ImageSkip(void* context, int32_t n);
-int32_t Renderer_ImageEndOfFile(void* context);
-ImagePixelData Renderer_CreateImagePixelData(FixedByteBuffer* blob);
 void* Renderer_CreateSurface(FixedByteBuffer* blob);
 void Renderer_BeforeCommit(void);
 void Renderer_AfterCommit(void);
