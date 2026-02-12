@@ -41,6 +41,7 @@
 #include "FNA3D.h"
 #include "FNA3D_Image.h"
 #include "SDL3/SDL.h"
+#include "ImagePixelData.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -673,7 +674,7 @@ Texture* Renderer_GetTextureData(const char* path, FixedByteBuffer* blob)
 	int32_t w;
 	int32_t h;
 	int32_t len;
-	uint8_t* imageData = FNA3D_Image_Load(Renderer_ImageRead, Renderer_ImageSkip, Renderer_ImageEndOfFile, rwops, &w, &h, &len, -1, -1, 0);
+	uint8_t* imageData = FNA3D_Image_Load(ImagePixelData_ImageRead, ImagePixelData_ImageSkip, ImagePixelData_ImageEndOfFile, rwops, &w, &h, &len, -1, -1, 0);
 
 	SDL_CloseIO(rwops);
 

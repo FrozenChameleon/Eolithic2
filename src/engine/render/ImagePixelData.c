@@ -23,17 +23,17 @@ Rectangle ImagePixelData_GetBounds(ImagePixelData* ipd)
 {
 	return ipd->mBounds;
 }
-static int32_t ImageRead(void* context, char* data, int32_t size)
+int32_t ImagePixelData_ImageRead(void* context, char* data, int32_t size)
 {
 	SDL_IOStream* rwop = (SDL_IOStream*)(context);
 	return (int32_t)SDL_ReadIO(rwop, data, size);
 }
-static void ImageSkip(void* context, int32_t n)
+void ImagePixelData_ImageSkip(void* context, int32_t n)
 {
 	SDL_IOStream* rwop = (SDL_IOStream*)(context);
 	SDL_SeekIO(rwop, n, SDL_IO_SEEK_CUR);
 }
-static int32_t ImageEndOfFile(void* context)
+int32_t ImagePixelData_ImageEndOfFile(void* context)
 {
 	SDL_IOStream* rwop = (SDL_IOStream*)(context);
 	int64_t size = SDL_GetIOSize(rwop);
@@ -47,9 +47,9 @@ ImagePixelData* ImagePixelData_Create(FixedByteBuffer* blob)
 	SDL_IOStream* rwops = SDL_IOFromMem(FixedByteBuffer_GetBuffer(blob), FixedByteBuffer_GetLength(blob));
 
 	stbi_io_callbacks cb;
-	cb.eof = ImageEndOfFile;
-	cb.read = ImageRead;
-	cb.skip = ImageSkip;
+	cb.eof = ImagePixelData_ImageEndOfFile;
+	cb.read = ImagePixelData_ImageRead;
+	cb.skip = ImagePixelData_ImageSkip;
 
 	int32_t imageWidth;
 	int32_t imageHeight;

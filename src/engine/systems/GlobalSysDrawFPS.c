@@ -13,9 +13,11 @@
 #include "../math/Rectangle.h"
 #include "../render/DrawTool.h"
 #include "../render/SpriteBatch.h"
+#include "../utils/Logger.h"
 
 #define TIME_TO_STOP_DRAWING 5
 
+static int32_t _mPrintCounter;
 static int32_t _mDoNotDrawThisCounter = TIME_TO_STOP_DRAWING;
 static int32_t _mOffsetFromCorner;
 static const char* _mFont = "game";
@@ -34,6 +36,13 @@ void GlobalSysDrawFPS_DoNotDrawThisRightNow(void)
 }
 static void Update(void* givenData)
 {
+	_mPrintCounter += 1;
+	if (_mPrintCounter > 60)
+	{
+		Logger_LogInformation(GameUpdater_GetFpsString());
+		_mPrintCounter = 0;
+	}
+
 	if (_mDoNotDrawThisCounter > 0)
 	{
 		_mDoNotDrawThisCounter -= 1;
