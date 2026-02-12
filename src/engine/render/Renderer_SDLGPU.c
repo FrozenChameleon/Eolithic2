@@ -13,6 +13,10 @@
   * See monoxna.LICENSE for details.
   */
 
+//SDL_gpu_examples and FNA3D's SDL_GPU driver were the main references while writing this...
+ 
+//Still needs to not fail spectacularly if vertice count goes beyond MAX_VERTICES, as unlikely as that is...
+
 #ifdef RENDER_SDLGPU
 
 #include "Renderer.h"
@@ -41,7 +45,7 @@
 
 #define MULTI_COLOR_REPLACE_LEN SHADER_PROGRAM_MAX_REPLACE_LENGTH
 
-#define TRANSFER_BUFFER_LEN 16000000
+#define TRANSFER_BUFFER_FOR_TEXTURE_LEN 16777216 /* 16 MiB */
 
 static const char* SHADER_PARAMETER_IS_TOTAL_WHITE_HIT_FLASH = "IsTotalWhiteHitFlash";
 static const char* SHADER_PARAMETER_PERFORM_ALPHA_TEST = "PerformAlphaTest";
@@ -211,14 +215,15 @@ typedef struct FragMultiplyUniform
 static uint16_t* _mIndexBufferData;
 
 static SDL_GPUTransferBuffer* _mTransferBufferForVertexBuffer;
-static SDL_GPUCommandBuffer* _mCommandBufferForRender;
-static SDL_GPUCommandBuffer* _mCommandBufferForCopy;
+static SDL_GPUCommandBuffer* _mRenderCommandBuffer;
+static SDL_GPUCommandBuffer* _mUploadCommandBuffer;
 static SDL_GPURenderPass* _mRenderPass;
 static SDL_GPUTexture* _mSwapchainTexture;
 static SDL_GPUCopyPass* _mCopyPass;
 
 static PositionTextureVertex _mBatchVertexBuffer[MAX_VERTICES];
-static uint32_t _mBatchVerticesIndex;
+static uint32_t _mCurrentBatchVerticesOffset;
+static uint32_t _mLastRenderVerticesOffset;
 
 // Matrix Math
 typedef struct Matrix4x4
@@ -429,7 +434,7 @@ static Matrix4x4 Matrix4x4_CreateLookAt(
 	};
 }
 
-static void FlushCommandBufferForCopy(void)
+static void SubmitCommandBufferForCopy(void)
 {
 	if (_mCopyPass != NULL)
 	{
@@ -437,20 +442,20 @@ static void FlushCommandBufferForCopy(void)
 		_mCopyPass = NULL;
 	}
 
-	if (_mCommandBufferForCopy != NULL)
+	if (_mUploadCommandBuffer != NULL)
 	{
-		SDL_SubmitGPUCommandBuffer(_mCommandBufferForCopy);
-		_mCommandBufferForCopy = NULL;
+		SDL_SubmitGPUCommandBuffer(_mUploadCommandBuffer);
+		_mUploadCommandBuffer = NULL;
 	}
 
-	_mCommandBufferForCopy = SDL_AcquireGPUCommandBuffer(_mDeviceGPU);
-	if (_mCommandBufferForCopy == NULL)
+	_mUploadCommandBuffer = SDL_AcquireGPUCommandBuffer(_mDeviceGPU);
+	if (_mUploadCommandBuffer == NULL)
 	{
 		SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
 		return;
 	}
 
-	_mCopyPass = SDL_BeginGPUCopyPass(_mCommandBufferForCopy);
+	_mCopyPass = SDL_BeginGPUCopyPass(_mUploadCommandBuffer);
 	if (_mCopyPass == NULL)
 	{
 		SDL_Log("SDL_BeginGPUCopyPass failed: %s", SDL_GetError());
@@ -494,11 +499,11 @@ Texture* Renderer_GetTextureData(const char* path, FixedByteBuffer* blob)
 			_mDeviceGPU,
 			&(SDL_GPUTransferBufferCreateInfo) {
 			.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-				.size = TRANSFER_BUFFER_LEN
+				.size = TRANSFER_BUFFER_FOR_TEXTURE_LEN
 		}
 		);
 
-		FlushCommandBufferForCopy();
+		SubmitCommandBufferForCopy();
 	}
 
 	ImagePixelData* ipd = ImagePixelData_Create(blob);
@@ -522,7 +527,7 @@ Texture* Renderer_GetTextureData(const char* path, FixedByteBuffer* blob)
 	SDL_GPUTransferBuffer* transferBufferToUse;
 	uint32_t transferBufferOffsetToUse;
 	bool forceNewTextures = false;
-	if (forceNewTextures || (textureDataLen >= TRANSFER_BUFFER_LEN))
+	if (forceNewTextures || (textureDataLen >= TRANSFER_BUFFER_FOR_TEXTURE_LEN))
 	{
 		isUsingTemporaryTransferBuffer = true;
 		transferBufferToUse = SDL_CreateGPUTransferBuffer(
@@ -536,9 +541,9 @@ Texture* Renderer_GetTextureData(const char* path, FixedByteBuffer* blob)
 	}
 	else
 	{
-		if ((_mTransferBufferForTextureOffset + textureDataLen) >= TRANSFER_BUFFER_LEN)
+		if ((_mTransferBufferForTextureOffset + textureDataLen) >= TRANSFER_BUFFER_FOR_TEXTURE_LEN)
 		{
-			FlushCommandBufferForCopy();
+			SubmitCommandBufferForCopy();
 			_mTransferBufferForTextureOffset = 0;
 		}
 		transferBufferToUse = _mTransferBufferForTexture;
@@ -812,7 +817,7 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 		_mDeviceGPU,
 		&(SDL_GPUTransferBufferCreateInfo) {
 		.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-			.size = (sizeof(PositionTextureVertex) * MAX_VERTICES)
+			.size = sizeof(PositionTextureVertex) * MAX_VERTICES
 	}
 	);
 
@@ -1003,14 +1008,14 @@ void Renderer_BeforeRender(void)
 {
 	_mLastTextureUsed = NULL;
 
-	_mCommandBufferForRender = SDL_AcquireGPUCommandBuffer(_mDeviceGPU);
-	if (_mCommandBufferForRender == NULL)
+	_mRenderCommandBuffer = SDL_AcquireGPUCommandBuffer(_mDeviceGPU);
+	if (_mRenderCommandBuffer == NULL)
 	{
 		SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
 		return;
 	}
 
-	if (!SDL_WaitAndAcquireGPUSwapchainTexture(_mCommandBufferForRender, _mDeviceWindowHandle, &_mSwapchainTexture, NULL, NULL)) {
+	if (!SDL_WaitAndAcquireGPUSwapchainTexture(_mRenderCommandBuffer, _mDeviceWindowHandle, &_mSwapchainTexture, NULL, NULL)) {
 		SDL_Log("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
 		return;
 	}
@@ -1023,7 +1028,7 @@ void Renderer_BeforeRender(void)
 		colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
 		colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
 
-		_mRenderPass = SDL_BeginGPURenderPass(_mCommandBufferForRender, &colorTargetInfo, 1, NULL);
+		_mRenderPass = SDL_BeginGPURenderPass(_mRenderCommandBuffer, &colorTargetInfo, 1, NULL);
 		SDL_BindGPUGraphicsPipeline(_mRenderPass, Pipeline);
 		SDL_BindGPUIndexBuffer(_mRenderPass, &(SDL_GPUBufferBinding){.buffer = IndexBuffer, .offset = 0 }, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 	}
@@ -1041,13 +1046,13 @@ void Renderer_BeforeCommit(void)
 		0,
 		-1
 	);
-	SDL_PushGPUVertexUniformData(_mCommandBufferForRender, 0, &cameraMatrix, sizeof(Matrix4x4));
-	SDL_PushGPUFragmentUniformData(_mCommandBufferForRender, 0, &(FragMultiplyUniform){ 1.0f, 1.0f, 1.0f, 1.0f }, sizeof(FragMultiplyUniform));
+	SDL_PushGPUVertexUniformData(_mRenderCommandBuffer, 0, &cameraMatrix, sizeof(Matrix4x4));
+	SDL_PushGPUFragmentUniformData(_mRenderCommandBuffer, 0, &(FragMultiplyUniform){ 1.0f, 1.0f, 1.0f, 1.0f }, sizeof(FragMultiplyUniform));
 	SDL_BindGPUIndexBuffer(_mRenderPass, &(SDL_GPUBufferBinding){.buffer = IndexBuffer, .offset = 0 }, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 }
-static void FlushBatch(void)
+static void SubmitVertices(void)
 {
-	if ((_mBatchVerticesIndex == 0) || (_mLastTextureUsed == NULL))
+	if ((_mCurrentBatchVerticesOffset == 0) || (_mLastTextureUsed == NULL))
 	{
 		return;
 	}
@@ -1056,9 +1061,9 @@ static void FlushBatch(void)
 	PositionTextureVertex* transferData = SDL_MapGPUTransferBuffer(
 		_mDeviceGPU,
 		_mTransferBufferForVertexBuffer,
-		true
+		false
 	);
-	SDL_memcpy(transferData, _mBatchVertexBuffer, sizeof(PositionTextureVertex) * _mBatchVerticesIndex);
+	SDL_memcpy(transferData, _mBatchVertexBuffer, sizeof(PositionTextureVertex) * _mCurrentBatchVerticesOffset);
 
 	SDL_UnmapGPUTransferBuffer(_mDeviceGPU, _mTransferBufferForVertexBuffer);
 
@@ -1071,56 +1076,88 @@ static void FlushBatch(void)
 		& (SDL_GPUBufferRegion) {
 		.buffer = VertexBuffer,
 			.offset = 0,
-			.size = sizeof(PositionTextureVertex) * _mBatchVerticesIndex
+			.size = sizeof(PositionTextureVertex) * _mCurrentBatchVerticesOffset
 	},
-		true
+		false
 	);
-	//
+}
+static void SubmitRender(void)
+{
+	if ((_mCurrentBatchVerticesOffset == 0) || (_mLastTextureUsed == NULL) || (_mLastRenderVerticesOffset == _mCurrentBatchVerticesOffset))
+	{
+		return;
+	}
 
 	SDL_BindGPUFragmentSamplers(_mRenderPass, 0, &(SDL_GPUTextureSamplerBinding){.texture = _mLastTextureUsed->mTextureData, .sampler = Samplers[0] }, 1);
 	SDL_BindGPUVertexBuffers(_mRenderPass, 0, &(SDL_GPUBufferBinding){.buffer = VertexBuffer, .offset = 0 }, 1);
 
-	uint32_t instances = _mBatchVerticesIndex / 4;
-	SDL_DrawGPUIndexedPrimitives(_mRenderPass, instances * 6, instances, 0, 0, 0);
+	uint32_t currentLength = (_mCurrentBatchVerticesOffset - _mLastRenderVerticesOffset);
+	uint32_t currentSprites = currentLength / 4;
 
-	_mBatchVerticesIndex = 0;
+	uint32_t offsetLength = _mLastRenderVerticesOffset;
+	uint32_t offsetSprites = offsetLength / 4;
+
+	SDL_DrawGPUIndexedPrimitives(_mRenderPass, currentSprites * 6, 1, offsetSprites * 6, 0, 0);
+
+	_mLastRenderVerticesOffset = _mCurrentBatchVerticesOffset;
+}
+static void FlushBatch(void)
+{
+	if ((_mCurrentBatchVerticesOffset == 0) || (_mLastTextureUsed == NULL))
+	{
+		_mLastRenderVerticesOffset = 0;
+		_mCurrentBatchVerticesOffset = 0;
+		return;
+	}
+
+	SubmitRender();
+
+	SubmitVertices();
+
+	_mLastRenderVerticesOffset = 0;
+	_mCurrentBatchVerticesOffset = 0;
 }
 void Renderer_DrawVertexPositionColorTexture4(Texture* texture, const VertexPositionColorTexture4* sprite)
 {
 	bool forceAll = false;
-	if (forceAll || (_mLastTextureUsed != texture) || ((_mBatchVerticesIndex + VERTICES_IN_SPRITE) >= MAX_VERTICES))
+	if (((_mCurrentBatchVerticesOffset + VERTICES_IN_SPRITE) >= MAX_VERTICES))
 	{
 		FlushBatch();
+	}
+	else if (forceAll || (_mLastTextureUsed != texture))
+	{
+		SubmitRender();
 		_mLastTextureUsed = texture;
 	}
 
-	_mBatchVertexBuffer[_mBatchVerticesIndex + 0] = (PositionTextureVertex){ sprite->Position0.X,  sprite->Position0.Y, sprite->Position0.Z,
+	_mBatchVertexBuffer[_mCurrentBatchVerticesOffset + 0] = (PositionTextureVertex){ sprite->Position0.X,  sprite->Position0.Y, sprite->Position0.Z,
 		sprite->TextureCoordinate0.U, sprite->TextureCoordinate0.V };
 
-	_mBatchVertexBuffer[_mBatchVerticesIndex + 1] = (PositionTextureVertex){ sprite->Position1.X,  sprite->Position1.Y, sprite->Position1.Z,
+	_mBatchVertexBuffer[_mCurrentBatchVerticesOffset + 1] = (PositionTextureVertex){ sprite->Position1.X,  sprite->Position1.Y, sprite->Position1.Z,
 		sprite->TextureCoordinate1.U, sprite->TextureCoordinate1.V };
 
-	_mBatchVertexBuffer[_mBatchVerticesIndex + 2] = (PositionTextureVertex){ sprite->Position2.X,  sprite->Position2.Y, sprite->Position2.Z,
+	_mBatchVertexBuffer[_mCurrentBatchVerticesOffset + 2] = (PositionTextureVertex){ sprite->Position2.X,  sprite->Position2.Y, sprite->Position2.Z,
 		sprite->TextureCoordinate2.U, sprite->TextureCoordinate2.V };
 
-	_mBatchVertexBuffer[_mBatchVerticesIndex + 3] = (PositionTextureVertex){ sprite->Position3.X,  sprite->Position3.Y, sprite->Position3.Z,
+	_mBatchVertexBuffer[_mCurrentBatchVerticesOffset + 3] = (PositionTextureVertex){ sprite->Position3.X,  sprite->Position3.Y, sprite->Position3.Z,
 		sprite->TextureCoordinate3.U, sprite->TextureCoordinate3.V };
 
-	_mBatchVerticesIndex += VERTICES_IN_SPRITE;
+	_mCurrentBatchVerticesOffset += VERTICES_IN_SPRITE;
 }
 void Renderer_AfterCommit(void)
 {
-	FlushBatch();
 }
 void Renderer_AfterRender(void)
 {
-	FlushCommandBufferForCopy();
+	FlushBatch();
+
+	SubmitCommandBufferForCopy();
 
 	SDL_EndGPURenderPass(_mRenderPass);
 	_mRenderPass = NULL;
 
-	SDL_SubmitGPUCommandBuffer(_mCommandBufferForRender);
-	_mCommandBufferForRender = NULL;
+	SDL_SubmitGPUCommandBuffer(_mRenderCommandBuffer);
+	_mRenderCommandBuffer = NULL;
 }
 void Renderer_FlushBatch(void)
 {
