@@ -54,3 +54,11 @@ void Matrix_CreateTranslationMut(Vector3 position, Matrix* result);
 Matrix Matrix_CreateTranslation(Vector3 position);
 Matrix Matrix_Multiply(Matrix matrix1, Matrix matrix2);
 Matrix Matrix_Mul(const Matrix* matrix1, Matrix matrix2);
+Matrix Matrix_CreateOrthographicOffCenter(
+	float left,
+	float right,
+	float bottom,
+	float top,
+	float zNearPlane,
+	float zFarPlane
+);

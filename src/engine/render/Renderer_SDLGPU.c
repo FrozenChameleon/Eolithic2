@@ -43,10 +43,13 @@
 #include "SDL3/SDL.h"
 #include "ImagePixelData.h"
 
+//#define DISABLE_OFFSCREEN_TARGET
+
 #define MULTI_COLOR_REPLACE_LEN SHADER_PROGRAM_MAX_REPLACE_LENGTH
 
 #define TRANSFER_BUFFER_FOR_TEXTURE_LEN 16777216 /* 16 MiB */
 
+/*
 static const char* SHADER_PARAMETER_IS_TOTAL_WHITE_HIT_FLASH = "IsTotalWhiteHitFlash";
 static const char* SHADER_PARAMETER_PERFORM_ALPHA_TEST = "PerformAlphaTest";
 static const char* SHADER_PARAMETER_MATRIX_TRANSFORM = "MatrixTransform";
@@ -60,36 +63,15 @@ static const char* SHADER_PARAMETER_COLOR_TARGET_2 = "ColorTarget2";
 static const char* SHADER_PARAMETER_COLOR_REPLACE_2 = "ColorReplace2";
 static const char* SHADER_PARAMETER_COLOR_TARGET_3 = "ColorTarget3";
 static const char* SHADER_PARAMETER_COLOR_REPLACE_3 = "ColorReplace3";
-static const char* SHADER_PARAMETER_COLOR_REPLACE_ALPHA = "ColorReplaceAlpha";
+static const char* SHADER_PARAMETER_COLOR_REPLACE_ALPHA = "ColorReplaceAlpha";*/
 
-static float _mInternalWidth;
-static float _mInternalHeight;
-static Vector3 _mInternalWorldTranslation;
-static float _mInternalWidthRender;
-static float _mInternalHeightRender;
-static Matrix _mMatrix;
-static SDL_Window* _mDeviceWindowHandle;
-static SDL_GPUDevice* _mDeviceGPU;
-static int32_t _mBatchNumber;
-//Setup Render State Stuff
-static float _mMultiColorReplaceData[MULTI_COLOR_REPLACE_LEN];
-static BlendState _mLastUsedBlendState = BLENDSTATE_INVALID;
-//
-static Texture _mOffscreenTarget;
-static bool _mIsDrawingFromOffscreenTarget;
-static bool _mIsDrawingToOffscreenTarget;
-static Rectangle _mVirtualBufferBounds;
-static Rectangle _mActualBufferBounds;
 
-static SDL_GPUTransferBuffer* _mTransferBufferForTexture;
-static uint32_t _mTransferBufferForTextureOffset;
-
-// Vertex Formats
-typedef struct PositionTextureVertex
-{
-	float x, y, z;
-	float u, v;
-} PositionTextureVertex;
+//static float _mMultiColorReplaceData[MULTI_COLOR_REPLACE_LEN];
+//static BlendState _mLastUsedBlendState = BLENDSTATE_INVALID;
+//static bool _mIsDrawingFroOffscreenTarget;
+//static bool _mIsDrawingToOffscreenTarget;
+//static Rectangle _mVirtualBufferBounds;
+//static Rectangle _mActualBufferBounds;
 
 static const char* SamplerNames[] =
 {
@@ -101,13 +83,7 @@ static const char* SamplerNames[] =
 	"AnisotropicWrap",
 };
 
-static SDL_GPUGraphicsPipeline* Pipeline;
-static SDL_GPUBuffer* VertexBuffer;
-static SDL_GPUBuffer* IndexBuffer;
-static SDL_GPUSampler* Samplers[SDL_arraysize(SamplerNames)];
-static Texture* _mLastTextureUsed;
-
-static Rectangle GetCurrentBufferBounds(void)
+/*static Rectangle GetCurrentBufferBounds(void)
 {
 	if (_mIsDrawingToOffscreenTarget)
 	{
@@ -125,7 +101,7 @@ static bool IsDepthBufferDisabled(void)
 static bool IsOffscreenTargetNeeded(void)
 {
 	return Service_PlatformRequiresOffscreenTargetForRender();
-}
+}*/
 
 static SDL_GPUShader* LoadShader(
 	SDL_GPUDevice* device,
@@ -207,262 +183,56 @@ static SDL_GPUShader* LoadShader(
 	return shader;
 }
 
-typedef struct FragMultiplyUniform
+typedef struct FixedRenderState
 {
-	float r, g, b, a;
-} FragMultiplyUniform;
+	SDL_Window* WindowHandle;
+	SDL_GPUDevice* DeviceHandle;
+	SDL_GPUGraphicsPipeline* PipelineForRTT;
+	SDL_GPUGraphicsPipeline* PipelineForSwap;
+	SDL_GPUBuffer* VertexBuffer;
+	SDL_GPUBuffer* IndexBuffer;
+	SDL_GPUSampler* Samplers[SDL_arraysize(SamplerNames)];
+	SDL_GPUTransferBuffer* TransferBufferForVertexBuffer;
+	VertexPositionColorTexture BatchVertexBuffer[MAX_VERTICES];
+	uint16_t* IndexBufferData;
+	Texture* OffscreenTarget;
+}FixedRenderState;
 
-static uint16_t* _mIndexBufferData;
-
-static SDL_GPUTransferBuffer* _mTransferBufferForVertexBuffer;
-static SDL_GPUCommandBuffer* _mRenderCommandBuffer;
-static SDL_GPUCommandBuffer* _mUploadCommandBuffer;
-static SDL_GPURenderPass* _mRenderPass;
-static SDL_GPUTexture* _mSwapchainTexture;
-static SDL_GPUCopyPass* _mCopyPass;
-
-static PositionTextureVertex _mBatchVertexBuffer[MAX_VERTICES];
-static uint32_t _mCurrentBatchVerticesOffset;
-static uint32_t _mLastRenderVerticesOffset;
-
-// Matrix Math
-typedef struct Matrix4x4
+typedef struct TempRenderState
 {
-	float m11, m12, m13, m14;
-	float m21, m22, m23, m24;
-	float m31, m32, m33, m34;
-	float m41, m42, m43, m44;
-} Matrix4x4;
+	SDL_GPUCommandBuffer* CommandRender;
+	SDL_GPUCommandBuffer* CommandUpload;
+	SDL_GPURenderPass* RenderPass;
+	SDL_GPUTexture* SwapchainTexture;
+	SDL_GPUCopyPass* CopyPass;
+	Texture* LastTextureUsed;
+	uint32_t CurrentBatchVerticesOffset;
+	uint32_t LastRenderVerticesOffset;
 
-static Vector3 Vector3_Normalize(Vector3 vec)
+}TempRenderState;
+
+static FixedRenderState _mFixed;
+static TempRenderState _mTemp;
+
+static void UpdateOffscreenTexture(void)
 {
-	float magnitude = SDL_sqrtf((vec.X * vec.X) + (vec.Y * vec.Y) + (vec.Z * vec.Z));
-	return (Vector3) {
-		vec.X / magnitude,
-			vec.Y / magnitude,
-			vec.Z / magnitude
-	};
+	Rectangle internalBounds = Utils_GetInternalRectangle();
+
+	_mFixed.OffscreenTarget = (Texture*)Utils_calloc(1, sizeof(Texture));
+	MString_AssignString(&_mFixed.OffscreenTarget->mPath, "");
+	_mFixed.OffscreenTarget->mBounds.Width = internalBounds.Width;
+	_mFixed.OffscreenTarget->mBounds.Height = internalBounds.Height;
+
+	SDL_GPUTextureCreateInfo info = { 0 };
+	info.type = SDL_GPU_TEXTURETYPE_2D;
+	info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+	info.width = internalBounds.Width;
+	info.height = internalBounds.Height;
+	info.layer_count_or_depth = 1;
+	info.num_levels = 1;
+	info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+	_mFixed.OffscreenTarget->mTextureData = SDL_CreateGPUTexture(_mFixed.DeviceHandle, &info);
 }
-
-static float Vector3_Dot(Vector3 vecA, Vector3 vecB)
-{
-	return (vecA.X * vecB.X) + (vecA.Y * vecB.Y) + (vecA.Z * vecB.Z);
-}
-
-static Vector3 Vector3_Cross(Vector3 vecA, Vector3 vecB)
-{
-	return (Vector3) {
-		vecA.Y* vecB.Z - vecB.Y * vecA.Z,
-			-(vecA.X * vecB.Z - vecB.X * vecA.Z),
-			vecA.X* vecB.Y - vecB.X * vecA.Y
-	};
-}
-static Matrix4x4 Matrix4x4_Multiply(Matrix4x4 matrix1, Matrix4x4 matrix2)
-{
-	Matrix4x4 result;
-
-	result.m11 = (
-		(matrix1.m11 * matrix2.m11) +
-		(matrix1.m12 * matrix2.m21) +
-		(matrix1.m13 * matrix2.m31) +
-		(matrix1.m14 * matrix2.m41)
-		);
-	result.m12 = (
-		(matrix1.m11 * matrix2.m12) +
-		(matrix1.m12 * matrix2.m22) +
-		(matrix1.m13 * matrix2.m32) +
-		(matrix1.m14 * matrix2.m42)
-		);
-	result.m13 = (
-		(matrix1.m11 * matrix2.m13) +
-		(matrix1.m12 * matrix2.m23) +
-		(matrix1.m13 * matrix2.m33) +
-		(matrix1.m14 * matrix2.m43)
-		);
-	result.m14 = (
-		(matrix1.m11 * matrix2.m14) +
-		(matrix1.m12 * matrix2.m24) +
-		(matrix1.m13 * matrix2.m34) +
-		(matrix1.m14 * matrix2.m44)
-		);
-	result.m21 = (
-		(matrix1.m21 * matrix2.m11) +
-		(matrix1.m22 * matrix2.m21) +
-		(matrix1.m23 * matrix2.m31) +
-		(matrix1.m24 * matrix2.m41)
-		);
-	result.m22 = (
-		(matrix1.m21 * matrix2.m12) +
-		(matrix1.m22 * matrix2.m22) +
-		(matrix1.m23 * matrix2.m32) +
-		(matrix1.m24 * matrix2.m42)
-		);
-	result.m23 = (
-		(matrix1.m21 * matrix2.m13) +
-		(matrix1.m22 * matrix2.m23) +
-		(matrix1.m23 * matrix2.m33) +
-		(matrix1.m24 * matrix2.m43)
-		);
-	result.m24 = (
-		(matrix1.m21 * matrix2.m14) +
-		(matrix1.m22 * matrix2.m24) +
-		(matrix1.m23 * matrix2.m34) +
-		(matrix1.m24 * matrix2.m44)
-		);
-	result.m31 = (
-		(matrix1.m31 * matrix2.m11) +
-		(matrix1.m32 * matrix2.m21) +
-		(matrix1.m33 * matrix2.m31) +
-		(matrix1.m34 * matrix2.m41)
-		);
-	result.m32 = (
-		(matrix1.m31 * matrix2.m12) +
-		(matrix1.m32 * matrix2.m22) +
-		(matrix1.m33 * matrix2.m32) +
-		(matrix1.m34 * matrix2.m42)
-		);
-	result.m33 = (
-		(matrix1.m31 * matrix2.m13) +
-		(matrix1.m32 * matrix2.m23) +
-		(matrix1.m33 * matrix2.m33) +
-		(matrix1.m34 * matrix2.m43)
-		);
-	result.m34 = (
-		(matrix1.m31 * matrix2.m14) +
-		(matrix1.m32 * matrix2.m24) +
-		(matrix1.m33 * matrix2.m34) +
-		(matrix1.m34 * matrix2.m44)
-		);
-	result.m41 = (
-		(matrix1.m41 * matrix2.m11) +
-		(matrix1.m42 * matrix2.m21) +
-		(matrix1.m43 * matrix2.m31) +
-		(matrix1.m44 * matrix2.m41)
-		);
-	result.m42 = (
-		(matrix1.m41 * matrix2.m12) +
-		(matrix1.m42 * matrix2.m22) +
-		(matrix1.m43 * matrix2.m32) +
-		(matrix1.m44 * matrix2.m42)
-		);
-	result.m43 = (
-		(matrix1.m41 * matrix2.m13) +
-		(matrix1.m42 * matrix2.m23) +
-		(matrix1.m43 * matrix2.m33) +
-		(matrix1.m44 * matrix2.m43)
-		);
-	result.m44 = (
-		(matrix1.m41 * matrix2.m14) +
-		(matrix1.m42 * matrix2.m24) +
-		(matrix1.m43 * matrix2.m34) +
-		(matrix1.m44 * matrix2.m44)
-		);
-
-	return result;
-}
-
-static Matrix4x4 Matrix4x4_CreateRotationZ(float radians)
-{
-	return (Matrix4x4) {
-		SDL_cosf(radians), SDL_sinf(radians), 0, 0,
-			-SDL_sinf(radians), SDL_cosf(radians), 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1
-	};
-}
-
-static Matrix4x4 Matrix4x4_CreateTranslation(float x, float y, float z)
-{
-	return (Matrix4x4) {
-		1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			x, y, z, 1
-	};
-}
-
-static Matrix4x4 Matrix4x4_CreateOrthographicOffCenter(
-	float left,
-	float right,
-	float bottom,
-	float top,
-	float zNearPlane,
-	float zFarPlane
-) {
-	return (Matrix4x4) {
-		2.0f / (right - left), 0, 0, 0,
-			0, 2.0f / (top - bottom), 0, 0,
-			0, 0, 1.0f / (zNearPlane - zFarPlane), 0,
-			(left + right) / (left - right), (top + bottom) / (bottom - top), zNearPlane / (zNearPlane - zFarPlane), 1
-	};
-}
-
-static Matrix4x4 Matrix4x4_CreatePerspectiveFieldOfView(
-	float fieldOfView,
-	float aspectRatio,
-	float nearPlaneDistance,
-	float farPlaneDistance
-) {
-	float num = 1.0f / ((float)SDL_tanf(fieldOfView * 0.5f));
-	return (Matrix4x4) {
-		num / aspectRatio, 0, 0, 0,
-			0, num, 0, 0,
-			0, 0, farPlaneDistance / (nearPlaneDistance - farPlaneDistance), -1,
-			0, 0, (nearPlaneDistance * farPlaneDistance) / (nearPlaneDistance - farPlaneDistance), 0
-	};
-}
-
-static Matrix4x4 Matrix4x4_CreateLookAt(
-	Vector3 cameraPosition,
-	Vector3 cameraTarget,
-	Vector3 cameraUpVector
-) {
-	Vector3 targetToPosition = {
-		cameraPosition.X - cameraTarget.X,
-		cameraPosition.Y - cameraTarget.Y,
-		cameraPosition.Z - cameraTarget.Z
-	};
-	Vector3 vectorA = Vector3_Normalize(targetToPosition);
-	Vector3 vectorB = Vector3_Normalize(Vector3_Cross(cameraUpVector, vectorA));
-	Vector3 vectorC = Vector3_Cross(vectorA, vectorB);
-
-	return (Matrix4x4) {
-		vectorB.X, vectorC.X, vectorA.X, 0,
-			vectorB.Y, vectorC.Y, vectorA.Y, 0,
-			vectorB.Z, vectorC.Z, vectorA.Z, 0,
-			-Vector3_Dot(vectorB, cameraPosition), -Vector3_Dot(vectorC, cameraPosition), -Vector3_Dot(vectorA, cameraPosition), 1
-	};
-}
-
-static void SubmitCommandBufferForCopy(void)
-{
-	if (_mCopyPass != NULL)
-	{
-		SDL_EndGPUCopyPass(_mCopyPass);
-		_mCopyPass = NULL;
-	}
-
-	if (_mUploadCommandBuffer != NULL)
-	{
-		SDL_SubmitGPUCommandBuffer(_mUploadCommandBuffer);
-		_mUploadCommandBuffer = NULL;
-	}
-
-	_mUploadCommandBuffer = SDL_AcquireGPUCommandBuffer(_mDeviceGPU);
-	if (_mUploadCommandBuffer == NULL)
-	{
-		SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
-		return;
-	}
-
-	_mCopyPass = SDL_BeginGPUCopyPass(_mUploadCommandBuffer);
-	if (_mCopyPass == NULL)
-	{
-		SDL_Log("SDL_BeginGPUCopyPass failed: %s", SDL_GetError());
-		return;
-	}
-}
-
 void Renderer_DrawTtText(Texture* texture, const float* verts, const float* tcoords, const unsigned int* colors, int32_t nverts)
 {
 	/*NextBatch(false);
@@ -477,11 +247,11 @@ void Renderer_DrawTtText(Texture* texture, const float* verts, const float* tcoo
 	Vector2 cameraPos = Vector2_MulFloat(offsetPosition, scaleFactor);
 	SetupRenderState(cameraPos, scaler, BLENDSTATE_NONPREMULTIPLIED, (FNA3D_Texture*)(texture->mTextureData), Renderer_INTERNAL_GetCurrentShaderProgram());
 
-	Renderer_SetupVerticesForTTFont(_mVertexBuffer.mVertices, fontState->mColor, 0, verts, tcoords, colors, nverts);
+	Renderer_SetupVerticesForTTFont(_VertexBuffer.mVertices, fontState->mColor, 0, verts, tcoords, colors, nverts);
 
-	VertexBufferInstance_SetData(&_mVertexBuffer, 0, nverts);
+	VertexBufferInstance_SetData(&_VertexBuffer, 0, nverts);
 
-	FNA3D_ApplyVertexBufferBindings(_mDeviceContext, &_mVertexBuffer.mVertexBufferBinding, 1, 1, 0);
+	FNA3D_ApplyVertexBufferBindings(_mDeviceContext, &_VertexBuffer.VertexBufferBinding, 1, 1, 0);
 
 	FNA3D_DrawPrimitives(_mDeviceContext, FNA3D_PRIMITIVETYPE_TRIANGLELIST, 0, nverts / 3);*/
 }
@@ -493,80 +263,53 @@ static inline uint32_t SDLGPU_INTERNAL_RoundToAlignment(
 }
 Texture* Renderer_GetTextureData(const char* path, FixedByteBuffer* blob)
 {
-	if(_mTransferBufferForTexture == NULL)
-	{
-		_mTransferBufferForTexture = SDL_CreateGPUTransferBuffer(
-			_mDeviceGPU,
-			&(SDL_GPUTransferBufferCreateInfo) {
-			.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-				.size = TRANSFER_BUFFER_FOR_TEXTURE_LEN
-		}
-		);
-
-		SubmitCommandBufferForCopy();
-	}
-
 	ImagePixelData* ipd = ImagePixelData_Create(blob);
 
 	uint8_t* textureData = ImagePixelData_GetData(ipd);
 	Rectangle textureBounds = ImagePixelData_GetBounds(ipd);
-
-	SDL_GPUTexture* gpuTex = SDL_CreateGPUTexture(_mDeviceGPU, &(SDL_GPUTextureCreateInfo){
-		.type = SDL_GPU_TEXTURETYPE_2D,
-			.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
-			.width = textureBounds.Width,
-			.height = textureBounds.Height,
-			.layer_count_or_depth = 1,
-			.num_levels = 1,
-			.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER
-	});
+	Texture* tex = Renderer_GetNewTextureData(path, textureBounds.Width, textureBounds.Height, false);
 
 	uint32_t textureDataLen = (textureBounds.Width * textureBounds.Height * 4);
 
-	bool isUsingTemporaryTransferBuffer = false;
-	SDL_GPUTransferBuffer* transferBufferToUse;
-	uint32_t transferBufferOffsetToUse;
-	bool forceNewTextures = false;
-	if (forceNewTextures || (textureDataLen >= TRANSFER_BUFFER_FOR_TEXTURE_LEN))
+	SDL_GPUCommandBuffer* commandUploadTexture = SDL_AcquireGPUCommandBuffer(_mFixed.DeviceHandle);
+	if (commandUploadTexture == NULL)
 	{
-		isUsingTemporaryTransferBuffer = true;
-		transferBufferToUse = SDL_CreateGPUTransferBuffer(
-			_mDeviceGPU,
-			&(SDL_GPUTransferBufferCreateInfo) {
-			.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-				.size = textureDataLen
-		}
-		);
-		transferBufferOffsetToUse = 0;
-	}
-	else
-	{
-		if ((_mTransferBufferForTextureOffset + textureDataLen) >= TRANSFER_BUFFER_FOR_TEXTURE_LEN)
-		{
-			SubmitCommandBufferForCopy();
-			_mTransferBufferForTextureOffset = 0;
-		}
-		transferBufferToUse = _mTransferBufferForTexture;
-		transferBufferOffsetToUse = _mTransferBufferForTextureOffset;
+		SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
+		return NULL;
 	}
 
+	SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandUploadTexture);
+	if (copyPass == NULL)
+	{
+		SDL_Log("SDL_BeginGPUCopyPass failed: %s", SDL_GetError());
+		return NULL;
+	}
+
+	SDL_GPUTransferBuffer* transferBufferToUse = SDL_CreateGPUTransferBuffer(
+		_mFixed.DeviceHandle,
+		&(SDL_GPUTransferBufferCreateInfo) {
+		.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+			.size = textureDataLen
+	}
+	);
+
 	Uint8* textureTransferPtr = SDL_MapGPUTransferBuffer(
-		_mDeviceGPU,
+		_mFixed.DeviceHandle,
 		transferBufferToUse,
 		false
 	);
-	SDL_memcpy(textureTransferPtr + transferBufferOffsetToUse, textureData, textureDataLen);
-	SDL_UnmapGPUTransferBuffer(_mDeviceGPU, _mTransferBufferForTexture);
+	SDL_memcpy(textureTransferPtr, textureData, textureDataLen);
+	SDL_UnmapGPUTransferBuffer(_mFixed.DeviceHandle, 0);
 
 	// Upload the transfer data to the GPU resources
 	SDL_UploadToGPUTexture(
-		_mCopyPass,
+		copyPass,
 		&(SDL_GPUTextureTransferInfo) {
 		.transfer_buffer = transferBufferToUse,
-			.offset = transferBufferOffsetToUse,
+			.offset = 0,
 	},
 		& (SDL_GPUTextureRegion) {
-		.texture = gpuTex,
+		.texture = tex->mTextureData,
 			.w = textureBounds.Width,
 			.h = textureBounds.Height,
 			.d = 1
@@ -574,20 +317,11 @@ Texture* Renderer_GetTextureData(const char* path, FixedByteBuffer* blob)
 		false
 	);
 
-	if (isUsingTemporaryTransferBuffer)
-	{
-		SDL_ReleaseGPUTransferBuffer(_mDeviceGPU, transferBufferToUse);
-	}
-	else
-	{
-		_mTransferBufferForTextureOffset += textureDataLen;
-		_mTransferBufferForTextureOffset = SDLGPU_INTERNAL_RoundToAlignment(
-			_mTransferBufferForTextureOffset,
-			SDL_GPUTextureFormatTexelBlockSize(SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM));
-	}
-	
-	Texture* tex = Renderer_GetNewTextureData(path, textureBounds.Width, textureBounds.Height, false);
-	tex->mTextureData = gpuTex;
+	SDL_EndGPUCopyPass(copyPass);
+	SDL_SubmitGPUCommandBuffer(commandUploadTexture);
+
+	SDL_ReleaseGPUTransferBuffer(_mFixed.DeviceHandle, transferBufferToUse);
+
 	return tex;
 }
 Texture* Renderer_GetNewTextureData(const char* path, int32_t width, int32_t height, bool clearTexture)
@@ -596,26 +330,17 @@ Texture* Renderer_GetNewTextureData(const char* path, int32_t width, int32_t hei
 	MString_AssignString(&tex->mPath, path);
 	tex->mBounds.Width = width;
 	tex->mBounds.Height = height;
+	SDL_GPUTexture* textureData = SDL_CreateGPUTexture(_mFixed.DeviceHandle, &(SDL_GPUTextureCreateInfo){
+		.type = SDL_GPU_TEXTURETYPE_2D,
+			.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
+			.width = width,
+			.height = height,
+			.layer_count_or_depth = 1,
+			.num_levels = 1,
+			.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER
+	});
+	tex->mTextureData = textureData;
 	return tex;
-	/*InvalidateNextSetupRenderState();
-
-	FNA3D_Texture* texture = FNA3D_CreateTexture2D(_mDeviceContext, FNA3D_SURFACEFORMAT_COLOR, width, height, 1, 0);
-
-	if (clearTexture)
-	{
-		int32_t dataLength = width * height * 4;
-		uint8_t* clearData = (uint8_t*)Utils_calloc(dataLength, sizeof(uint8_t));
-		FNA3D_SetTextureData2D(_mDeviceContext, texture, 0, 0, width, height, 0, clearData, dataLength);
-		Utils_free(clearData);
-	}
-
-	Texture* tex = (Texture*)Utils_calloc(1, sizeof(Texture));
-	MString_AssignString(&tex->mPath, path);
-	tex->mBounds.Width = width;
-	tex->mBounds.Height = height;
-	tex->mTextureData = texture;
-
-	return tex;*/
 }
 void Renderer_UpdateTextureData(Texture* texture, int32_t x, int32_t y, int32_t w, int32_t h, int32_t level, void* data, int32_t dataLength)
 {
@@ -623,81 +348,14 @@ void Renderer_UpdateTextureData(Texture* texture, int32_t x, int32_t y, int32_t 
 
 	FNA3D_SetTextureData2D(_mDeviceContext, (FNA3D_Texture*)(texture->mTextureData), x, y, w, h, level, data, dataLength);*/
 }
-int32_t Renderer_Init(void* deviceWindowHandle)
+static SDL_GPUGraphicsPipeline* CreatePipeline(SDL_GPUShader* vertexShader, SDL_GPUShader* fragmentShader, SDL_GPUTextureFormat textureFormat)
 {
-	_mIndexBufferData = Renderer_GetDefaultIndexBufferData();
-
-	_mInternalWidth = (float)Utils_GetInternalWidth();
-	_mInternalHeight = (float)Utils_GetInternalHeight();
-	_mInternalWidthRender = (float)Utils_GetInternalRenderWidth();
-	_mInternalHeightRender = (float)Utils_GetInternalRenderHeight();
-	_mInternalWorldTranslation.X = (_mInternalWidth / 2.0f);
-	_mInternalWorldTranslation.Y = (_mInternalHeight / 2.0f);
-	_mInternalWorldTranslation.Z = 0;
-
-	_mDeviceWindowHandle = (SDL_Window*)deviceWindowHandle;
-
-	_mDeviceGPU = SDL_CreateGPUDevice(
-		SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-		true,
-		NULL);
-
-	if (_mDeviceGPU == NULL)
-	{
-		SDL_Log("GPUCreateDevice failed");
-		return -1;
-	}
-
-	if (!SDL_ClaimWindowForGPUDevice(_mDeviceGPU, _mDeviceWindowHandle))
-	{
-		SDL_Log("GPUClaimWindow failed");
-		return -1;
-	}
-
-	SDL_GPUPresentMode presentMode = SDL_GPU_PRESENTMODE_VSYNC;
-	if (SDL_WindowSupportsGPUPresentMode(
-		_mDeviceGPU,
-		_mDeviceWindowHandle,
-		SDL_GPU_PRESENTMODE_IMMEDIATE
-	)) {
-		presentMode = SDL_GPU_PRESENTMODE_IMMEDIATE;
-	}
-	else if (SDL_WindowSupportsGPUPresentMode(
-		_mDeviceGPU,
-		_mDeviceWindowHandle,
-		SDL_GPU_PRESENTMODE_MAILBOX
-	)) {
-		presentMode = SDL_GPU_PRESENTMODE_MAILBOX;
-	}
-
-	SDL_SetGPUSwapchainParameters(
-		_mDeviceGPU,
-		_mDeviceWindowHandle,
-		SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
-		presentMode
-	);
-
-	// Create the shaders
-	SDL_GPUShader* vertexShader = LoadShader(_mDeviceGPU, "TexturedQuadWithMatrix.vert", 0, 1, 0, 0);
-	if (vertexShader == NULL)
-	{
-		SDL_Log("Failed to create vertex shader!");
-		return -1;
-	}
-
-	SDL_GPUShader* fragmentShader = LoadShader(_mDeviceGPU, "TexturedQuadWithMultiplyColor.frag", 1, 1, 0, 0);
-	if (fragmentShader == NULL)
-	{
-		SDL_Log("Failed to create fragment shader!");
-		return -1;
-	}
-
 	// Create the pipeline
 	SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = {
 		.target_info = {
 			.num_color_targets = 1,
 			.color_target_descriptions = (SDL_GPUColorTargetDescription[]){{
-				.format = SDL_GetGPUSwapchainTextureFormat(_mDeviceGPU, _mDeviceWindowHandle),
+				.format = textureFormat,
 				.blend_state = {
 						.enable_blend = true,
 						.color_blend_op = SDL_GPU_BLENDOP_ADD,
@@ -715,19 +373,26 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 				.slot = 0,
 				.input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
 				.instance_step_rate = 0,
-				.pitch = sizeof(PositionTextureVertex)
+				.pitch = sizeof(VertexPositionColorTexture)
 			}},
-			.num_vertex_attributes = 2,
+			.num_vertex_attributes = 3,
 			.vertex_attributes = (SDL_GPUVertexAttribute[]){{
 				.buffer_slot = 0,
 				.format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
 				.location = 0,
 				.offset = 0
-			}, {
+			},
+			{
+				.buffer_slot = 0,
+				.format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,
+				.location = 1,
+				.offset = (sizeof(float) * 3)
+			},
+			{
 				.buffer_slot = 0,
 				.format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
-				.location = 1,
-				.offset = sizeof(float) * 3
+				.location = 2,
+				.offset = (sizeof(float) * 3) + (sizeof(float) * 4)
 			}}
 		},
 		.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
@@ -735,18 +400,82 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 		.fragment_shader = fragmentShader
 	};
 
-	Pipeline = SDL_CreateGPUGraphicsPipeline(_mDeviceGPU, &pipelineCreateInfo);
-	if (Pipeline == NULL)
+	SDL_GPUGraphicsPipeline* pipeline = SDL_CreateGPUGraphicsPipeline(_mFixed.DeviceHandle, &pipelineCreateInfo);
+	if (pipeline == NULL)
 	{
 		SDL_Log("Failed to create pipeline!");
+	}
+	return pipeline;
+}
+int32_t Renderer_Init(void* deviceWindowHandle)
+{
+	_mFixed.IndexBufferData = Renderer_GetDefaultIndexBufferData();
+
+	_mFixed.WindowHandle = (SDL_Window*)deviceWindowHandle;
+
+	_mFixed.DeviceHandle = SDL_CreateGPUDevice(
+		SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+		true,
+		NULL);
+
+	if (_mFixed.DeviceHandle == NULL)
+	{
+		SDL_Log("GPUCreateDevice failed");
 		return -1;
 	}
 
-	SDL_ReleaseGPUShader(_mDeviceGPU, vertexShader);
-	SDL_ReleaseGPUShader(_mDeviceGPU, fragmentShader);
+	if (!SDL_ClaimWindowForGPUDevice(_mFixed.DeviceHandle, _mFixed.WindowHandle))
+	{
+		SDL_Log("GPUClaimWindow failed");
+		return -1;
+	}
+
+	SDL_GPUPresentMode presentMode = SDL_GPU_PRESENTMODE_VSYNC;
+	if (SDL_WindowSupportsGPUPresentMode(
+		_mFixed.DeviceHandle,
+		_mFixed.WindowHandle,
+		SDL_GPU_PRESENTMODE_IMMEDIATE
+	)) {
+		presentMode = SDL_GPU_PRESENTMODE_IMMEDIATE;
+	}
+	else if (SDL_WindowSupportsGPUPresentMode(
+		_mFixed.DeviceHandle,
+		_mFixed.WindowHandle,
+		SDL_GPU_PRESENTMODE_MAILBOX
+	)) {
+		presentMode = SDL_GPU_PRESENTMODE_MAILBOX;
+	}
+
+	SDL_SetGPUSwapchainParameters(
+		_mFixed.DeviceHandle,
+		_mFixed.WindowHandle,
+		SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
+		presentMode
+	);
+
+	// Create the shaders
+	SDL_GPUShader* vertexShader = LoadShader(_mFixed.DeviceHandle, "TexturedQuadColorWithMatrix2.vert", 0, 1, 0, 0);
+	if (vertexShader == NULL)
+	{
+		SDL_Log("Failed to create vertex shader!");
+		return -1;
+	}
+
+	SDL_GPUShader* fragmentShader = LoadShader(_mFixed.DeviceHandle, "TexturedQuadColor.frag", 1, 1, 0, 0);
+	if (fragmentShader == NULL)
+	{
+		SDL_Log("Failed to create fragment shader!");
+		return -1;
+	}
+
+	_mFixed.PipelineForSwap = CreatePipeline(vertexShader, fragmentShader, SDL_GetGPUSwapchainTextureFormat(_mFixed.DeviceHandle, _mFixed.WindowHandle));
+	_mFixed.PipelineForRTT = CreatePipeline(vertexShader, fragmentShader, SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM);
+
+	SDL_ReleaseGPUShader(_mFixed.DeviceHandle, vertexShader);
+	SDL_ReleaseGPUShader(_mFixed.DeviceHandle, fragmentShader);
 
 	// PointClamp
-	Samplers[0] = SDL_CreateGPUSampler(_mDeviceGPU, &(SDL_GPUSamplerCreateInfo){
+	_mFixed.Samplers[0] = SDL_CreateGPUSampler(_mFixed.DeviceHandle, &(SDL_GPUSamplerCreateInfo){
 		.min_filter = SDL_GPU_FILTER_NEAREST,
 			.mag_filter = SDL_GPU_FILTER_NEAREST,
 			.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST,
@@ -755,7 +484,7 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 			.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE,
 	});
 	// PointWrap
-	Samplers[1] = SDL_CreateGPUSampler(_mDeviceGPU, &(SDL_GPUSamplerCreateInfo){
+	_mFixed.Samplers[1] = SDL_CreateGPUSampler(_mFixed.DeviceHandle, &(SDL_GPUSamplerCreateInfo){
 		.min_filter = SDL_GPU_FILTER_NEAREST,
 			.mag_filter = SDL_GPU_FILTER_NEAREST,
 			.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST,
@@ -764,7 +493,7 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 			.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
 	});
 	// LinearClamp
-	Samplers[2] = SDL_CreateGPUSampler(_mDeviceGPU, &(SDL_GPUSamplerCreateInfo){
+	_mFixed.Samplers[2] = SDL_CreateGPUSampler(_mFixed.DeviceHandle, &(SDL_GPUSamplerCreateInfo){
 		.min_filter = SDL_GPU_FILTER_LINEAR,
 			.mag_filter = SDL_GPU_FILTER_LINEAR,
 			.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR,
@@ -773,7 +502,7 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 			.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE,
 	});
 	// LinearWrap
-	Samplers[3] = SDL_CreateGPUSampler(_mDeviceGPU, &(SDL_GPUSamplerCreateInfo){
+	_mFixed.Samplers[3] = SDL_CreateGPUSampler(_mFixed.DeviceHandle, &(SDL_GPUSamplerCreateInfo){
 		.min_filter = SDL_GPU_FILTER_LINEAR,
 			.mag_filter = SDL_GPU_FILTER_LINEAR,
 			.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR,
@@ -782,7 +511,7 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 			.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
 	});
 	// AnisotropicClamp
-	Samplers[4] = SDL_CreateGPUSampler(_mDeviceGPU, &(SDL_GPUSamplerCreateInfo){
+	_mFixed.Samplers[4] = SDL_CreateGPUSampler(_mFixed.DeviceHandle, &(SDL_GPUSamplerCreateInfo){
 		.min_filter = SDL_GPU_FILTER_LINEAR,
 			.mag_filter = SDL_GPU_FILTER_LINEAR,
 			.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR,
@@ -793,7 +522,7 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 			.max_anisotropy = 4
 	});
 	// AnisotropicWrap
-	Samplers[5] = SDL_CreateGPUSampler(_mDeviceGPU, &(SDL_GPUSamplerCreateInfo){
+	_mFixed.Samplers[5] = SDL_CreateGPUSampler(_mFixed.DeviceHandle, &(SDL_GPUSamplerCreateInfo){
 		.min_filter = SDL_GPU_FILTER_LINEAR,
 			.mag_filter = SDL_GPU_FILTER_LINEAR,
 			.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR,
@@ -805,24 +534,24 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 	});
 
 	// Create the GPU resources
-	VertexBuffer = SDL_CreateGPUBuffer(
-		_mDeviceGPU,
+	_mFixed.VertexBuffer = SDL_CreateGPUBuffer(
+		_mFixed.DeviceHandle,
 		&(SDL_GPUBufferCreateInfo) {
 		.usage = SDL_GPU_BUFFERUSAGE_VERTEX,
-			.size = sizeof(PositionTextureVertex) * MAX_VERTICES
+			.size = sizeof(VertexPositionColorTexture) * MAX_VERTICES
 	}
 	);
 
-	_mTransferBufferForVertexBuffer = SDL_CreateGPUTransferBuffer(
-		_mDeviceGPU,
+	_mFixed.TransferBufferForVertexBuffer = SDL_CreateGPUTransferBuffer(
+		_mFixed.DeviceHandle,
 		&(SDL_GPUTransferBufferCreateInfo) {
 		.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-			.size = sizeof(PositionTextureVertex) * MAX_VERTICES
+			.size = sizeof(VertexPositionColorTexture) * MAX_VERTICES
 	}
 	);
 
-	IndexBuffer = SDL_CreateGPUBuffer(
-		_mDeviceGPU,
+	_mFixed.IndexBuffer = SDL_CreateGPUBuffer(
+		_mFixed.DeviceHandle,
 		&(SDL_GPUBufferCreateInfo) {
 		.usage = SDL_GPU_BUFFERUSAGE_INDEX,
 			.size = sizeof(Uint16) * MAX_INDICES
@@ -833,7 +562,7 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 	{
 		// Set up buffer data
 		SDL_GPUTransferBuffer* bufferTransferBuffer = SDL_CreateGPUTransferBuffer(
-			_mDeviceGPU,
+			_mFixed.DeviceHandle,
 			&(SDL_GPUTransferBufferCreateInfo) {
 			.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
 				.size = (sizeof(Uint16) * MAX_INDICES)
@@ -841,15 +570,15 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 		);
 
 		uint16_t* transferData = SDL_MapGPUTransferBuffer(
-			_mDeviceGPU,
+			_mFixed.DeviceHandle,
 			bufferTransferBuffer,
 			true
 		);
-		SDL_memcpy(transferData, _mIndexBufferData, sizeof(uint16_t)* MAX_INDICES);
+		SDL_memcpy(transferData, _mFixed.IndexBufferData, sizeof(uint16_t)* MAX_INDICES);
 
-		SDL_UnmapGPUTransferBuffer(_mDeviceGPU, bufferTransferBuffer);
+		SDL_UnmapGPUTransferBuffer(_mFixed.DeviceHandle, bufferTransferBuffer);
 
-		SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(_mDeviceGPU);
+		SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(_mFixed.DeviceHandle);
 		SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
 		SDL_UploadToGPUBuffer(
@@ -859,7 +588,7 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 				.offset = 0
 		},
 			& (SDL_GPUBufferRegion) {
-			.buffer = IndexBuffer,
+			.buffer = _mFixed.IndexBuffer,
 				.offset = 0,
 				.size = sizeof(Uint16) * MAX_INDICES
 		},
@@ -868,8 +597,10 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 
 		SDL_EndGPUCopyPass(copyPass);
 		SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
-		SDL_ReleaseGPUTransferBuffer(_mDeviceGPU, bufferTransferBuffer);
+		SDL_ReleaseGPUTransferBuffer(_mFixed.DeviceHandle, bufferTransferBuffer);
 	}
+
+	UpdateOffscreenTexture();
 
 	// Finally, print instructions!
 	SDL_Log("Press Left/Right to switch between sampler states");
@@ -924,13 +655,13 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 	_mBlendControlTypeAlphaBlend.multiSampleMask = -1;
 
 	//Sampler State
-	_mSamplerState.addressU = FNA3D_TEXTUREADDRESSMODE_WRAP;
-	_mSamplerState.addressV = FNA3D_TEXTUREADDRESSMODE_WRAP;
-	_mSamplerState.addressW = FNA3D_TEXTUREADDRESSMODE_WRAP;
-	_mSamplerState.filter = FNA3D_TEXTUREFILTER_POINT;
-	_mSamplerState.maxAnisotropy = 0;
-	_mSamplerState.maxMipLevel = 0;
-	_mSamplerState.mipMapLevelOfDetailBias = 0;
+	_Samplerstate.addressU = FNA3D_TEXTUREADDRESSMODE_WRAP;
+	_Samplerstate.addressV = FNA3D_TEXTUREADDRESSMODE_WRAP;
+	_Samplerstate.addressW = FNA3D_TEXTUREADDRESSMODE_WRAP;
+	_Samplerstate.filter = FNA3D_TEXTUREFILTER_POINT;
+	_Samplerstate.maxAnisotropy = 0;
+	_Samplerstate.maxMipLevel = 0;
+	_Samplerstate.mipMapLevelOfDetailBias = 0;
 
 	//Vertex Elements
 	_mVertexElements[0].offset = 0;
@@ -974,7 +705,7 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 
 	CreateIndexBuffer();
 
-	VertexBufferInstance_Init(&_mVertexBuffer);
+	VertexBufferInstance_Init(&_VertexBuffer);
 
 	FNA3D_SetBlendState(_mDeviceContext, &_mBlendControlTypeNonPremultiplied);
 
@@ -1006,39 +737,63 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 }
 void Renderer_BeforeRender(void)
 {
-	_mLastTextureUsed = NULL;
+	Utils_memset(&_mTemp, 0, sizeof(TempRenderState));
 
-	_mRenderCommandBuffer = SDL_AcquireGPUCommandBuffer(_mDeviceGPU);
-	if (_mRenderCommandBuffer == NULL)
+	Renderer_UpdateDisplayDimensions();
+
+	_mTemp.LastTextureUsed = NULL;
+
+	_mTemp.CommandUpload = SDL_AcquireGPUCommandBuffer(_mFixed.DeviceHandle);
+	if (_mTemp.CommandUpload == NULL)
 	{
 		SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
 		return;
 	}
 
-	if (!SDL_WaitAndAcquireGPUSwapchainTexture(_mRenderCommandBuffer, _mDeviceWindowHandle, &_mSwapchainTexture, NULL, NULL)) {
+	_mTemp.CopyPass = SDL_BeginGPUCopyPass(_mTemp.CommandUpload);
+	if (_mTemp.CopyPass == NULL)
+	{
+		SDL_Log("SDL_BeginGPUCopyPass failed: %s", SDL_GetError());
+		return;
+	}
+
+	_mTemp.CommandRender = SDL_AcquireGPUCommandBuffer(_mFixed.DeviceHandle);
+	if (_mTemp.CommandRender == NULL)
+	{
+		SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
+		return;
+	}
+
+	if (!SDL_WaitAndAcquireGPUSwapchainTexture(_mTemp.CommandRender, _mFixed.WindowHandle, &_mTemp.SwapchainTexture, NULL, NULL)) {
 		SDL_Log("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
 		return;
 	}
 
-	if (_mSwapchainTexture != NULL)
-	{
-		SDL_GPUColorTargetInfo colorTargetInfo = { 0 };
-		colorTargetInfo.texture = _mSwapchainTexture;
-		colorTargetInfo.clear_color = (SDL_FColor){ 0.0f, 0.0f, 0.0f, 1.0f };
-		colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
-		colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
+	SDL_GPUTexture* textureToRenderTo = NULL;
+	SDL_GPUGraphicsPipeline* pipelineToUse = NULL;
+#ifdef DISABLE_OFFSCREEN_TARGET
+	textureToRenderTo = _mTemp.SwapchainTexture;
+	pipelineToUse = _mFixed.PipelineForSwap;
+#else
+	textureToRenderTo = _mFixed.OffscreenTarget->mTextureData;
+	pipelineToUse = _mFixed.PipelineForRTT;
+#endif
+	SDL_GPUColorTargetInfo colorTargetInfo = { 0 };
+	colorTargetInfo.texture = textureToRenderTo;
+	colorTargetInfo.clear_color = (SDL_FColor){ 0.0f, 0.0f, 0.0f, 1.0f };
+	colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
+	colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
 
-		_mRenderPass = SDL_BeginGPURenderPass(_mRenderCommandBuffer, &colorTargetInfo, 1, NULL);
-		SDL_BindGPUGraphicsPipeline(_mRenderPass, Pipeline);
-		SDL_BindGPUIndexBuffer(_mRenderPass, &(SDL_GPUBufferBinding){.buffer = IndexBuffer, .offset = 0 }, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-	}
+	_mTemp.RenderPass = SDL_BeginGPURenderPass(_mTemp.CommandRender, &colorTargetInfo, 1, NULL);
+	SDL_BindGPUGraphicsPipeline(_mTemp.RenderPass, pipelineToUse);
+	SDL_BindGPUIndexBuffer(_mTemp.RenderPass, &(SDL_GPUBufferBinding){.buffer = _mFixed.IndexBuffer, .offset = 0 }, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 }
 void Renderer_BeforeCommit(void)
 {
 	Vector2 cameraPos = Renderer_INTERNAL_GetCurrentCameraPosition();
 	cameraPos.X -= 640;
 	cameraPos.Y -= 360;
-	Matrix4x4 cameraMatrix = Matrix4x4_CreateOrthographicOffCenter(
+	Matrix cameraMatrix = Matrix_CreateOrthographicOffCenter(
 		cameraPos.X,
 		cameraPos.X + 1280,
 		cameraPos.Y + 720,
@@ -1046,103 +801,116 @@ void Renderer_BeforeCommit(void)
 		0,
 		-1
 	);
-	SDL_PushGPUVertexUniformData(_mRenderCommandBuffer, 0, &cameraMatrix, sizeof(Matrix4x4));
-	SDL_PushGPUFragmentUniformData(_mRenderCommandBuffer, 0, &(FragMultiplyUniform){ 1.0f, 1.0f, 1.0f, 1.0f }, sizeof(FragMultiplyUniform));
-	SDL_BindGPUIndexBuffer(_mRenderPass, &(SDL_GPUBufferBinding){.buffer = IndexBuffer, .offset = 0 }, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+	SDL_PushGPUVertexUniformData(_mTemp.CommandRender, 0, &cameraMatrix, sizeof(Matrix));
+	SDL_BindGPUIndexBuffer(_mTemp.RenderPass, &(SDL_GPUBufferBinding){.buffer = _mFixed.IndexBuffer, .offset = 0 }, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+}
+static void SubmitRender(void)
+{
+	if ((_mTemp.CurrentBatchVerticesOffset == 0) ||
+		(_mTemp.LastTextureUsed == NULL) ||
+		(_mTemp.LastRenderVerticesOffset == _mTemp.CurrentBatchVerticesOffset))
+	{
+		return;
+	}
+
+	SDL_BindGPUFragmentSamplers(_mTemp.RenderPass, 0,
+		&(SDL_GPUTextureSamplerBinding){.texture = _mTemp.LastTextureUsed->mTextureData, .sampler = _mFixed.Samplers[0] }, 1);
+	SDL_BindGPUVertexBuffers(_mTemp.RenderPass, 0,
+		&(SDL_GPUBufferBinding){.buffer = _mFixed.VertexBuffer, .offset = 0 }, 1);
+
+	uint32_t currentLength = (_mTemp.CurrentBatchVerticesOffset - _mTemp.LastRenderVerticesOffset);
+	uint32_t currentSprites = currentLength / 4;
+
+	uint32_t offsetLength = _mTemp.LastRenderVerticesOffset;
+	uint32_t offsetSprites = offsetLength / 4;
+
+	SDL_DrawGPUIndexedPrimitives(_mTemp.RenderPass, currentSprites * 6, 1, offsetSprites * 6, 0, 0);
+
+	_mTemp.LastRenderVerticesOffset = _mTemp.CurrentBatchVerticesOffset;
 }
 static void SubmitVertices(void)
 {
-	if ((_mCurrentBatchVerticesOffset == 0) || (_mLastTextureUsed == NULL))
+	if ((_mTemp.CurrentBatchVerticesOffset == 0))
 	{
 		return;
 	}
 
 	// Set up buffer data
-	PositionTextureVertex* transferData = SDL_MapGPUTransferBuffer(
-		_mDeviceGPU,
-		_mTransferBufferForVertexBuffer,
+	VertexPositionColorTexture* transferData = SDL_MapGPUTransferBuffer(
+		_mFixed.DeviceHandle,
+		_mFixed.TransferBufferForVertexBuffer,
 		false
 	);
-	SDL_memcpy(transferData, _mBatchVertexBuffer, sizeof(PositionTextureVertex) * _mCurrentBatchVerticesOffset);
+	SDL_memcpy(transferData, _mFixed.BatchVertexBuffer, sizeof(VertexPositionColorTexture) * _mTemp.CurrentBatchVerticesOffset);
 
-	SDL_UnmapGPUTransferBuffer(_mDeviceGPU, _mTransferBufferForVertexBuffer);
+	SDL_UnmapGPUTransferBuffer(_mFixed.DeviceHandle, _mFixed.TransferBufferForVertexBuffer);
 
 	SDL_UploadToGPUBuffer(
-		_mCopyPass,
+		_mTemp.CopyPass,
 		&(SDL_GPUTransferBufferLocation) {
-		.transfer_buffer = _mTransferBufferForVertexBuffer,
+		.transfer_buffer = _mFixed.TransferBufferForVertexBuffer,
 			.offset = 0
 	},
 		& (SDL_GPUBufferRegion) {
-		.buffer = VertexBuffer,
+		.buffer = _mFixed.VertexBuffer,
 			.offset = 0,
-			.size = sizeof(PositionTextureVertex) * _mCurrentBatchVerticesOffset
+			.size = sizeof(VertexPositionColorTexture) * _mTemp.CurrentBatchVerticesOffset
 	},
 		false
 	);
 }
-static void SubmitRender(void)
-{
-	if ((_mCurrentBatchVerticesOffset == 0) || (_mLastTextureUsed == NULL) || (_mLastRenderVerticesOffset == _mCurrentBatchVerticesOffset))
-	{
-		return;
-	}
-
-	SDL_BindGPUFragmentSamplers(_mRenderPass, 0, &(SDL_GPUTextureSamplerBinding){.texture = _mLastTextureUsed->mTextureData, .sampler = Samplers[0] }, 1);
-	SDL_BindGPUVertexBuffers(_mRenderPass, 0, &(SDL_GPUBufferBinding){.buffer = VertexBuffer, .offset = 0 }, 1);
-
-	uint32_t currentLength = (_mCurrentBatchVerticesOffset - _mLastRenderVerticesOffset);
-	uint32_t currentSprites = currentLength / 4;
-
-	uint32_t offsetLength = _mLastRenderVerticesOffset;
-	uint32_t offsetSprites = offsetLength / 4;
-
-	SDL_DrawGPUIndexedPrimitives(_mRenderPass, currentSprites * 6, 1, offsetSprites * 6, 0, 0);
-
-	_mLastRenderVerticesOffset = _mCurrentBatchVerticesOffset;
-}
 static void FlushBatch(void)
 {
-	if ((_mCurrentBatchVerticesOffset == 0) || (_mLastTextureUsed == NULL))
-	{
-		_mLastRenderVerticesOffset = 0;
-		_mCurrentBatchVerticesOffset = 0;
-		return;
-	}
-
 	SubmitRender();
 
 	SubmitVertices();
 
-	_mLastRenderVerticesOffset = 0;
-	_mCurrentBatchVerticesOffset = 0;
+	_mTemp.LastRenderVerticesOffset = 0;
+	_mTemp.CurrentBatchVerticesOffset = 0;
+	_mTemp.LastTextureUsed = NULL;
 }
 void Renderer_DrawVertexPositionColorTexture4(Texture* texture, const VertexPositionColorTexture4* sprite)
 {
-	bool forceAll = false;
-	if (((_mCurrentBatchVerticesOffset + VERTICES_IN_SPRITE) >= MAX_VERTICES))
+	if ((texture == NULL) || (texture->mTextureData == NULL))
 	{
-		FlushBatch();
+		Logger_LogWarning("Attempted to render NULL texture or texture data!");
+		return;
 	}
-	else if (forceAll || (_mLastTextureUsed != texture))
+
+	if ((_mTemp.CurrentBatchVerticesOffset + VERTICES_IN_SPRITE) >= MAX_VERTICES) //Just hard limiting vertexes for now anyway... //TODO
+	{
+		Logger_LogWarning("Reached vertex buffer limit!");
+		return;
+	}
+
+	if (_mTemp.LastTextureUsed == NULL)
+	{
+		_mTemp.LastTextureUsed = texture;
+	}
+
+	if ((_mTemp.LastTextureUsed != texture))
 	{
 		SubmitRender();
-		_mLastTextureUsed = texture;
+		_mTemp.LastTextureUsed = texture;
 	}
 
-	_mBatchVertexBuffer[_mCurrentBatchVerticesOffset + 0] = (PositionTextureVertex){ sprite->Position0.X,  sprite->Position0.Y, sprite->Position0.Z,
+	_mFixed.BatchVertexBuffer[_mTemp.CurrentBatchVerticesOffset + 0] = (VertexPositionColorTexture){ sprite->Position0.X,  sprite->Position0.Y, sprite->Position0.Z,
+		sprite->Color0.R, sprite->Color0.G, sprite->Color0.B, sprite->Color0.A,
 		sprite->TextureCoordinate0.U, sprite->TextureCoordinate0.V };
 
-	_mBatchVertexBuffer[_mCurrentBatchVerticesOffset + 1] = (PositionTextureVertex){ sprite->Position1.X,  sprite->Position1.Y, sprite->Position1.Z,
+	_mFixed.BatchVertexBuffer[_mTemp.CurrentBatchVerticesOffset + 1] = (VertexPositionColorTexture){ sprite->Position1.X,  sprite->Position1.Y, sprite->Position1.Z,
+		sprite->Color1.R, sprite->Color1.G, sprite->Color1.B, sprite->Color1.A,
 		sprite->TextureCoordinate1.U, sprite->TextureCoordinate1.V };
 
-	_mBatchVertexBuffer[_mCurrentBatchVerticesOffset + 2] = (PositionTextureVertex){ sprite->Position2.X,  sprite->Position2.Y, sprite->Position2.Z,
+	_mFixed.BatchVertexBuffer[_mTemp.CurrentBatchVerticesOffset + 2] = (VertexPositionColorTexture){ sprite->Position2.X,  sprite->Position2.Y, sprite->Position2.Z,
+		sprite->Color2.R, sprite->Color2.G, sprite->Color2.B, sprite->Color2.A,
 		sprite->TextureCoordinate2.U, sprite->TextureCoordinate2.V };
 
-	_mBatchVertexBuffer[_mCurrentBatchVerticesOffset + 3] = (PositionTextureVertex){ sprite->Position3.X,  sprite->Position3.Y, sprite->Position3.Z,
+	_mFixed.BatchVertexBuffer[_mTemp.CurrentBatchVerticesOffset + 3] = (VertexPositionColorTexture){ sprite->Position3.X,  sprite->Position3.Y, sprite->Position3.Z,
+		sprite->Color3.R, sprite->Color3.G, sprite->Color3.B, sprite->Color3.A,
 		sprite->TextureCoordinate3.U, sprite->TextureCoordinate3.V };
 
-	_mCurrentBatchVerticesOffset += VERTICES_IN_SPRITE;
+	_mTemp.CurrentBatchVerticesOffset += VERTICES_IN_SPRITE;
 }
 void Renderer_AfterCommit(void)
 {
@@ -1151,13 +919,46 @@ void Renderer_AfterRender(void)
 {
 	FlushBatch();
 
-	SubmitCommandBufferForCopy();
+	SDL_EndGPURenderPass(_mTemp.RenderPass);
 
-	SDL_EndGPURenderPass(_mRenderPass);
-	_mRenderPass = NULL;
+#ifndef DISABLE_OFFSCREEN_TARGET
+	SDL_GPUColorTargetInfo colorTargetInfo = { 0 };
+	colorTargetInfo.texture = _mTemp.SwapchainTexture;
+	colorTargetInfo.clear_color = (SDL_FColor){ 0.0f, 0.0f, 0.0f, 1.0f };
+	colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
+	colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
 
-	SDL_SubmitGPUCommandBuffer(_mRenderCommandBuffer);
-	_mRenderCommandBuffer = NULL;
+	_mTemp.RenderPass = SDL_BeginGPURenderPass(_mTemp.CommandRender, &colorTargetInfo, 1, NULL);
+
+	SDL_BindGPUGraphicsPipeline(_mTemp.RenderPass, _mFixed.PipelineForSwap);
+	SDL_BindGPUIndexBuffer(_mTemp.RenderPass, &(SDL_GPUBufferBinding){.buffer = _mFixed.IndexBuffer, .offset = 0 }, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+	Vector2 cameraPos = Vector2_Zero;
+	cameraPos.X += 0;
+	cameraPos.Y += 0;
+	Matrix cameraMatrix = Matrix_CreateOrthographicOffCenter(
+		cameraPos.X,
+		cameraPos.X + 1280,
+		cameraPos.Y + 720,
+		cameraPos.Y,
+		0,
+		-1
+	);
+	SDL_PushGPUVertexUniformData(_mTemp.CommandRender, 0, &cameraMatrix, sizeof(Matrix));
+
+	Rectangle screenBounds = Renderer_GetScreenBounds();
+	Renderer_Draw(_mFixed.OffscreenTarget, screenBounds, Color_White);
+	FlushBatch();
+
+	SDL_EndGPURenderPass(_mTemp.RenderPass);
+#endif
+
+	SDL_EndGPUCopyPass(_mTemp.CopyPass);
+
+	SDL_SubmitGPUCommandBuffer(_mTemp.CommandUpload);
+
+	SDL_SubmitGPUCommandBuffer(_mTemp.CommandRender);
+
+	Utils_memset(&_mTemp, 0, sizeof(TempRenderState));
 }
 void Renderer_FlushBatch(void)
 {
@@ -1275,29 +1076,27 @@ void Renderer_ResetBackBuffer(void)
 			MString_Dispose(&tempString);
 		}
 
-		if (_mOffscreenTarget.mTextureData != NULL)
+		if (_OffscreenTarget.mTextureData != NULL)
 		{
-			FNA3D_AddDisposeTexture(_mDeviceContext, (FNA3D_Texture*)(_mOffscreenTarget.mTextureData));
-			_mOffscreenTarget.mTextureData = NULL;
+			FNA3D_AddDisposeTexture(_mDeviceContext, (FNA3D_Texture*)(_OffscreenTarget.mTextureData));
+			_OffscreenTarget.mTextureData = NULL;
 		}
 
-		_mOffscreenTargetBinding.twod.width = _mVirtualBufferBounds.Width;
-		_mOffscreenTargetBinding.twod.height = _mVirtualBufferBounds.Height;
+		_OffscreenTargetBinding.twod.width = _mVirtualBufferBounds.Width;
+		_OffscreenTargetBinding.twod.height = _mVirtualBufferBounds.Height;
 
-		_mOffscreenTarget.mTextureData = FNA3D_CreateTexture2D(_mDeviceContext, FNA3D_SURFACEFORMAT_COLOR, _mVirtualBufferBounds.Width, _mVirtualBufferBounds.Height, 1, 1);
-		_mOffscreenTarget.mBounds.Width = _mVirtualBufferBounds.Width;
-		_mOffscreenTarget.mBounds.Height = _mVirtualBufferBounds.Height;
+		_OffscreenTarget.mTextureData = FNA3D_CreateTexture2D(_mDeviceContext, FNA3D_SURFACEFORMAT_COLOR, _mVirtualBufferBounds.Width, _mVirtualBufferBounds.Height, 1, 1);
+		_OffscreenTarget.mBounds.Width = _mVirtualBufferBounds.Width;
+		_OffscreenTarget.mBounds.Height = _mVirtualBufferBounds.Height;
 	}*/
 }
 Rectangle Renderer_GetDrawableSize(void)
 {
-	return Rectangle_Empty;
-	/*Rectangle drawableSize;
+	Rectangle drawableSize;
 	drawableSize.X = 0;
 	drawableSize.Y = 0;
-	SDL_GetWindowSizeInPixels((SDL_Window*)_mDeviceWindowHandle, &drawableSize.Width, &drawableSize.Height);
-	//FNA3D_GetDrawableSize(_mDeviceWindowHandle, &drawableSize.Width, &drawableSize.Height);
-	return drawableSize;*/
+	SDL_GetWindowSizeInPixels(_mFixed.WindowHandle, &drawableSize.Width, &drawableSize.Height);
+	return drawableSize;
 }
 
 #endif

@@ -7,8 +7,8 @@
 #pragma once
 
 #ifdef RENDER_SDLGPU
-#define MAX_VERTICES 32768
-#define MAX_INDICES 49152
+#define MAX_VERTICES 65536
+#define MAX_INDICES 98304
 #else
 #define MAX_VERTICES 8192
 #define MAX_INDICES 12288

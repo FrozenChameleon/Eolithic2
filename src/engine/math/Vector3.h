@@ -22,11 +22,9 @@ typedef struct Vector3
 	float Z;
 } Vector3;
 
-void Vector3_InitFromFloat(Vector3* vector, float value);
 void Vector3_Init(Vector3* vector, float x, float y, float z);
-//Vector3 Vector3_Normalize(Vector3 value);
-//Vector3 Vector3_Cross(Vector3 vector1, Vector3 vector2);
-void Vector3_CrossMut(const Vector3* vector1, const Vector3* vector2, Vector3* result);
-//float Vector3_Dot(Vector3 vector1, Vector3 vector2);
-void Vector3_DotMut(const Vector3* vector1, const Vector3* vector2, float* result);
-Vector3 Vector3_Sub(const Vector3* vector1, const Vector3* vector2);
+void Vector3_Init2(Vector3* vector, float value);
+Vector3 Vector3_Normalize(Vector3 value);
+Vector3 Vector3_Cross(Vector3 vector1, Vector3 vector2);
+float Vector3_Dot(Vector3 vector1, Vector3 vector2);
+Vector3 Vector3_Sub(Vector3 vector1, Vector3 vector2);

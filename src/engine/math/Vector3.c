@@ -18,19 +18,20 @@
 #include "MathHelper.h"
 #include "Math.h"
 
-void Vector3_InitFromFloat(Vector3* vector, float value)
-{
-	vector->X = value;
-	vector->Y = value;
-	vector->Z = value;
-}
 void Vector3_Init(Vector3* vector, float x, float y, float z)
 {
 	vector->X = x;
 	vector->Y = y;
 	vector->Z = z;
 }
-/*Vector3 Vector3_Normalize(Vector3 value)
+void Vector3_Init2(Vector3* vector, float value)
+{
+	vector->X = value;
+	vector->Y = value;
+	vector->Z = value;
+}
+
+Vector3 Vector3_Normalize(Vector3 value)
 {
 	float factor = 1.0f / (float)Math_sqrt(
 		(value.X * value.X) +
@@ -45,32 +46,21 @@ void Vector3_Init(Vector3* vector, float x, float y, float z)
 }
 Vector3 Vector3_Cross(Vector3 vector1, Vector3 vector2)
 {
-	Vector3 vector3;
-	Vector3_CrossMut(&vector1, &vector2, &vector3);
-	return vector3;
-}*/
-void Vector3_CrossMut(const Vector3* vector1, const Vector3* vector2, Vector3* result)
-{
-	result->X = (vector1->Y * vector2->Z - vector2->Y * vector1->Z);
-	result->Y = -(vector1->X * vector2->Z - vector2->X * vector1->Z);
-	result->Z = (vector1->X * vector2->Y - vector2->X * vector1->Y);
+	Vector3 result;
+	result.X = (vector1.Y * vector2.Z - vector2.Y * vector1.Z);
+	result.Y = -(vector1.X * vector2.Z - vector2.X * vector1.Z);
+	result.Z = (vector1.X * vector2.Y - vector2.X * vector1.Y);
+	return result;
 }
-/*float Vector3_Dot(Vector3 vector1, Vector3 vector2)
+float Vector3_Dot(Vector3 vector1, Vector3 vector2)
 {
 	return (vector1.X * vector2.X) + (vector1.Y * vector2.Y) + (vector1.Z * vector2.Z);
-}*/
-void Vector3_DotMut(const Vector3* vector1, const Vector3* vector2, float* result)
-{
-	float dotProduct = ((vector1->X * vector2->X) +
-		(vector1->Y * vector2->Y) +
-		(vector1->Z * vector2->Z));
-	*result = dotProduct;
 }
-Vector3 Vector3_Sub(const Vector3* vector1, const Vector3* vector2)
+Vector3 Vector3_Sub(Vector3 vector1, Vector3 vector2)
 {
 	Vector3 temp;
-	temp.X = (vector1->X - vector2->X);
-	temp.Y = (vector1->Y - vector2->Y);
-	temp.Z = (vector1->Z - vector2->Z);
+	temp.X = (vector1.X - vector2.X);
+	temp.Y = (vector1.Y - vector2.Y);
+	temp.Z = (vector1.Z - vector2.Z);
 	return temp;
 }
