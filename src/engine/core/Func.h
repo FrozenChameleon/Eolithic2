@@ -15,7 +15,7 @@
 #include "../render/Color.h"
 //#include "../utils/OeStringPair.h"
 //#include "../utils/TimerDouble.h"
-#include "../resources/Resource.h"
+#include "../resources/ResourceManager.h"
 #include "../gamestate/GameState.h"
 #include "../collision/Body.h"
 //#include "../collision/CollisionEngine.h"

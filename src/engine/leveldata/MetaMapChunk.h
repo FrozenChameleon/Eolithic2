@@ -8,7 +8,7 @@
 
 #include "../utils/Macros.h"
 #include "../math/Point.h"
-#include "../resources/Resource.h"
+#include "../resources/ResourceManager.h"
 #include "../render/Color.h"
 #include "../utils/MString.h"
 

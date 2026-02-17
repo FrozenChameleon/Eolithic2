@@ -44,6 +44,10 @@
 #include "../gamestate/GameStateManager.h"
 #include "../render/DrawTool.h"
 #include "../resources/ResourceManagerList.h"
+#include "../globals/Globals.h"
+#ifdef EDITOR_MODE
+#include "../editor/Editor.h"
+#endif
 
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
 
@@ -145,10 +149,10 @@ Rectangle Renderer_GetWantedBackBufferBounds(void)
 	int32_t internalRenderWidth = Utils_GetInternalRenderWidth();
 	int32_t internalRenderHeight = Utils_GetInternalRenderHeight();
 
-	int32_t mul = Renderer_GetRenderTargetScale();
-
 #ifdef DEBUG_DEF_FORCE_LOWEST_BACK_BUFFER_SIZE
-	mul = 1;
+	int32_t mul = 1;
+#else
+	int32_t mul = Renderer_GetRenderTargetScale();
 #endif
 
 	Rectangle bounds;
@@ -1024,18 +1028,24 @@ void Renderer_SetupRenderState(void)
 {
 	SpriteBatch_DisposePinnedStrings();
 
+	SpriteBatch_Clear(&_mOrangeSpriteBatch);
+	SpriteBatch_Clear(&_mOrangeSpriteBatchHud);
+
 	if (GameLoader_IsLoading())
 	{
-		SpriteBatch_Clear(&_mOrangeSpriteBatch);
-		SpriteBatch_Clear(&_mOrangeSpriteBatchHud);
 		GameLoader_Draw(&_mOrangeSpriteBatchHud);
 	}
 	else
 	{
-		SpriteBatch_Clear(&_mOrangeSpriteBatch);
 		GameStateManager_Draw(&_mOrangeSpriteBatch);
-		SpriteBatch_Clear(&_mOrangeSpriteBatchHud);
 		GameStateManager_DrawHud(&_mOrangeSpriteBatchHud);
+#ifdef EDITOR_MODE
+		if (Globals_IsEditorActive())
+		{
+			Editor_Draw(&_mOrangeSpriteBatch);
+			Editor_DrawHud(&_mOrangeSpriteBatchHud);
+		}
+#endif
 	}
 }
 int32_t Renderer_GetFPS(void)

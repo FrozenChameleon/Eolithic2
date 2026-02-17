@@ -15,6 +15,54 @@
 #include "../utils/IStringArray.h"
 #include "../io/DynamicByteBuffer.h"
 
+typedef struct Resource
+{
+	void* mData;
+	ResourceManager* mManager;
+	ResourceID mID;
+	MString* mPath;
+	char mFilenameWithoutExtension[EE_FILENAME_MAX];
+} Resource;
+
+static void* LoadResourceDataFromBufferReader(Resource* resource, BufferReader* br)
+{
+	if ((resource->mPath == NULL) || (resource->mFilenameWithoutExtension == NULL))
+	{
+		Logger_LogInformation("Resource missing path!");
+		return NULL;
+	}
+
+	return resource->mManager->_mFromStream(MString_Text(resource->mPath), resource->mFilenameWithoutExtension, br);
+}
+static void LoadResourceDataFromResourcePath(Resource* resource)
+{
+	if ((resource->mPath == NULL) || (resource->mFilenameWithoutExtension == NULL))
+	{
+		Logger_LogInformation("Resource missing path!");
+		return;
+	}
+
+	BufferReader* br = BufferReader_CreateFromPath(MString_Text(resource->mPath));
+	resource->mData = LoadResourceDataFromBufferReader(resource, br);
+	BufferReader_Dispose(br);
+
+	{
+		MString* tempString = NULL;
+		MString_Combine2(&tempString, "Loaded resource late: ", resource->mFilenameWithoutExtension);
+		Logger_LogInformation(MString_Text(tempString));
+		MString_Dispose(&tempString);
+	}
+}
+static void LoadResourceDataFromResourcePathIfMissing(Resource* resource)
+{
+	if (resource->mData != NULL)
+	{
+		return;
+	}
+
+	LoadResourceDataFromResourcePath(resource);
+}
+
 static void PrintHelper(const char* str1, const char* str2)
 {
 	MString* tempString = NULL;
@@ -25,6 +73,20 @@ static void PrintHelper(const char* str1, const char* str2)
 static void PrintResourceType(ResourceManager* rm)
 {
 	PrintHelper("Resource type: ", rm->_mResourceType);
+}
+
+const char* Resource_GetFilenameWithoutExtension(Resource* res)
+{
+	return res->mFilenameWithoutExtension;
+}
+void* Resource_GetData(Resource* res)
+{
+	LoadResourceDataFromResourcePathIfMissing(res);
+	return res->mData;
+}
+MString* Resource_GetPath(Resource* res)
+{
+	return res->mPath;
 }
 
 void ResourceManager_Init(ResourceManager* rm)
@@ -99,6 +161,7 @@ void* ResourceManager_GetResourceData(ResourceManager* rm, const char* filenameW
 		PrintResourceType(rm);
 		return NULL;
 	}
+	LoadResourceDataFromResourcePathIfMissing(resource);
 	return resource->mData;
 }
 Resource* ResourceManager_LoadAssetFromStreamAndCreateResource(ResourceManager* rm, BufferReader* br, const char* filenameWithoutExtension, const char* path)
@@ -110,16 +173,16 @@ Resource* ResourceManager_LoadAssetFromStreamAndCreateResource(ResourceManager* 
 		MString_Dispose(&tempString);
 	}
 	Resource* resource = (Resource*)Utils_calloc(1, sizeof(Resource));
-	Utils_memset(resource, 0, sizeof(Resource));
+	resource->mManager = rm;
 	MString_AssignString(&resource->mPath, path);
-	Utils_strlcpy(resource->mFileNameWithoutExtension, filenameWithoutExtension, EE_FILENAME_MAX);
+	Utils_strlcpy(resource->mFilenameWithoutExtension, filenameWithoutExtension, EE_FILENAME_MAX);
 	resource->mID = rm->_mResourceCounter;
 	rm->_mResourceCounter += 1;
-	if (rm->_mFromStream != NULL)
+	if (!rm->_mDelayLoading && (rm->_mFromStream != NULL))
 	{
-		resource->mData = rm->_mFromStream(MString_Text(resource->mPath), resource->mFileNameWithoutExtension, br);
+		resource->mData = LoadResourceDataFromBufferReader(resource, br);
 	}
-	shput(rm->sh_resources, resource->mFileNameWithoutExtension, resource);
+	shput(rm->sh_resources, resource->mFilenameWithoutExtension, resource);
 	return resource;
 }
 const char* ResourceManager_GetDatFileName(ResourceManager* rm)
@@ -196,7 +259,9 @@ Resource* ResourceManager_GetResourceByIndex(ResourceManager* rm, int32_t index)
 }
 void* ResourceManager_GetResourceDataByIndex(ResourceManager* rm, int32_t index)
 {
-	return rm->sh_resources[index].value->mData;
+	Resource* resource = rm->sh_resources[index].value;
+	LoadResourceDataFromResourcePathIfMissing(resource);
+	return resource->mData;
 }
 const char* ResourceManager_GetKey(ResourceManager* rm, const char* filenameWithoutExtension)
 {

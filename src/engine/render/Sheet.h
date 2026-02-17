@@ -10,7 +10,7 @@
 #include "RenderCommands.h"
 #include "../math/Vector2.h"
 #include "../math/Rectangle.h"
-#include "../resources/Resource.h"
+#include "../resources/ResourceManager.h"
 #include "../utils/IStringArray.h"
 
 typedef struct DrawInstance DrawInstance;

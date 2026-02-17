@@ -6,40 +6,27 @@
 
 #include "GlobalSysDefaultState.h"
 
-#include "../editor/Editor.h"
 #include "../globals/Globals.h"
 #include "../gamestate/GameStateManager.h"
 #include "../gamestate/GameState.h"
 
 static void Draw(void* givenData, SpriteBatch* spriteBatch)
 {
-#ifdef EDITOR_MODE
-	if (Globals_DebugIsEditorMode())
+	if (Globals_IsEditorActive())
 	{
-		Editor_Draw(spriteBatch);
+		return;
 	}
-	else
-	{
-		GameState_Draw(GameStateManager_GetGameState(), spriteBatch);
-	}
-#else
+
 	GameState_Draw(GameStateManager_GetGameState(), spriteBatch);
-#endif
 }
 static void DrawHud(void* givenData, SpriteBatch* spriteBatch)
 {
-#ifdef EDITOR_MODE
-	if (Globals_DebugIsEditorMode())
+	if (Globals_IsEditorActive())
 	{
-		Editor_DrawHud(spriteBatch);
+		return;
 	}
-	else
-	{
-		GameState_DrawHud(GameStateManager_GetGameState(), spriteBatch);
-	}
-#else
+
 	GameState_DrawHud(GameStateManager_GetGameState(), spriteBatch);
-#endif
 }
 /*void OeGlobalSysDefaultState_DrawDebugHud(OeSpriteBatch* spriteBatch)
 {
@@ -49,22 +36,12 @@ static void DrawHud(void* givenData, SpriteBatch* spriteBatch)
 }*/
 static void Update(void* givenData)
 {
-#ifdef EDITOR_MODE
-	if (Globals_DebugIsEditorMode())
+	if (Globals_IsEditorActive())
 	{
-		Editor_Update();
+		return;
 	}
-	else
-	{
-		//WILLNOTDO 06262023 (EDITOR_MODE) 2023 OeGuiThingViewer.Update();
-		//WILLNOTDO 06262023 (EDITOR_MODE) 2023 if (!OeConsole.IsPresent())
-		//WILLNOTDO 06262023 (EDITOR_MODE) 2023 {
-		GameState_Update(GameStateManager_GetGameState());
-		//WILLNOTDO 06262023 (EDITOR_MODE) 2023 }
-	}
-#else
+
 	GameState_Update(GameStateManager_GetGameState());
-#endif
 }
 
 System* GlobalSysDefaultState_CreateSystem(void)

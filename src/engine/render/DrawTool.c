@@ -32,7 +32,7 @@ Texture* DrawTool_GetSinglePixel(void)
 		}
 	}
 
-	return (Texture*)_mSinglePixel->mData;
+	return (Texture*)Resource_GetData(_mSinglePixel);
 }
 void DrawTool_DrawRectangle(SpriteBatch* spriteBatch, Color color, int32_t depth, int32_t x, int32_t y, int32_t width, int32_t height, float rotation, bool isCenter)
 {

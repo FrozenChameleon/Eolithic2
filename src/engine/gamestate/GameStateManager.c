@@ -122,7 +122,7 @@ void GameStateManager_DebugDrawInfoHelper(int32_t* counter, SpriteBatch* spriteB
 Camera* GameStateManager_GetCurrentRenderCamera(void)
 {
 #ifdef EDITOR_MODE
-	if (Globals_DebugIsEditorMode())
+	if (Globals_IsEditorActive())
 	{
 		return Editor_GetCamera();
 	}

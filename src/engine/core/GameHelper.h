@@ -8,7 +8,7 @@
 
 #include "../utils/Macros.h"
 #include "../input/InputAction.h"
-#include "../resources/Resource.h"
+#include "../resources/ResourceManager.h"
 #include "../utils/StringPair.h"
 #include "../systems/System.h"
 #include "../collision/Body.h"

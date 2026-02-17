@@ -41,7 +41,13 @@
 #include "MenuFunc.h"
 #include  "../audio/AudioEngine.h"
 #include "../input/MouseState.h"
+#ifdef EDITOR_MODE
 #include "../editor/Editor.h"
+#include "imgui.h"
+#include "imgui_impl_sdl3.h"
+#include "imgui_impl_sdlgpu3.h"
+
+#endif
 
 static const double FIXED_TIME_STEP_TICK = (1.0 / 60.0);
 #define MAX_TIME_STEP_FRAMES 4
@@ -178,14 +184,8 @@ int32_t Game_Run(void)
 		}
 		Game_PollEvents();
 		Game_Update(delta);
-		if (!Service_SuppressDrawing())
-		{
-			Game_Draw(delta);
-		}
-		if (!isDone)
-		{
-			isDone = Game_IsExitingGame();
-		}
+		Game_Draw(delta);
+		isDone = Game_IsExitingGame();
 	}
 	Game_Dispose();
 	return 0;
@@ -195,6 +195,12 @@ void Game_PollEvents(void) //Derived from FNA
 	SDL_Event e;
 	while (SDL_PollEvent(&e) == 1)
 	{
+#ifdef EDITOR_MODE
+		// (Where your code calls SDL_PollEvent())
+		ImGui_ImplSDL3_ProcessEvent(&e); // Forward your event to backend
+		// (You should discard mouse/keyboard messages in your game/engine when io.WantCaptureMouse/io.WantCaptureKeyboard are set.)
+#endif
+
 		if (e.type == SDL_EVENT_MOUSE_WHEEL)
 		{
 			//Logger_LogInformationSilently("Event: mouse wheel");
@@ -272,6 +278,15 @@ void Game_PollEvents(void) //Derived from FNA
 		}
 	}
 
+#ifdef EDITOR_MODE
+	// (After event loop)
+	// Start the Dear ImGui frame
+	ImGui_ImplSDLGPU3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
+	//ImGui::ShowDemoWindow(); // Show demo window! :)
+#endif
+
 	_mIsFirstPollEvents = false;
 }
 bool Game_IsExitingGame(void)
@@ -288,33 +303,44 @@ bool Game_IsActive(void)
 }
 void Game_Update(double gameTime)
 {
-	Game_UpdateHelper(gameTime);
+	ServiceHelper_Update(gameTime);
+
+	if (GameLoader_IsLoading())
+	{
+		GameLoader_Update(gameTime);
+		Renderer_SetupRenderState();
+	}
+
+	if (GameLoader_IsLoading())
+	{
+		return;
+	}
+
+	GameUpdater_Update(gameTime);
+
+#ifdef EDITOR_MODE
+	if (Globals_IsEditorActive())
+	{
+		Editor_Update();
+		Renderer_SetupRenderState();
+	}
+#endif
 }
 void Game_Draw(double gameTime)
 {
 #ifdef EDITOR_MODE
-	if (Globals_DebugIsRenderDisabled())
+	if (Globals_IsRenderDisabled())
 	{
 		return;
 	}
 #endif
 
+	if (Service_SuppressDrawing())
+	{
+		return;
+	}
+
 	Renderer_Render(gameTime);
-}
-void Game_UpdateHelper(double delta)
-{
-	ServiceHelper_Update(delta);
-
-	if (GameLoader_IsLoading())
-	{
-		GameLoader_Update(delta);
-		Renderer_SetupRenderState();
-	}
-
-	if (!GameLoader_IsLoading())
-	{
-		GameUpdater_Update(delta);
-	}
 }
 void Game_Dispose(void)
 {

@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include "Resource.h"
 #include "ResourceManager.h"
 
 void ResourceManagerList_Init(void);

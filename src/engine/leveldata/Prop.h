@@ -8,7 +8,7 @@
 
 #include "../math/Rectangle.h"
 #include "../render/Animation.h"
-#include "../resources/Resource.h"
+#include "../resources/ResourceManager.h"
 
 typedef struct SpriteBatch SpriteBatch;
 typedef struct Sheet Sheet;

@@ -2186,7 +2186,7 @@ Resource* Get_LevelDataResource(void)
 }
 const char* Get_LevelFileName(void)
 {
-	return Get_LevelDataResource()->mFileNameWithoutExtension;
+	return Resource_GetFilenameWithoutExtension(Get_LevelDataResource());
 }
 Rectangle Get_BodyRectangle(Entity entity)
 {

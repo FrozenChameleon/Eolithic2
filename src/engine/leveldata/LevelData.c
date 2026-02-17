@@ -437,12 +437,13 @@ void LevelData_DrawTiles2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camer
 }
 Texture* LevelData_GetTilesetTexture(LevelData* ld)
 {
-	Resource* resource = ResourceManager_GetResource(ResourceManagerList_Texture(), ld->mTilesetName);
-	if ((resource == NULL) || (resource->mData == NULL))
+	void* resourceData = ResourceManager_GetResourceData(ResourceManagerList_Texture(), ld->mTilesetName);
+	if (resourceData == NULL)
 	{
 		return NULL;
 	}
-	return (Texture*)resource->mData;
+
+	return (Texture*)resourceData;
 }
 void LevelData_DrawProps(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera)
 {

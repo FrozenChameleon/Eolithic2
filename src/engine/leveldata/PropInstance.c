@@ -14,7 +14,7 @@
 #include "../math/Points.h"
 #include "../render/Color.h"
 #include "../render/DrawTool.h"
-#include "../resources/Resource.h"
+#include "../resources/ResourceManager.h"
 #include "../resources/ResourceManagerList.h"
 
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE

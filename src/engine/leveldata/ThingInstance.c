@@ -16,7 +16,7 @@
 #include "../utils/Cvars.h"
 #include "../core/Game.h"
 #include "../core/GameHelper.h"
-#include "../resources/Resource.h"
+#include "../resources/ResourceManager.h"
 #include "../utils/Utils.h"
 #include "../../third_party/stb_ds.h"
 

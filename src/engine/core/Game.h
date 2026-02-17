@@ -27,5 +27,4 @@ void Game_Exit(void);
 bool Game_IsActive(void);
 void Game_Update(double gameTime);
 void Game_Draw(double gameTime);
-void Game_UpdateHelper(double delta);
 void Game_Dispose(void);

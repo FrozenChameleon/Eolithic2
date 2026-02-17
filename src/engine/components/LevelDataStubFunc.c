@@ -14,7 +14,7 @@ LevelData* LevelDataStubFunc_GetLevelData(const LevelDataStub* data)
 	Resource* resource = LevelDataStubFunc_GetLevelDataResource(data);
 	if (resource != NULL)
 	{
-		return (LevelData*)resource->mData;
+		return (LevelData*)Resource_GetData(resource);
 	}
 	else
 	{

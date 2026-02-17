@@ -13,7 +13,7 @@
 #include "../io/BufferReader.h"
 #include "../io/File.h"
 #include "AnimTile.h"
-#include "../resources/Resource.h"
+#include "../resources/ResourceManager.h"
 #include "../render/DrawTool.h"
 #include "../render/Color.h"
 #include "../utils/Utils.h"

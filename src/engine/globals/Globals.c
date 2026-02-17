@@ -28,7 +28,7 @@ static bool _mIsExceptionUnsafe;
 static bool _mDebugFileModeWasSet;
 static bool _mIsDebugFileMode;
 static bool _mIsRenderDisabled;
-static bool _mDebugIsEditorMode;
+static bool _mIsEditorActive;
 
 Vector2 GLOBALS_DEBUG_QUICK_PLAYER_POSITION;
 int32_t GLOBALS_DEBUG_SHOW_INFO;
@@ -42,27 +42,27 @@ bool GLOBALS_DEBUG_JUST_LOADED_MAP_NOTIFY_EDITOR;
 bool GLOBALS_DEBUG_IS_META_MAP_EDIT_TILE_MODE_AT_MAP_LOAD;
 bool GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS;
 
-bool Globals_DebugIsEditorMode(void)
+bool Globals_IsEditorActive(void)
 {
 #ifdef EDITOR_MODE
-	return _mDebugIsEditorMode;
+	return _mIsEditorActive;
 #else
 	return false;
 #endif
 }
-void Globals_SetDebugIsEditorMode(bool value)
+void Globals_SetIsEditorActive(bool value)
 {
 #ifdef EDITOR_MODE
-	_mDebugIsEditorMode = value;
+	_mIsEditorActive = value;
 #else
 	//DO NOTHING
 #endif
 }
-bool Globals_DebugIsRenderDisabled(void)
+bool Globals_IsRenderDisabled(void)
 {
 	return _mIsRenderDisabled;
 }
-void Globals_DebugSetRenderDisabled(bool value)
+void Globals_SetIsRenderDisabled(bool value)
 {
 	_mIsRenderDisabled = value;
 }

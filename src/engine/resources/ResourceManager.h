@@ -6,18 +6,24 @@
  
 #pragma once
 
-#include "Resource.h"
 #include "../utils/Macros.h"
 #include "../io/BufferReader.h"
 
 #define RESOURCEMANAGER_DIRECTORIES_LEN 5
 
+typedef struct MString MString;
 typedef struct DynamicByteBuffer DynamicByteBuffer;
 
 typedef void* (*ResourceManager_FromStreamFunc)(const char* path, const char* filenameWithoutExtension, BufferReader* br);
 typedef void (*ResourceManager_DisposeFunc)(void* resourceData);
 typedef void (*ResourceManager_WriteFunc)(void* resourceData, DynamicByteBuffer* dbb);
 typedef void (*ResourceManager_ReadFunc)(void* resourceData, BufferReader* br);
+
+typedef struct Resource Resource;
+
+const char* Resource_GetFilenameWithoutExtension(Resource* res);
+void* Resource_GetData(Resource* res);
+MString* Resource_GetPath(Resource* res);
 
 typedef struct ResourceManager
 {
@@ -35,6 +41,7 @@ typedef struct ResourceManager
 	char _mDirectories[RESOURCEMANAGER_DIRECTORIES_LEN][EE_PATH_MAX];
 	bool _mReadFromDirectory;
 	bool _mIsReadingText;
+	bool _mDelayLoading;
 } ResourceManager;
 
 void ResourceManager_Init(ResourceManager* rm);

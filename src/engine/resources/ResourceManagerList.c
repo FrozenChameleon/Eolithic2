@@ -115,6 +115,7 @@ void ResourceManagerList_Init(void)
 		textureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
 		textureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
 		textureMan->_mReadFromDirectory = true;
+		textureMan->_mDelayLoading = true;
 	}
 
 	{
@@ -141,6 +142,7 @@ void ResourceManagerList_Init(void)
 		movieTextureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
 		movieTextureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
 		movieTextureMan->_mReadFromDirectory = true;
+		movieTextureMan->_mDelayLoading = true;
 	}
 
 	{
@@ -155,6 +157,7 @@ void ResourceManagerList_Init(void)
 		soundEffectMan->_mFromStream = (ResourceManager_FromStreamFunc)SoundEffect_FromStream;
 		soundEffectMan->_mDispose = (ResourceManager_DisposeFunc)SoundEffect_Dispose;
 		soundEffectMan->_mReadFromDirectory = true;
+		soundEffectMan->_mDelayLoading = true;
 	}
 
 	{
@@ -169,6 +172,7 @@ void ResourceManagerList_Init(void)
 		musicMan->_mFromStream = (ResourceManager_FromStreamFunc)Music_FromStream;
 		musicMan->_mDispose = (ResourceManager_DisposeFunc)Music_Dispose;
 		musicMan->_mReadFromDirectory = true;
+		musicMan->_mDelayLoading = true;
 	}
 
 	{

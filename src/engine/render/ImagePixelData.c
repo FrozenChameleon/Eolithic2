@@ -59,7 +59,7 @@ ImagePixelData* ImagePixelData_Create(FixedByteBuffer* blob)
 	imageData = stbi_load_from_callbacks(&cb, rwops, &imageWidth, &imageHeight, &imageFormat, STBI_rgb_alpha);
 	SDL_CloseIO(rwops);
 
-	ImagePixelData* pixelImageData = Utils_calloc(1, sizeof(ImagePixelData));
+	ImagePixelData* pixelImageData = (ImagePixelData*)Utils_calloc(1, sizeof(ImagePixelData));
 	pixelImageData->mData = imageData;
 	pixelImageData->mBounds.Width = imageWidth;
 	pixelImageData->mBounds.Height = imageHeight;

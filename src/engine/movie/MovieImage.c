@@ -25,7 +25,7 @@ static Sheet* CreateNewSheetForMovieImage(const char* image)
 	temp->mTextureResource = ResourceManager_GetResource(movieTextureMan, internedKey);
 	Utils_strlcpy(temp->mSheetName, internedKey, EE_FILENAME_MAX);
 	Utils_strlcpy(temp->mUnderlyingTextureName, internedKey, EE_FILENAME_MAX);
-	temp->mRectangle = ((Texture*)temp->mTextureResource->mData)->mBounds;
+	temp->mRectangle = ((Texture*)Resource_GetData(temp->mTextureResource))->mBounds;
 	return temp;
 }
 void MovieImage_Init(MovieImage* mi, int32_t scale, const char* image)

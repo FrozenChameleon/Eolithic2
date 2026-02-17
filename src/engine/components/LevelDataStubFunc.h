@@ -7,7 +7,7 @@
 #pragma once
 
 #include "LevelDataStub.h"
-#include "../resources/Resource.h"
+#include "../resources/ResourceManager.h"
 #include "../leveldata/LevelData.h"
 
 LevelData* LevelDataStubFunc_GetLevelData(const LevelDataStub* data);

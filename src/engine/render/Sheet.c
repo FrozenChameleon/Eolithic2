@@ -13,6 +13,7 @@
 #include "../globals/Globals.h"
 #include "SpriteBatch.h"
 #include "../render/TextureOffset.h"
+#include "../utils/PNGPeakTool.h"
 
 #define DEBUG_SHEET_NAME "DEBUG_ERROR_777"
 
@@ -82,19 +83,25 @@ void Sheet_BuildSheets(void)
 	for (int32_t i = 0; i < ResourceManager_Length(textureMan); i += 1)
 	{
 		Resource* resource = ResourceManager_GetResourceByIndex(textureMan, i);
-		if (resource->mData == NULL)
+	
+		if (resource == NULL)
 		{
 			continue;
 		}
 
+		const char* resourceFilenameWithoutExtension = Resource_GetFilenameWithoutExtension(resource);
+		MString* resourcePath = Resource_GetPath(resource);
+		Rectangle bounds = PNGPeakTool_GetBounds(MString_Text(resourcePath));
+		//void* resourceData = Resource_GetData(resource);
+	
 		Sheet* sheet = (Sheet*)Utils_calloc(1, sizeof(Sheet));
 		InitSheet(sheet);
-		Utils_strlcpy(sheet->mUnderlyingTextureName, resource->mFileNameWithoutExtension, EE_FILENAME_MAX);
+		Utils_strlcpy(sheet->mUnderlyingTextureName, resourceFilenameWithoutExtension, EE_FILENAME_MAX);
 		Utils_strlcpy(sheet->mSheetName, sheet->mUnderlyingTextureName, EE_FILENAME_MAX);
 		sheet->mTextureResource = resource;
-		sheet->mRectangle = ((Texture*)sheet->mTextureResource->mData)->mBounds;
+		sheet->mRectangle = bounds;
 		arrput(arr_sheet_list, sheet);
-		shput(sh_sheet_map, resource->mFileNameWithoutExtension, sheet);
+		shput(sh_sheet_map, resourceFilenameWithoutExtension, sheet);
 	}
 
 	/* //DEBUG ONLY FOR NOW
@@ -161,7 +168,7 @@ Texture* Sheet_GetTexture(Sheet* sheet)
 	}
 	else
 	{
-		return (Texture*)texResource->mData;
+		return (Texture*)Resource_GetData(texResource);
 	}
 }
 

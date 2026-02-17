@@ -129,8 +129,8 @@ static void Cheats(void)
 	{
 		if (Input_IsKeyTapped(KEYS_NUMPAD0))
 		{
-			Globals_DebugSetRenderDisabled(!Globals_DebugIsRenderDisabled());
-			DebugLogBoolHelper("Render Disabled: ", Globals_DebugIsRenderDisabled());
+			Globals_SetIsRenderDisabled(!Globals_IsRenderDisabled());
+			DebugLogBoolHelper("Render Disabled: ", Globals_IsRenderDisabled());
 		}
 	}
 	else
@@ -207,7 +207,7 @@ static void Cheats(void)
 		}
 		if (Input_IsKeyTapped(KEYS_NUMPAD8))
 		{
-			if (Globals_DebugIsEditorMode())
+			if (Globals_IsEditorActive())
 			{
 				Cvars_FlipAsBool(CVARS_EDITOR_SHOW_COLLISION);
 				DebugLogBoolHelper("Show Editor Col: ", Cvars_GetAsBool(CVARS_EDITOR_SHOW_COLLISION));
@@ -464,7 +464,7 @@ static void UpdateLoop(double delta)
 	}
 
 #ifdef EDITOR_MODE
-	if (!Globals_DebugIsEditorMode() && Globals_IsDebugGameSpeedSet())
+	if (!Globals_IsEditorActive() && Globals_IsDebugGameSpeedSet())
 	{
 		delta *= Globals_GetDebugGameSpeedAsMul();
 	}
@@ -581,7 +581,7 @@ void GameUpdater_DebugReloadMap(void)
 	
 	{
 		MString* tempString = NULL;
-		MString_Combine5(&tempString, "Map Reloaded (Full) [", Get_LevelDataResource()->mFileNameWithoutExtension, "][", Get_LevelFileName(), "]");
+		MString_Combine5(&tempString, "Map Reloaded (Full) [", Resource_GetFilenameWithoutExtension(Get_LevelDataResource()), "][", Get_LevelFileName(), "]");
 		Logger_LogInformation(MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
@@ -599,10 +599,10 @@ void GameUpdater_FastReset(void)
 	GLOBALS_DEBUG_QUICK_PLAYER_POSITION = Vector2_Zero;
 	GameStateManager_DebugForceReloadMapNow();
 	GameStateManager_SetGameState(GAMESTATEMANAGER_GAME_STATE_NORMAL);
-	Globals_SetDebugIsEditorMode(false);
+	Globals_SetIsEditorActive(false);
 	{
 		MString* tempString = NULL;
-		MString_Combine5(&tempString, "Map Reloaded (Fast) [", MString_Text(Get_LevelDataResource()->mPath), "][", Get_LevelData()->mLevelName, "]");
+		MString_Combine5(&tempString, "Map Reloaded (Fast) [", MString_Text(Resource_GetPath(Get_LevelDataResource())), "][", Get_LevelData()->mLevelName, "]");
 		Logger_LogInformation(MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
@@ -613,7 +613,7 @@ void GameUpdater_FastResetPlusMove(void)
 }
 void GameUpdater_ToggleEditor(void)
 {
-	Globals_SetDebugIsEditorMode(!Globals_DebugIsEditorMode());
+	Globals_SetIsEditorActive(!Globals_IsEditorActive());
 	Logger_LogInformation("Editor Toggle");
 }
 void GameUpdater_ToggleDebugAutoSpeed(void)
