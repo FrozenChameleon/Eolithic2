@@ -13,7 +13,7 @@ const char* GameUpdater_GetFpsString(void);
 float GameUpdater_GetAutoSpeedUpdateSpeed(void);
 int32_t GameUpdater_GetFPS(void);
 bool GameUpdater_IsInterpolated(void);
-void GameUpdater_Update(double delta);
+void GameUpdater_Update(double deltaTime);
 void GameUpdater_DebugReloadMap(void);
 void GameUpdater_DebugSaveMap(void);
 void GameUpdater_FastReset(void);

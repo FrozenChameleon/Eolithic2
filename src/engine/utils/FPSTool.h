@@ -16,4 +16,4 @@ typedef struct FPSTool
 	double mTime;
 } FPSTool;
 
-bool FPSTool_Update(FPSTool* data, double delta);
+bool FPSTool_Update(FPSTool* data, double deltaTime);

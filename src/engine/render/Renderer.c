@@ -68,6 +68,7 @@ static bool _mIndexBufferDataSet;
 static uint16_t _mIndexBufferData[MAX_INDICES];
 
 static int32_t _mCurrentDepth;
+static float _mCurrentCameraZoom = 1.0f;
 static Vector2 _mCurrentCameraPosition;
 static BlendState _mCurrentBlendState;
 static ShaderProgram* _mCurrentShaderProgram;
@@ -137,6 +138,14 @@ void Renderer_INTERNAL_SetCurrentDepth(int32_t value)
 int32_t Renderer_INTERNAL_GetCurrentDepth(void)
 {
 	return _mCurrentDepth;
+}
+void Renderer_INTERNAL_SetCurrentZoom(float value)
+{
+	_mCurrentCameraZoom = value;
+}
+float Renderer_INTERNAL_GetCurrentZoom(void)
+{
+	return _mCurrentCameraZoom;
 }
 Rectangle Renderer_GetWantedBackBufferBounds(void)
 {
@@ -485,7 +494,7 @@ void Renderer_Draw5(Texture* texture, Vector2 position, Rectangle sourceRectangl
 		(uint8_t)(effects & (SpriteEffects)0x03)
 	);
 }
-void Renderer_DrawSheet(RenderCommandSheet* draw, double delta)
+void Renderer_DrawSheet(RenderCommandSheet* draw, double deltaTime)
 {
 	SpriteEffects effects = Renderer_GetEffects(draw->mFlipX, draw->mFlipY);
 	Texture* sheetTex = draw->mTexture;
@@ -498,8 +507,8 @@ void Renderer_DrawSheet(RenderCommandSheet* draw, double delta)
 		}
 		else
 		{
-			Vector2 position = { (float)Utils_GetInterpolated(delta, draw->mPosition.X, draw->mLastPosition.X) ,
-				(float)Utils_GetInterpolated(delta, draw->mPosition.Y, draw->mLastPosition.Y) };
+			Vector2 position = { (float)Utils_GetInterpolated(deltaTime, draw->mPosition.X, draw->mLastPosition.X) ,
+				(float)Utils_GetInterpolated(deltaTime, draw->mPosition.Y, draw->mLastPosition.Y) };
 			Renderer_Draw4(sheetTex, Vector2_Add(position, draw->mOrigin),
 				draw->mSourceRectangle, draw->mColor, Math_ToRadians(draw->mRotation), draw->mOrigin, draw->mScale, effects, draw->mDepth);
 		}
@@ -594,7 +603,7 @@ Rectangle Renderer_RenderBmFont(bool drawTheText, BmFont* bmf, const char* text,
 
 	return Rectangle_Create(0, 0, boundsMaxWidth, boundsHeight);
 }
-void Renderer_DrawString(RenderCommandString* draw, double delta)
+void Renderer_DrawString(RenderCommandString* draw, double deltaTime)
 {
 	const char* strToDraw = draw->mString;
 
@@ -634,8 +643,8 @@ void Renderer_DrawString(RenderCommandString* draw, double delta)
 	Vector2 finalPos;
 	if (draw->mIsInterpolated)
 	{
-		finalPos = Vector2_Create((float)(Utils_GetInterpolated(delta, offsetPosition.X, offsetLastPosition.X)),
-			(float)(Utils_GetInterpolated(delta, offsetPosition.Y, offsetLastPosition.Y)));
+		finalPos = Vector2_Create((float)(Utils_GetInterpolated(deltaTime, offsetPosition.X, offsetLastPosition.X)),
+			(float)(Utils_GetInterpolated(deltaTime, offsetPosition.Y, offsetLastPosition.Y)));
 	}
 	else
 	{
@@ -718,7 +727,7 @@ void Renderer_DrawTiles(RenderCommandTileLayer* draw)
 		}
 	}
 }
-static uint64_t DrawTheInstance(uint8_t* buffer, uint64_t position, double delta, bool drawSheet, bool drawManyRectangle, bool drawString, bool drawTileLayer)
+static uint64_t DrawTheInstance(uint8_t* buffer, uint64_t position, double deltaTime, bool drawSheet, bool drawManyRectangle, bool drawString, bool drawTileLayer)
 {
 	_mCurrentBlendState = BLENDSTATE_NONPREMULTIPLIED;
 	_mCurrentShaderProgram = _mGlobalShaderProgram;
@@ -741,7 +750,7 @@ static uint64_t DrawTheInstance(uint8_t* buffer, uint64_t position, double delta
 			int32_t passes = commandSheet->mExtraPasses + 1;
 			for (int32_t i = 0; i < passes; i += 1)
 			{
-				Renderer_DrawSheet(commandSheet, delta);
+				Renderer_DrawSheet(commandSheet, deltaTime);
 			}
 		}
 	}
@@ -769,14 +778,14 @@ static uint64_t DrawTheInstance(uint8_t* buffer, uint64_t position, double delta
 		sizeToReturn = sizeof(RenderCommandString);
 		if (drawString)
 		{
-			Renderer_DrawString((RenderCommandString*)(buffer + position), delta);
+			Renderer_DrawString((RenderCommandString*)(buffer + position), deltaTime);
 		}
 	}
 	}
 
 	return sizeToReturn;
 }
-static void DrawTheDepth(int32_t depth, RenderStream* drawLayer, double delta, bool drawSheet, bool drawManyRectangle, bool drawString, bool drawTileLayer)
+static void DrawTheDepth(int32_t depth, RenderStream* drawLayer, double deltaTime, bool drawSheet, bool drawManyRectangle, bool drawString, bool drawTileLayer)
 {
 	_mCurrentDepth = depth;
 	uint64_t currentPosition = 0;
@@ -784,19 +793,19 @@ static void DrawTheDepth(int32_t depth, RenderStream* drawLayer, double delta, b
 	uint8_t* buffer = DynamicByteBuffer_GetBuffer(drawLayer->_mBuffer);
 	while (currentPosition < endPosition)
 	{
-		uint64_t sizeOfCommand = DrawTheInstance(buffer, currentPosition, delta, drawSheet, drawManyRectangle, drawString, drawTileLayer);
+		uint64_t sizeOfCommand = DrawTheInstance(buffer, currentPosition, deltaTime, drawSheet, drawManyRectangle, drawString, drawTileLayer);
 		currentPosition += sizeOfCommand;
 	}
 }
-static void DrawEverythingForwards(RenderStream* draws, double delta, bool drawSheet, bool drawManyRectangle, bool drawString, bool drawTileLayer)
+static void DrawEverythingForwards(RenderStream* draws, double deltaTime, bool drawSheet, bool drawManyRectangle, bool drawString, bool drawTileLayer)
 {
 	for (int32_t i = 0; i < SPRITEBATCH_RENDER_STREAMS_LEN; i += 1)
 	{
-		DrawTheDepth(i, &draws[i], delta, drawSheet, drawManyRectangle, drawString, drawTileLayer);
+		DrawTheDepth(i, &draws[i], deltaTime, drawSheet, drawManyRectangle, drawString, drawTileLayer);
 	}
 }
 /*
-static void DrawEverythingBackwards(std_vector<std_vector<DrawInstance>>& draws, double delta, bool drawSheet, bool drawManyRectangle, bool drawString, bool drawTileLayer)
+static void DrawEverythingBackwards(std_vector<std_vector<DrawInstance>>& draws, double deltaTime, bool drawSheet, bool drawManyRectangle, bool drawString, bool drawTileLayer)
 {
 	for (int32_t i = (draws.size() - 1); i >= 0; i -= 1)
 	{
@@ -804,13 +813,13 @@ static void DrawEverythingBackwards(std_vector<std_vector<DrawInstance>>& draws,
 	}
 }
 */
-void Renderer_Commit(SpriteBatch* render, Vector2 cameraOffset, double delta)
+void Renderer_Commit(SpriteBatch* render, Vector2 cameraOffset, float cameraZoom, double deltaTime)
 {
 	_mCurrentCameraPosition = cameraOffset;
+	_mCurrentCameraZoom = cameraZoom;
 	_mCurrentBlendState = BLENDSTATE_NONPREMULTIPLIED;
 	_mCurrentShaderProgram = NULL;
-
-	RenderStream* draws = render->_mRenderStreams;
+	
 	//std_vector<std_vector<OeDrawInstance>>& draws = render->GetDraws();
 
 	Renderer_BeforeCommit();
@@ -834,7 +843,8 @@ void Renderer_Commit(SpriteBatch* render, Vector2 cameraOffset, double delta)
 	DrawEverythingForwards(draws, delta, true, true, true, drawTileLayer);
 	*/
 
-	DrawEverythingForwards(draws, delta, true, true, true, drawTileLayer);
+	RenderStream* draws = render->_mRenderStreams;
+	DrawEverythingForwards(draws, deltaTime, true, true, true, drawTileLayer);
 
 	Renderer_AfterCommit();
 }
@@ -882,13 +892,13 @@ void* Renderer_CreateSurface(FixedByteBuffer* blob)
 	return surface;
 	*/
 }
-void Renderer_Render(double delta)
+void Renderer_Render(double deltaTime)
 {
 	Renderer_UpdateDisplayDimensions();
 
 	Renderer_BeforeRender();
 
-	Renderer_SetupCommit(delta);
+	Renderer_SetupCommit(deltaTime);
 
 	Renderer_AfterRender();
 }
@@ -998,31 +1008,29 @@ Rectangle Renderer_GetScreenBounds(void)
 {
 	return _mScreenBounds;
 }
-void Renderer_SetupCommit(double delta)
+void Renderer_SetupCommit(double deltaTime)
 {
-	FPSTool_Update(&_mFpsToolDraw, delta);
+	FPSTool_Update(&_mFpsToolDraw, deltaTime);
 
 	if (GameLoader_IsLoading())
 	{
-		Renderer_Commit(&_mOrangeSpriteBatchHud, Vector2_Zero, 1);
+		Renderer_Commit(&_mOrangeSpriteBatchHud, Vector2_Zero, 1.0f, 1.0);
 		return;
 	}
 
 	double stepLength = Utils_GetNormalStepLength();
-	double drawDelta;
+	double drawDeltaTime;
 	if (!GameUpdater_IsInterpolated())
 	{
-		drawDelta = stepLength;
+		drawDeltaTime = stepLength;
 	}
 	else
 	{
-		drawDelta = GameUpdater_GetDeltaAccumulator();
+		drawDeltaTime = GameUpdater_GetDeltaAccumulator();
 	}
 	Camera* camera = GameStateManager_GetCurrentRenderCamera();
-	Vector2 cam = Camera_GetInterpCameraAsVector2(camera, drawDelta);
-	Vector2 hud = Vector2_Create((float)(camera->mWorldWidth / 2), (float)(camera->mWorldHeight / 2));
-	Renderer_Commit(&_mOrangeSpriteBatch, cam, drawDelta);
-	Renderer_Commit(&_mOrangeSpriteBatchHud, hud, drawDelta);
+	Renderer_Commit(&_mOrangeSpriteBatch, Camera_GetInterpCameraAsVector2(camera, drawDeltaTime), camera->mWorldZoom, drawDeltaTime);
+	Renderer_Commit(&_mOrangeSpriteBatchHud, Vector2_Create(camera->mWorldWidth / 2.0f, camera->mWorldHeight / 2.0f), 1.0f, drawDeltaTime);
 }
 void Renderer_SetupRenderState(void)
 {
@@ -1087,3 +1095,4 @@ int32_t Renderer_GetRenderTargetScale(void)
 
 	return mul;
 }
+

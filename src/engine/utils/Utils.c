@@ -506,10 +506,10 @@ double Utils_GetNormalStepLength(void)
 {
 	return MATH_TICK_60HZ;
 }
-double Utils_GetInterpolated(double delta, float current, float last)
+double Utils_GetInterpolated(double deltaTime, float current, float last)
 {
 	float diff = current - last;
-	double mul = delta / Utils_GetNormalStepLength();
+	double mul = deltaTime / Utils_GetNormalStepLength();
 	return last + (diff * mul);
 }
 Rectangle Utils_GetInternalRectangle(void)
@@ -1234,7 +1234,7 @@ void Utils_DeleteBinding(int32_t player, int32_t index, const char* dataName)
 		MString_Dispose(&tempString);
 	}
 
-	InputCheck dummyCheck = { 0 };
+	InputCheck dummyCheck = { INPUTCHECK_TYPE_DUMMY };
 	InputChecks_Set(&data->mChecks, index, dummyCheck);
 	InputBindings_SaveAllBindings();
 }

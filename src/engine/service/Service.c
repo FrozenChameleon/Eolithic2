@@ -212,11 +212,11 @@ void Service_SetAchievementMap(int32_t* achievementMap, int32_t achievementMapLe
 	_mAchievementMap = achievementMap;
 	_mAchievementMapLength = achievementMapLength;
 }
-void Service_Update(double delta)
+void Service_Update(double deltaTime)
 {
 	if (Service_IsLeaderboardRateLimited())
 	{
-		_mLeaderboardRequestDelayCounter += delta;
+		_mLeaderboardRequestDelayCounter += deltaTime;
 	}
 	else
 	{
@@ -235,7 +235,7 @@ void Service_Update(double delta)
 		}
 	}
 
-	Service_UpdateHelper(delta);
+	Service_UpdateHelper(deltaTime);
 }
 void Service_DisableLeaderboards(void)
 {

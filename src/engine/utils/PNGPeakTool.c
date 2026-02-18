@@ -10,7 +10,7 @@ Rectangle PNGPeakTool_GetBounds(const char* path)
 
 	BufferReader* br = BufferReader_CreateFromPath(path);
 	BufferReader_Seek(br, 8, BUFFER_READER_SEEK_FROM_CURRENT);
-	int32_t chunkSize = BufferReader_ReadI32(br);
+	BufferReader_ReadI32(br); //chunkSize
 
     char chunkType[5];
 	chunkType[0] = BufferReader_ReadU8(br);

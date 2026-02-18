@@ -66,7 +66,7 @@ void Service_HandleApplicationExit(void)
 void Service_Create(void)
 {
 }
-void Service_UpdateHelper(double delta)
+void Service_UpdateHelper(double deltaTime)
 {
 }
 void Service_Resize(int32_t width, int32_t height)
@@ -268,7 +268,7 @@ void Service_TurnOffLeaderboardCannotConnectError(void)
 {
 
 }
-bool Service_IsWaitingOnServiceToFinishLoading(double delta)
+bool Service_IsWaitingOnServiceToFinishLoading(double deltaTime)
 {
 	return false;
 }

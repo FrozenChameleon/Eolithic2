@@ -136,7 +136,7 @@ void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const  Camera* camera, i
 	{
 		PropInstance* propInstance = &t->arr_props[i];
 
-		Rectangle cameraCheck = PropInstance_GetRectangle(propInstance, position);
+		/*Rectangle cameraCheck = PropInstance_GetRectangle(propInstance, position);
 		//To compensate for possible rotation around its upper left, which is how it is done for some reason.
 		if (cameraCheck.Width < cameraCheck.Height)
 		{
@@ -151,7 +151,7 @@ void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const  Camera* camera, i
 		if (!Rectangle_Intersects(&cameraRect, &cameraCheck))
 		{
 			continue;
-		}
+		}*/
 
 		if (!overrideDepth)
 		{

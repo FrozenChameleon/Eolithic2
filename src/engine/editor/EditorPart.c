@@ -62,7 +62,7 @@ void EditorPart_DummyCreateWindows(void)
 {
 
 }
-void EditorPart_DummyUpdate(void)
+void EditorPart_DummyUpdate(double deltaTime)
 {
 	Logger_LogWarning("This should not run!");
 }
@@ -74,22 +74,21 @@ void EditorPart_DummyDrawHud(SpriteBatch* spriteBatch)
 {
 	Logger_LogWarning("This should not run!");
 }
-EditorPartData* EditorPart_CreateDummyFuncData(void)
+PartFuncData EditorPart_CreateDummyFuncData(void)
 {
-	return NULL; //TODO
-	/*OeEditorPartFuncData data = new OeEditorPartFuncData();
+	PartFuncData data = { 0 };
 
-	data.mDebugName = OeUtils.NOT_SET;
+	Utils_strlcpy(data.mDebugName, EE_STR_NOT_SET, EE_FILENAME_MAX);
 
-	data.CreateWindows = DummyCreateWindows;
-	data.Update = DummyUpdate;
-	data.Draw = DummyDraw;
-	data.DrawHud = DummyDrawHud;
-	data.JustLoadedMap = DummyJustLoadedMap;
-	data.JustChangedToThisPart = DummyJustChangedToThisPart;
-	data.Save = DummySave;
+	data.CreateWindows = EditorPart_DummyCreateWindows;
+	data.Update = EditorPart_DummyUpdate;
+	data.Draw = EditorPart_DummyDraw;
+	data.DrawHud = EditorPart_DummyDrawHud;
+	data.JustLoadedMap = EditorPart_DummyJustLoadedMap;
+	data.JustChangedToThisPart = EditorPart_DummyJustChangedToThisPart;
+	data.Save = EditorPart_DummySave;
 
-	return data;*/
+	return data;
 }
 void EditorPart_DefaultHandlePatches(void)
 {
@@ -378,11 +377,11 @@ void EditorPart_HandleCurrentLayerSelection(void)
 		Cvars_SetAsInt(CVARS_EDITOR_CURRENT_LAYER, 9);
 	}
 }
-void EditorPart_DefaultHandleKeyMovement(void)
+void EditorPart_DefaultHandleKeyMovement(double deltaTime)
 {
-	int speedX = 0;
-	int speedY = 0;
-	int speed = Cvars_GetAsInt(CVARS_EDITOR_DRAW_MOVE_SPEED);
+	double speedX = 0;
+	double speedY = 0;
+	double speed = Cvars_GetAsInt(CVARS_EDITOR_DRAW_MOVE_SPEED) * 16;
 
 	if (Input_IsKeyPressed(KEYS_W))
 	{
@@ -409,6 +408,9 @@ void EditorPart_DefaultHandleKeyMovement(void)
 
 	if ((speedX != 0) || (speedY != 0))
 	{
+		speedX *= deltaTime;
+		speedY *= deltaTime;
+
 		Vector2 currentPos = EditorPart_GetEditorPosition(0);
 		Vector2 speedVec = Vector2_Create((float)speedX, (float)speedY);
 		EditorPart_SetEditorPosition(0, Vector2_Add(currentPos, speedVec));
@@ -480,7 +482,8 @@ void EditorPart_SetEditorPosition(int32_t index, Vector2 position)
 void EditorPart_DefaultUpdateCameraZoom(void)
 {
 	Camera* camera = Editor_GetCamera();
-	camera->mWorldZoom = EditorPart_GetEditorZoom(0) / 100.0f;
+	int32_t editorZoom = EditorPart_GetEditorZoom(0);
+	camera->mWorldZoom = editorZoom / 100.0f;
 }
 void EditorPart_DefaultUpdateCameraPosition(void)
 {
@@ -539,11 +542,11 @@ void EditorPart_DefaultHandleDeleteKey(void)
 	_mPatch2 = GetPatch(x1, x2, y1, y2, x1, y1);
 	CheckPatch();*/
 }
-void EditorPart_DoDefaultEditorPartUpdateRoutine(void)
+void EditorPart_DoDefaultEditorPartUpdateRoutine(double deltaTime)
 {
-	EditorPart_DefaultHandleKeyMovement();
+	EditorPart_DefaultHandleKeyMovement(deltaTime);
 
-	EditorPart_DefaultHandleSpacebarHingeMovement();
+	EditorPart_DefaultHandleSpacebarHingeMovement(deltaTime);
 
 	EditorPart_DefaultHandleZoom();
 
@@ -1029,7 +1032,7 @@ Tile* EditorPart_GetCloneOfTiles(int x1, int x2, int y1, int y2)
 
 	return tiles;*/
 }
-void EditorPart_DefaultHandleSpacebarHingeMovement(void)
+void EditorPart_DefaultHandleSpacebarHingeMovement(double deltaTime)
 {
 	if (Input_IsKeyPressed(KEYS_SPACE))
 	{
@@ -1085,7 +1088,9 @@ void EditorPart_DefaultHandleSpacebarHingeMovement(void)
 		}
 
 		Vector2 halfMovement = Vector2_Create(-movementX / 2.0f, -movementY / 2.0f);
-		EditorPart_SetEditorPosition(0, Vector2_Add(EditorPart_GetEditorPosition(0), halfMovement));
+		halfMovement = Vector2_MulDouble(halfMovement, deltaTime * 16);
+		Vector2 newPosition = Vector2_Add(EditorPart_GetEditorPosition(0), halfMovement);
+		EditorPart_SetEditorPosition(0, newPosition);
 	}
 }
 bool EditorPart_IsMouseInsideSelectionRectangle(void)

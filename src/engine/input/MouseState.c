@@ -42,6 +42,7 @@ void MouseData_Poll(MouseData* md)
 	Uint32 mouseButtonState = SDL_GetMouseState(&md->_mMousePosition.X, &md->_mMousePosition.Y);
 
 	md->_mScrollWheelValue = _mGlobalScrollWheelValue;
+	_mGlobalScrollWheelValue = 0;
 
 	md->_mIsButtonDown[MOUSEBUTTONS_LEFTBUTTON] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_LEFT));
 	md->_mIsButtonDown[MOUSEBUTTONS_RIGHTBUTTON] = (mouseButtonState & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT));
@@ -178,11 +179,25 @@ float MouseState_GetDifferenceMouseY(void)
 }
 bool MouseState_JustScrolledUp(void)
 {
-	return MouseData_GetScrollWheelValue(&_mLastFrame) < MouseState_GetScrollWheelValue();
+	int32_t lastValue = MouseData_GetScrollWheelValue(&_mLastFrame);
+	int32_t currentValue = MouseState_GetScrollWheelValue();
+	if (currentValue == 0)
+	{
+		return false;
+	}
+
+	return lastValue < currentValue;
 }
 bool MouseState_JustScrolledDown(void)
 {
-	return MouseData_GetScrollWheelValue(&_mLastFrame) > MouseState_GetScrollWheelValue();
+	int32_t lastValue = MouseData_GetScrollWheelValue(&_mLastFrame);
+	int32_t currentValue = MouseState_GetScrollWheelValue();
+	if (currentValue == 0)
+	{
+		return false;
+	}
+
+	return lastValue > currentValue;
 }
 void MouseState_INTERNAL_SetScrollWheelValue(int32_t value)
 {

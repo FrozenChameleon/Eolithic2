@@ -844,9 +844,9 @@ void Do_SetIgnoringTransitions(Entity entity, bool value)
 {
 	Do_SetBoolTag(C_TagIsIgnoringTransitions, entity, value);
 }
-void Do_DrawBodyRectangle(Entity entity, SpriteBatch* spriteBatch, double delta, int32_t depth, Color color)
+void Do_DrawBodyRectangle(Entity entity, SpriteBatch* spriteBatch, double deltaTime, int32_t depth, Color color)
 {
-	Body_DrawBody(Get_Body(entity), spriteBatch, delta, depth, color);
+	Body_DrawBody(Get_Body(entity), spriteBatch, deltaTime, depth, color);
 }
 void Do_SetDepthOverride(Entity entity, int32_t value)
 {
@@ -1808,13 +1808,13 @@ int32_t Get_HalfTileSize(void)
 {
 	return HALF_TILE_SIZE;
 }
-float Get_InterpolatedX(Entity entity, double delta)
+float Get_InterpolatedX(Entity entity, double deltaTime)
 {
 	return 0;
 	//double temp = Utils_GetInterpolated(delta, Body_GetPosition(Get_Body(entity)).X, Body_GetLastRenderPosition(Get_Body(entity)).X);
 	//return (float)temp;
 }
-float Get_InterpolatedY(Entity entity, double delta)
+float Get_InterpolatedY(Entity entity, double deldeltaTimeta)
 {
 	return 0;
 	//double temp = Utils_GetInterpolated(delta, Body_GetPosition(Get_Body(entity)).Y, Body_GetLastRenderPosition(Get_Body(entity)).Y);

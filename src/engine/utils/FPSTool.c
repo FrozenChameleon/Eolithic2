@@ -6,9 +6,9 @@
 
 #include "FPSTool.h"
 
-bool FPSTool_Update(FPSTool* data, double delta)
+bool FPSTool_Update(FPSTool* data, double deltaTime)
 {
-	data->mTime += delta;
+	data->mTime += deltaTime;
 	data->mFrames += 1;
 	if (data->mTime >= 1)
 	{

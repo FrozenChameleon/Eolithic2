@@ -212,6 +212,7 @@ typedef struct TempRenderState
 
 static FixedRenderState _mFixed;
 static TempRenderState _mTemp;
+static bool _mIsReadyToDrawImGui;
 
 void Renderer_DrawTtText(Texture* texture, const float* verts, const float* tcoords, const unsigned int* colors, int32_t nverts)
 {
@@ -814,8 +815,12 @@ void Renderer_BeforeCommit(void)
 			cameraPos.Y + 720,
 			cameraPos.Y,
 			0,
-			-1
+			1
 		);
+		float cameraZoom = Renderer_INTERNAL_GetCurrentZoom();
+		Vector3 matrixScaleValue = { 1.0f / cameraZoom, 1.0f / cameraZoom, 1.0f };
+		Matrix matrixScale = Matrix_CreateScale(matrixScaleValue);
+		cameraMatrix = Matrix_Mul(&cameraMatrix, matrixScale);
 		SDL_PushGPUVertexUniformData(_mTemp.CommandRender, 0, &cameraMatrix, sizeof(Matrix));
 	}
 
@@ -957,6 +962,53 @@ void Renderer_DrawVertexPositionColorTexture4(Texture* texture, const VertexPosi
 void Renderer_AfterCommit(void)
 {
 }
+void Renderer_StartImGuiFrame(void)
+{
+#ifdef EDITOR_MODE
+	// (After event loop)
+	// Start the Dear ImGui frame
+	ImGui_ImplSDLGPU3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
+	//ImGui::ShowDemoWindow(); // Show demo window! :)
+#endif
+}
+void Renderer_SetupImGuiRenderState(void)
+{
+#ifdef EDITOR_MODE
+	ImGui::Render();
+	_mIsReadyToDrawImGui = true;
+#endif
+}
+static void DrawImGuiRenderPass(void)
+{
+#ifdef EDITOR_MODE
+	if (!_mIsReadyToDrawImGui)
+	{
+		return;
+	}
+
+	// Rendering
+	// (Your code clears your framebuffer, renders your other stuff etc.)
+	ImDrawData* draw_data = ImGui::GetDrawData();
+	ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, _mTemp.CommandRender);
+
+	// Setup and start a render pass
+	SDL_GPUColorTargetInfo target_info = {};
+	target_info.texture = _mTemp.SwapchainTexture;
+	target_info.load_op = SDL_GPU_LOADOP_LOAD;
+	target_info.store_op = SDL_GPU_STOREOP_STORE;
+	target_info.mip_level = 0;
+	target_info.layer_or_depth_plane = 0;
+	target_info.cycle = false;
+	SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(_mTemp.CommandRender, &target_info, 1, nullptr);
+
+	// Render ImGui
+	ImGui_ImplSDLGPU3_RenderDrawData(draw_data, _mTemp.CommandRender, render_pass);
+
+	SDL_EndGPURenderPass(render_pass);
+#endif
+}
 void Renderer_AfterRender(void)
 {
 	FlushBatch();
@@ -1003,34 +1055,13 @@ void Renderer_AfterRender(void)
 
 	SDL_SubmitGPUCommandBuffer(_mTemp.CommandUpload);
 
-#ifdef EDITOR_MODE
-	// Rendering
-// (Your code clears your framebuffer, renders your other stuff etc.)
-	ImGui::Render();
-
-	ImDrawData* draw_data = ImGui::GetDrawData();
-	ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, _mTemp.CommandRender);
-
-	// Setup and start a render pass
-	SDL_GPUColorTargetInfo target_info = {};
-	target_info.texture = _mTemp.SwapchainTexture;
-	target_info.load_op = SDL_GPU_LOADOP_LOAD;
-	target_info.store_op = SDL_GPU_STOREOP_STORE;
-	target_info.mip_level = 0;
-	target_info.layer_or_depth_plane = 0;
-	target_info.cycle = false;
-	SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(_mTemp.CommandRender, &target_info, 1, nullptr);
-
-	// Render ImGui
-	ImGui_ImplSDLGPU3_RenderDrawData(draw_data, _mTemp.CommandRender, render_pass);
-
-	SDL_EndGPURenderPass(render_pass);
-#endif
+	DrawImGuiRenderPass();
 
 	SDL_SubmitGPUCommandBuffer(_mTemp.CommandRender);
 
 	Utils_memset(&_mTemp, 0, sizeof(TempRenderState));
 }
+
 void Renderer_FlushBatch(void)
 {
 }
@@ -1147,7 +1178,7 @@ void Renderer_ResetBackBuffer(void)
 		SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_B_FLOAT, 0.0f);
 		SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_A_FLOAT, 1.0f);
 		info.props = temp;
-		_mFixed.OffscreenTarget->mTextureData = SDL_CreateGPUTexture(_mFixed.DeviceHandle, &info);
+		_mFixed.OffscreenTarget->mTextureData = SDL_CreateGPUTexture(_mFixed.DeviceHandle, &info); //TODO LEAK
 	}
 }
 Rectangle Renderer_GetDrawableSize(void)

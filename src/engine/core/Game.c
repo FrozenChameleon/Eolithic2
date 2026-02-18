@@ -46,7 +46,6 @@
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlgpu3.h"
-
 #endif
 
 static const double FIXED_TIME_STEP_TICK = (1.0 / 60.0);
@@ -161,30 +160,30 @@ int32_t Game_Run(void)
 	while (!isDone)
 	{
 		bool isFixedTimeStep = IsFixedTimeStep();
-		double delta = deltaLeftover;
+		double deltaTime = deltaLeftover;
 		deltaLeftover = 0;
 		do
 		{
 			uint64_t newTicks = Stopwatch_GetTicks();
-			delta += Stopwatch_GetElapsedSeconds(oldTicks, newTicks);
+			deltaTime += Stopwatch_GetElapsedSeconds(oldTicks, newTicks);
 			oldTicks = newTicks;
-		} while ((delta < FIXED_TIME_STEP_TICK) && isFixedTimeStep);
+		} while ((deltaTime < FIXED_TIME_STEP_TICK) && isFixedTimeStep);
 		if (isFixedTimeStep)
 		{
-			deltaLeftover = (delta - FIXED_TIME_STEP_TICK);
-			delta = FIXED_TIME_STEP_TICK;
+			deltaLeftover = (deltaTime - FIXED_TIME_STEP_TICK);
+			deltaTime = FIXED_TIME_STEP_TICK;
 		}
-		if (delta > MAX_TIME_STEP)
+		if (deltaTime > MAX_TIME_STEP)
 		{
-			delta = MAX_TIME_STEP;
+			deltaTime = MAX_TIME_STEP;
 		}
 		if (deltaLeftover > MAX_TIME_STEP)
 		{
 			deltaLeftover = MAX_TIME_STEP;
 		}
 		Game_PollEvents();
-		Game_Update(delta);
-		Game_Draw(delta);
+		Game_Update(deltaTime);
+		Game_Draw(deltaTime);
 		isDone = Game_IsExitingGame();
 	}
 	Game_Dispose();
@@ -278,15 +277,6 @@ void Game_PollEvents(void) //Derived from FNA
 		}
 	}
 
-#ifdef EDITOR_MODE
-	// (After event loop)
-	// Start the Dear ImGui frame
-	ImGui_ImplSDLGPU3_NewFrame();
-	ImGui_ImplSDL3_NewFrame();
-	ImGui::NewFrame();
-	//ImGui::ShowDemoWindow(); // Show demo window! :)
-#endif
-
 	_mIsFirstPollEvents = false;
 }
 bool Game_IsExitingGame(void)
@@ -301,13 +291,13 @@ bool Game_IsActive(void)
 {
 	return Window_IsActive();
 }
-void Game_Update(double gameTime)
+void Game_Update(double deltaTime)
 {
-	ServiceHelper_Update(gameTime);
+	ServiceHelper_Update(deltaTime);
 
 	if (GameLoader_IsLoading())
 	{
-		GameLoader_Update(gameTime);
+		GameLoader_Update(deltaTime);
 		Renderer_SetupRenderState();
 	}
 
@@ -316,17 +306,9 @@ void Game_Update(double gameTime)
 		return;
 	}
 
-	GameUpdater_Update(gameTime);
-
-#ifdef EDITOR_MODE
-	if (Globals_IsEditorActive())
-	{
-		Editor_Update();
-		Renderer_SetupRenderState();
-	}
-#endif
+	GameUpdater_Update(deltaTime);
 }
-void Game_Draw(double gameTime)
+void Game_Draw(double deltaTime)
 {
 #ifdef EDITOR_MODE
 	if (Globals_IsRenderDisabled())
@@ -340,7 +322,7 @@ void Game_Draw(double gameTime)
 		return;
 	}
 
-	Renderer_Render(gameTime);
+	Renderer_Render(deltaTime);
 }
 void Game_Dispose(void)
 {

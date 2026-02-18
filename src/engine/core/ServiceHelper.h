@@ -9,7 +9,7 @@
 #include "stdint.h"
 #include "stdbool.h"
 
-void ServiceHelper_Update(double delta);
+void ServiceHelper_Update(double deltaTime);
 bool ServiceHelper_HasPlayerHasLostControllerConnection(void);
 int32_t ServiceHelper_GetPlayerThatLostControllerConnection(void);
 void ServiceHelper_HandlePlayerLostControllerConnection(void);

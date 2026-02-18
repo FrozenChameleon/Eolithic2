@@ -4,6 +4,7 @@
 #include "../math/Vector2.h"
 #include "../math/Point.h"
 #include "../math/Rectangle.h"
+#include "PartFuncData.h"
 
 typedef struct Tile Tile;
 typedef struct SpriteBatch SpriteBatch;
@@ -20,10 +21,10 @@ void EditorPart_DummyJustChangedToThisPart(void);
 void EditorPart_DummySave(void);
 void EditorPart_DummyJustLoadedMap(void);
 void EditorPart_DummyCreateWindows(void);
-void EditorPart_DummyUpdate(void);
+void EditorPart_DummyUpdate(double deltaTime);
 void EditorPart_DummyDraw(SpriteBatch* spriteBatch);
 void EditorPart_DummyDrawHud(SpriteBatch* spriteBatch);
-EditorPartData* EditorPart_CreateDummyFuncData(void);
+PartFuncData EditorPart_CreateDummyFuncData(void);
 void EditorPart_DefaultHandlePatches(void);
 void EditorPart_DefaultDrawSingleSelectionSelectedTiles(SpriteBatch* spriteBatch);
 void EditorPart_DefaultHandleColumnsAndRows(void);
@@ -31,7 +32,7 @@ void EditorPart_DefaultHandleCopy(void);
 int EditorPart_GetCurrentLayer(void);
 void EditorPart_ClearPatches(void);
 void EditorPart_HandleCurrentLayerSelection(void);
-void EditorPart_DefaultHandleKeyMovement(void);
+void EditorPart_DefaultHandleKeyMovement(double deltaTime);
 void EditorPart_HandleTab(void);
 int EditorPart_GetEditorZoom(int32_t index);
 void EditorPart_SetEditorZoom(int32_t index, int32_t zoom);
@@ -40,7 +41,7 @@ void EditorPart_SetEditorPosition(int32_t index, Vector2 position);
 void EditorPart_DefaultUpdateCameraZoom(void);
 void EditorPart_DefaultUpdateCameraPosition(void);
 void EditorPart_DefaultHandleDeleteKey(void);
-void EditorPart_DoDefaultEditorPartUpdateRoutine(void);
+void EditorPart_DoDefaultEditorPartUpdateRoutine(double deltaTime);
 //void EditorPart_DoDefaultEditorPartDrawRoutine(SpriteBatch* spriteBatch, Action<OeSpriteBatch> drawSingleSelectionSelectedTiles);
 void EditorPart_DoDefaultEditorPartDrawHudRoutine(SpriteBatch* spriteBatch, const char* status);
 void EditorPart_DrawCopyTiles(SpriteBatch* spriteBatch);
@@ -81,7 +82,7 @@ LevelPatch* EditorPart_GetPatchSingleSelection(void);
 LevelPatch* EditorPart_GetPatchSelectionRectangle(void);
 LevelPatch* EditorPart_GetPatch(int x1, int x2, int y1, int y2, int i, int j);
 Tile* EditorPart_GetCloneOfTiles(int x1, int x2, int y1, int y2);
-void EditorPart_DefaultHandleSpacebarHingeMovement(void);
+void EditorPart_DefaultHandleSpacebarHingeMovement(double deltaTime);
 bool EditorPart_IsMouseInsideSelectionRectangle(void);
 void EditorPart_ResetSelectionRectangle(void);
 bool EditorPart_HandleSelectionRectangle(void);

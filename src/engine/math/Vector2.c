@@ -141,6 +141,12 @@ Vector2 Vector2_MulFloat(Vector2 value1, float value2)
 	value1.Y *= value2;
 	return value1;
 }
+Vector2 Vector2_MulDouble(Vector2 value1, double value2)
+{
+	value1.X = (float)(value1.X * value2);
+	value1.Y = (float)(value1.Y * value2);
+	return value1;
+}
 Vector2 Vector2_DivFloat(Vector2 value1, float value2)
 {
 	value1.X /= value2;

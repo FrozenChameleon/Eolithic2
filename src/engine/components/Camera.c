@@ -33,10 +33,10 @@ bool Camera_IsCameraAtTargetPosition(const Camera* camera)
 	}
 	return false;
 }
-Vector2 Camera_GetInterpCameraAsVector2(const Camera* camera, double delta)
+Vector2 Camera_GetInterpCameraAsVector2(const Camera* camera, double deltaTime)
 {
-	float x = Camera_GetRenderedInterpolatedX(camera, delta);
-	float y = Camera_GetRenderedInterpolatedY(camera, delta);
+	float x = Camera_GetRenderedInterpolatedX(camera, deltaTime);
+	float y = Camera_GetRenderedInterpolatedY(camera, deltaTime);
 
 	x += (camera->mCurrentShake.X * camera->mCurrentShakeMul);
 	y += (camera->mCurrentShake.Y * camera->mCurrentShakeMul);
@@ -52,14 +52,14 @@ Vector2 Camera_GetInterpCameraAsVector2(const Camera* camera, double delta)
 	Vector2 returnVector = { x, y };
 	return returnVector;
 }
-Matrix Camera_GetInterpCamera(const Camera* camera, float offsetX, float offsetY, double delta, int32_t scale)
+Matrix Camera_GetInterpCamera(const Camera* camera, float offsetX, float offsetY, double deltaTime, int32_t scale)
 {
-	Vector2 pos = Camera_GetInterpCameraAsVector2(camera, delta);
+	Vector2 pos = Camera_GetInterpCameraAsVector2(camera, deltaTime);
 	return Camera_GetTranslation(offsetX + pos.X, offsetY + pos.Y, 
 		camera->mWorldRotation, (1.0f / camera->mWorldZoom) * scale, 
 		(float)(camera->mWorldWidth * scale), (float)(camera->mWorldHeight * scale));
 }
-float Camera_GetRenderedInterpolatedX(const Camera* camera, double delta)
+float Camera_GetRenderedInterpolatedX(const Camera* camera, double deltaTime)
 {
 	float x;
 	if (camera->mLastRenderedPosition.X == camera->mCurrentPosition.X)
@@ -68,11 +68,11 @@ float Camera_GetRenderedInterpolatedX(const Camera* camera, double delta)
 	}
 	else
 	{
-		x = (float)Utils_GetInterpolated(delta, camera->mCurrentPosition.X, camera->mLastRenderedPosition.X);
+		x = (float)Utils_GetInterpolated(deltaTime, camera->mCurrentPosition.X, camera->mLastRenderedPosition.X);
 	}
 	return x;
 }
-float Camera_GetRenderedInterpolatedY(const Camera* camera, double delta)
+float Camera_GetRenderedInterpolatedY(const Camera* camera, double deltaTime)
 {
 	float y;
 	if (camera->mLastRenderedPosition.Y == camera->mCurrentPosition.Y)
@@ -81,7 +81,7 @@ float Camera_GetRenderedInterpolatedY(const Camera* camera, double delta)
 	}
 	else
 	{
-		y = (float)Utils_GetInterpolated(delta, camera->mCurrentPosition.Y, camera->mLastRenderedPosition.Y);
+		y = (float)Utils_GetInterpolated(deltaTime, camera->mCurrentPosition.Y, camera->mLastRenderedPosition.Y);
 	}
 	return y;
 }

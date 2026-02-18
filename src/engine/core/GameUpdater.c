@@ -30,6 +30,12 @@
 #include "../io/DynamicByteBuffer.h"
 #include "../render/Renderer.h"
 #include "../gamestate/GameState.h"
+#ifdef EDITOR_MODE
+#include "../editor/Editor.h"
+#include "imgui.h"
+#include "imgui_impl_sdl3.h"
+#include "imgui_impl_sdlgpu3.h"
+#endif
 
 static uint64_t _mSkippedFrames;
 static uint64_t _mGlobalTicks;
@@ -257,6 +263,8 @@ static void Tick(void)
 {
 	Utils_FreeArena(UTILS_ALLOCATION_ARENA_JUST_THIS_FRAME);
 
+	Renderer_StartImGuiFrame();
+
 	GameStateManager_UpdateLastRenderPosition();
 
 	if (ServiceHelper_HasPlayerHasLostControllerConnection())
@@ -286,7 +294,14 @@ static void Tick(void)
 
 #ifdef EDITOR_MODE
 	Cheats();
+	if (Globals_IsEditorActive())
+	{
+		Editor_Update(1.0f / 60.0f);
+		Renderer_SetupRenderState();
+	}
 #endif
+
+	Renderer_SetupImGuiRenderState();
 }
 #ifdef EDITOR_MODE
 static bool HandleDebugPauseAndStep(void)
@@ -426,7 +441,7 @@ static bool IsPaused(void)
 	return false;
 #endif
 }
-static void UpdateLoop(double delta)
+static void UpdateLoop(double deltaTime)
 {
 #ifdef EDITOR_MODE
 	if (HandleDebugPauseAndStep())
@@ -452,7 +467,7 @@ static void UpdateLoop(double delta)
 			{
 				fixedTimeStepTicks = 1;
 			}
-			delta *= fixedTimeStepTicks;
+			deltaTime *= fixedTimeStepTicks;
 		}
 	}
 	else
@@ -466,7 +481,7 @@ static void UpdateLoop(double delta)
 #ifdef EDITOR_MODE
 	if (!Globals_IsEditorActive() && Globals_IsDebugGameSpeedSet())
 	{
-		delta *= Globals_GetDebugGameSpeedAsMul();
+		deltaTime *= Globals_GetDebugGameSpeedAsMul();
 	}
 #endif
 
@@ -487,7 +502,7 @@ static void UpdateLoop(double delta)
 	}
 	else
 	{
-		_mDeltaAccumulator += delta;
+		_mDeltaAccumulator += deltaTime;
 		while (_mDeltaAccumulator >= stepLength)
 		{
 			if (ticked)
@@ -556,11 +571,11 @@ bool GameUpdater_IsInterpolated(void)
 
 	return true;
 }
-void GameUpdater_Update(double delta)
+void GameUpdater_Update(double deltaTime)
 {
-	_mLastDelta = delta;
+	_mLastDelta = deltaTime;
 
-	FPSTool_Update(&_mFpsToolUpdate, delta);
+	FPSTool_Update(&_mFpsToolUpdate, deltaTime);
 
 	if (!Game_IsActive())
 	{
@@ -572,7 +587,7 @@ void GameUpdater_Update(double delta)
 
 	if (!IsPaused())
 	{
-		UpdateLoop(delta);
+		UpdateLoop(deltaTime);
 	}
 }
 void GameUpdater_DebugReloadMap(void)

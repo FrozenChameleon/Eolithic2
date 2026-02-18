@@ -227,14 +227,14 @@ static void HandleFps(void)
 		Cvars_SaveUserConfig2(false);
 	}
 }
-static void UpdatePreloaderGraphic(double delta)
+static void UpdatePreloaderGraphic(double deltaTime)
 {
 	if (arrlen(arr_preloader_textures) <= 0)
 	{
 		return;
 	}
 
-	_mFlipDeltaAccumulator += delta;
+	_mFlipDeltaAccumulator += deltaTime;
 	double flipTime = 1.0 / 4.0;
 	if (_mFlipDeltaAccumulator >= flipTime)
 	{
@@ -246,9 +246,9 @@ static void UpdatePreloaderGraphic(double delta)
 		_mFlipDeltaAccumulator -= flipTime;
 	}
 }
-static void StepLoading(double delta)
+static void StepLoading(double deltaTime)
 {
-	UpdatePreloaderGraphic(delta);
+	UpdatePreloaderGraphic(deltaTime);
 
 	if (arrlen(arr_loading_jobs) > 0)
 	{
@@ -256,7 +256,7 @@ static void StepLoading(double delta)
 	}
 	else
 	{
-		if (Service_IsWaitingOnServiceToFinishLoading(delta))
+		if (Service_IsWaitingOnServiceToFinishLoading(deltaTime))
 		{
 			_mStep = STEP_WAIT_ON_SERVICE;
 		}
@@ -271,11 +271,11 @@ static void StepLoading(double delta)
 		}
 	}
 }
-static void StepTestFPS(double delta)
+static void StepTestFPS(double deltaTime)
 {
-	UpdatePreloaderGraphic(delta);
+	UpdatePreloaderGraphic(deltaTime);
 
-	_mDeltaAccumulator += delta;
+	_mDeltaAccumulator += deltaTime;
 	if (_mDeltaAccumulator >= 1)
 	{
 		HandleFps();
@@ -287,9 +287,9 @@ static void StepTestFPS(double delta)
 		_mFps += 1;
 	}
 }
-static void StepBlink(double delta)
+static void StepBlink(double deltaTime)
 {
-	_mDeltaAccumulator += delta;
+	_mDeltaAccumulator += deltaTime;
 	if (_mDeltaAccumulator < LOADER_TICK_TIME)
 	{
 		return;
@@ -315,9 +315,9 @@ static void StepBlink(double delta)
 		_mDeltaAccumulator -= LOADER_TICK_TIME;
 	}
 }
-static void StepFadeOut(double delta)
+static void StepFadeOut(double deltaTime)
 {
-	_mDeltaAccumulator += delta;
+	_mDeltaAccumulator += deltaTime;
 	if (_mDeltaAccumulator < LOADER_TICK_TIME)
 	{
 		return;
@@ -334,7 +334,7 @@ static void StepFadeOut(double delta)
 	}
 }
 
-void GameLoader_Update(double delta)
+void GameLoader_Update(double deltaTime)
 {
 	if (!_mIsLoading)
 	{
@@ -361,19 +361,19 @@ void GameLoader_Update(double delta)
 		switch (_mStep)
 		{
 		case STEP_LOADING:
-			StepLoading(delta);
+			StepLoading(deltaTime);
 			break;
 		case STEP_TEST_FPS:
-			StepTestFPS(delta);
+			StepTestFPS(deltaTime);
 			break;
 		case STEP_BLINK:
-			StepBlink(delta);
+			StepBlink(deltaTime);
 			break;
 		case STEP_FADE_OUT:
-			StepFadeOut(delta);
+			StepFadeOut(deltaTime);
 			break;
 		case STEP_WAIT_ON_SERVICE:
-			if (!Service_IsWaitingOnServiceToFinishLoading(delta))
+			if (!Service_IsWaitingOnServiceToFinishLoading(deltaTime))
 			{
 				_mStep = STEP_BLINK;
 			}

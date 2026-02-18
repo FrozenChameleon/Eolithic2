@@ -45,10 +45,10 @@ typedef struct Camera
 void Camera_UpdateLastRenderPosition(Camera* camera);
 bool Camera_IsHorizontalTube(const Camera* camera);
 bool Camera_IsCameraAtTargetPosition(const Camera* camera);
-Vector2 Camera_GetInterpCameraAsVector2(const Camera* camera, double delta);
-Matrix Camera_GetInterpCamera(const Camera* camera, float offsetX, float offsetY, double delta, int32_t scale);
-float Camera_GetRenderedInterpolatedX(const Camera* camera, double delta);
-float Camera_GetRenderedInterpolatedY(const Camera* camera, double delta);
+Vector2 Camera_GetInterpCameraAsVector2(const Camera* camera, double deltaTime);
+Matrix Camera_GetInterpCamera(const Camera* camera, float offsetX, float offsetY, double deltaTime, int32_t scale);
+float Camera_GetRenderedInterpolatedX(const Camera* camera, double deltaTime);
+float Camera_GetRenderedInterpolatedY(const Camera* camera, double deltaTime);
 Matrix Camera_GetTranslation(float x, float y, float rotation, float zoom, float width, float height);
 void Camera_Resize(Camera* camera, int32_t width, int32_t height);
 bool Camera_MoveCameraSomewhereVector2(Camera* camera, bool immediate, Vector2 target, float speed);

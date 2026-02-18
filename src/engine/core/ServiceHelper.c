@@ -128,7 +128,7 @@ static void LoadEverything(void)
 	}
 }
 
-void ServiceHelper_Update(double delta)
+void ServiceHelper_Update(double deltaTime)
 {
 	TrySignIn();
 
@@ -136,7 +136,7 @@ void ServiceHelper_Update(double delta)
 
 	UpdateLostControllerConnectionStatus();
 
-	Service_Update(delta);
+	Service_Update(deltaTime);
 }
 bool ServiceHelper_HasPlayerHasLostControllerConnection(void)
 {

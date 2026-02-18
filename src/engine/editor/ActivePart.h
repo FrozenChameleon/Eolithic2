@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../utils/Macros.h"
+#include "PartFuncData.h"
 
 typedef struct SpriteBatch SpriteBatch;
 
@@ -16,6 +17,9 @@ typedef enum EditorPartType
 	EDITORPART_DRAW = 7
 } EditorPartType;
 
-int32_t EditorActivePart_GetCurrentLayer(void);
-void EditorActivePart_Draw(SpriteBatch* spriteBatch);
-void EditorActivePart_DrawHud(SpriteBatch* spriteBatch);
+void ActivePart_Init(void);
+int32_t ActivePart_GetCurrentLayer(void);
+void ActivePart_Update(double deltaTime);
+void ActivePart_Draw(SpriteBatch* spriteBatch);
+void ActivePart_DrawHud(SpriteBatch* spriteBatch);
+PartFuncData ActivePart_GetCurrentPart(void);
