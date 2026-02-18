@@ -77,6 +77,8 @@ static const char* SHADER_PARAMETER_COLOR_REPLACE_ALPHA = "ColorReplaceAlpha";*/
 //static Rectangle _mVirtualBufferBounds;
 //static Rectangle _mActualBufferBounds;
 
+#define AMOUNT_OF_VERTEX_BUFFERS 16
+
 static const char* SamplerNames[] =
 {
 	"PointClamp",
@@ -89,6 +91,8 @@ static const char* SamplerNames[] =
 
 static bool IsOffscreenTargetNeeded(void)
 {
+	return false;
+
 	if (Globals_IsEditorActive())
 	{
 		return false;
@@ -184,17 +188,21 @@ static SDL_GPUShader* LoadShader(
 
 typedef struct FixedRenderState
 {
+	uint64_t VertexBufferCounter;
 	SDL_Window* WindowHandle;
 	SDL_GPUDevice* DeviceHandle;
 	SDL_GPUGraphicsPipeline* PipelineForRTT;
 	SDL_GPUGraphicsPipeline* PipelineForSwap;
-	SDL_GPUBuffer* VertexBuffer;
+	SDL_GPUBuffer* VertexBuffer[AMOUNT_OF_VERTEX_BUFFERS];
 	SDL_GPUBuffer* IndexBuffer;
 	SDL_GPUSampler* Samplers[SDL_arraysize(SamplerNames)];
-	SDL_GPUTransferBuffer* TransferBufferForVertexBuffer;
+	SDL_GPUTransferBuffer* TransferBufferForVertexBuffer[AMOUNT_OF_VERTEX_BUFFERS];
 	VertexPositionColorTexture BatchVertexBuffer[MAX_VERTICES];
 	uint16_t* IndexBufferData;
 	Texture* OffscreenTarget;
+	uint32_t CurrentVertexBufferOffset;
+	uint32_t LastVertexBufferOffset;
+	uint32_t LastRenderVerticesOffset;
 }FixedRenderState;
 
 typedef struct TempRenderState
@@ -205,14 +213,20 @@ typedef struct TempRenderState
 	SDL_GPUTexture* SwapchainTexture;
 	SDL_GPUCopyPass* CopyPass;
 	Texture* LastTextureUsed;
-	uint32_t CurrentBatchVerticesOffset;
-	uint32_t LastRenderVerticesOffset;
-
 }TempRenderState;
 
 static FixedRenderState _mFixed;
 static TempRenderState _mTemp;
 static bool _mIsReadyToDrawImGui;
+
+static SDL_GPUTransferBuffer* GetTransferBufferForVertexBuffer()
+{
+	return _mFixed.TransferBufferForVertexBuffer[_mFixed.VertexBufferCounter % AMOUNT_OF_VERTEX_BUFFERS];
+}
+static SDL_GPUBuffer* GetVertexBuffer()
+{
+	return _mFixed.VertexBuffer[_mFixed.VertexBufferCounter % AMOUNT_OF_VERTEX_BUFFERS];
+}
 
 void Renderer_DrawTtText(Texture* texture, const float* verts, const float* tcoords, const unsigned int* colors, int32_t nverts)
 {
@@ -515,20 +529,22 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 	}
 
 	// Create the GPU resources
+	for(int i = 0; i < AMOUNT_OF_VERTEX_BUFFERS; i += 1)
 	{
 		SDL_GPUBufferCreateInfo info;
 		Utils_memset(&info, 0, sizeof(SDL_GPUBufferCreateInfo));
 		info.usage = SDL_GPU_BUFFERUSAGE_VERTEX;
 		info.size = sizeof(VertexPositionColorTexture) * MAX_VERTICES;
-		_mFixed.VertexBuffer = SDL_CreateGPUBuffer(_mFixed.DeviceHandle, &info);
+		_mFixed.VertexBuffer[i] = SDL_CreateGPUBuffer(_mFixed.DeviceHandle, &info);
 	}
 
+	for (int i = 0; i < AMOUNT_OF_VERTEX_BUFFERS; i += 1)
 	{
 		SDL_GPUTransferBufferCreateInfo info;
 		Utils_memset(&info, 0, sizeof(SDL_GPUTransferBufferCreateInfo));
 		info.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
 		info.size = sizeof(VertexPositionColorTexture) * MAX_VERTICES;
-		_mFixed.TransferBufferForVertexBuffer = SDL_CreateGPUTransferBuffer(_mFixed.DeviceHandle, &info);
+		_mFixed.TransferBufferForVertexBuffer[i] = SDL_CreateGPUTransferBuffer(_mFixed.DeviceHandle, &info);
 	}
 
 	{
@@ -728,9 +744,44 @@ int32_t Renderer_Init(void* deviceWindowHandle)
 
 	return 0;*/
 }
+static SDL_GPUGraphicsPipeline* GetPipelineToUse()
+{
+	SDL_GPUGraphicsPipeline* pipelineToUse = NULL;
+	if (IsOffscreenTargetNeeded())
+	{
+		pipelineToUse = _mFixed.PipelineForRTT;
+	}
+	else
+	{
+		pipelineToUse = _mFixed.PipelineForSwap;
+	}
+	return pipelineToUse;
+}
+static SDL_GPUTexture* GetTextureToRenderTo()
+{
+	SDL_GPUTexture* textureToRenderTo = NULL;
+	if (IsOffscreenTargetNeeded())
+	{
+		textureToRenderTo = (SDL_GPUTexture*)_mFixed.OffscreenTarget->mTextureData;
+	}
+	else
+	{
+		textureToRenderTo = _mTemp.SwapchainTexture;
+	}
+	return textureToRenderTo;
+}
+static void SwitchToNextVertexBuffer()
+{
+	_mFixed.LastRenderVerticesOffset = 0;
+	_mFixed.LastVertexBufferOffset = 0;
+	_mFixed.CurrentVertexBufferOffset = 0;
+	_mFixed.VertexBufferCounter += 1;
+}
 void Renderer_BeforeRender(void)
 {
 	Utils_memset(&_mTemp, 0, sizeof(TempRenderState));
+
+	SwitchToNextVertexBuffer();
 
 	Renderer_UpdateDisplayDimensions();
 
@@ -763,19 +814,6 @@ void Renderer_BeforeRender(void)
 		return;
 	}
 
-	SDL_GPUTexture* textureToRenderTo = NULL;
-	SDL_GPUGraphicsPipeline* pipelineToUse = NULL;
-	if (IsOffscreenTargetNeeded())
-	{
-		textureToRenderTo = (SDL_GPUTexture*)_mFixed.OffscreenTarget->mTextureData;
-		pipelineToUse = _mFixed.PipelineForRTT;
-	}
-	else
-	{
-		textureToRenderTo = _mTemp.SwapchainTexture;
-		pipelineToUse = _mFixed.PipelineForSwap;
-	}
-
 	{
 		SDL_FColor clearColor;
 		Utils_memset(&clearColor, 0, sizeof(SDL_FColor));
@@ -786,25 +824,28 @@ void Renderer_BeforeRender(void)
 
 		SDL_GPUColorTargetInfo colorTargetInfo;
 		Utils_memset(&colorTargetInfo, 0, sizeof(SDL_GPUColorTargetInfo));
-		colorTargetInfo.texture = textureToRenderTo;
+		colorTargetInfo.texture = GetTextureToRenderTo();
 		colorTargetInfo.clear_color = clearColor;
 		colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
 		colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
 		_mTemp.RenderPass = SDL_BeginGPURenderPass(_mTemp.CommandRender, &colorTargetInfo, 1, NULL);
 	}
 
-	SDL_BindGPUGraphicsPipeline(_mTemp.RenderPass, pipelineToUse);
-
-	{
-		SDL_GPUBufferBinding bufferBinding;
-		Utils_memset(&bufferBinding, 0, sizeof(SDL_GPUBufferBinding));
-		bufferBinding.buffer = _mFixed.IndexBuffer;
-		bufferBinding.offset = 0;
-		SDL_BindGPUIndexBuffer(_mTemp.RenderPass, &bufferBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-	}
+	SDL_EndGPURenderPass(_mTemp.RenderPass);
 }
 void Renderer_BeforeCommit(void)
 {
+	{
+		SDL_GPUColorTargetInfo colorTargetInfo;
+		Utils_memset(&colorTargetInfo, 0, sizeof(SDL_GPUColorTargetInfo));
+		colorTargetInfo.texture = GetTextureToRenderTo();
+		colorTargetInfo.load_op = SDL_GPU_LOADOP_LOAD;
+		colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
+		_mTemp.RenderPass = SDL_BeginGPURenderPass(_mTemp.CommandRender, &colorTargetInfo, 1, NULL);
+	}
+
+	SDL_BindGPUGraphicsPipeline(_mTemp.RenderPass, GetPipelineToUse());
+
 	{ //Push current camera positions...
 		Vector2 cameraPos = Renderer_INTERNAL_GetCurrentCameraPosition();
 		cameraPos.X -= 640;
@@ -818,7 +859,7 @@ void Renderer_BeforeCommit(void)
 			1
 		);
 		float cameraZoom = Renderer_INTERNAL_GetCurrentZoom();
-		Vector3 matrixScaleValue = { 1.0f / cameraZoom, 1.0f / cameraZoom, 1.0f };
+		Vector3 matrixScaleValue = { (1.0f / cameraZoom), (1.0f / cameraZoom), 1.0f };
 		Matrix matrixScale = Matrix_CreateScale(matrixScaleValue);
 		cameraMatrix = Matrix_Mul(&cameraMatrix, matrixScale);
 		SDL_PushGPUVertexUniformData(_mTemp.CommandRender, 0, &cameraMatrix, sizeof(Matrix));
@@ -834,12 +875,19 @@ void Renderer_BeforeCommit(void)
 }
 static void SubmitRender(void)
 {
-	if ((_mTemp.CurrentBatchVerticesOffset == 0) ||
+	if ((_mFixed.CurrentVertexBufferOffset == 0) ||
 		(_mTemp.LastTextureUsed == NULL) ||
-		(_mTemp.LastRenderVerticesOffset == _mTemp.CurrentBatchVerticesOffset))
+		(_mFixed.LastRenderVerticesOffset == _mFixed.CurrentVertexBufferOffset))
 	{
 		return;
 	}
+	
+	uint32_t bufferLengthInVertices = (_mFixed.CurrentVertexBufferOffset - _mFixed.LastRenderVerticesOffset);
+	uint32_t bufferLengthInSprites = bufferLengthInVertices / 4;
+
+	uint32_t bufferOffsetInVertices = _mFixed.LastRenderVerticesOffset;
+	uint32_t bufferOffsetInSprites = bufferOffsetInVertices / 4;
+	uint32_t bufferOffsetInBytes = sizeof(VertexPositionColorTexture) * bufferOffsetInVertices;
 
 	{
 		SDL_GPUTextureSamplerBinding samplerBinding;
@@ -852,45 +900,49 @@ static void SubmitRender(void)
 	{
 		SDL_GPUBufferBinding bufferBinding;
 		Utils_memset(&bufferBinding, 0, sizeof(SDL_GPUBufferBinding));
-		bufferBinding.buffer = _mFixed.VertexBuffer;
+		bufferBinding.buffer = GetVertexBuffer();
 		bufferBinding.offset = 0;
 		SDL_BindGPUVertexBuffers(_mTemp.RenderPass, 0, &bufferBinding, 1);
 	}
 
-	uint32_t currentLength = (_mTemp.CurrentBatchVerticesOffset - _mTemp.LastRenderVerticesOffset);
-	uint32_t currentSprites = currentLength / 4;
+	SDL_DrawGPUIndexedPrimitives(_mTemp.RenderPass, bufferLengthInSprites * 6, 1, bufferOffsetInSprites * 6, 0, 0);
 
-	uint32_t offsetLength = _mTemp.LastRenderVerticesOffset;
-	uint32_t offsetSprites = offsetLength / 4;
-
-	SDL_DrawGPUIndexedPrimitives(_mTemp.RenderPass, currentSprites * 6, 1, offsetSprites * 6, 0, 0);
-
-	_mTemp.LastRenderVerticesOffset = _mTemp.CurrentBatchVerticesOffset;
+	_mFixed.LastRenderVerticesOffset = _mFixed.CurrentVertexBufferOffset;
 }
-static void SubmitVertices(void)
+static void SubmitVertices()
 {
-	if ((_mTemp.CurrentBatchVerticesOffset == 0))
+	uint32_t fromOffset = _mFixed.LastVertexBufferOffset;
+	uint32_t toOffset = _mFixed.CurrentVertexBufferOffset;
+	_mFixed.LastVertexBufferOffset = _mFixed.CurrentVertexBufferOffset;
+
+	if ((fromOffset == toOffset) || (toOffset < fromOffset))
 	{
 		return;
 	}
 
+	uint32_t bufferOffsetInVertices = fromOffset;
+	uint32_t bufferLengthInVertices = toOffset - fromOffset;
+
+	uint32_t bufferOffsetInBytes = sizeof(VertexPositionColorTexture) * bufferOffsetInVertices;
+	uint32_t bufferLengthInBytes = sizeof(VertexPositionColorTexture) * bufferLengthInVertices;
+
 	// Set up buffer data
 	VertexPositionColorTexture* transferData = (VertexPositionColorTexture*)SDL_MapGPUTransferBuffer(_mFixed.DeviceHandle,
-		_mFixed.TransferBufferForVertexBuffer, false);
-	SDL_memcpy(transferData, _mFixed.BatchVertexBuffer, sizeof(VertexPositionColorTexture) * _mTemp.CurrentBatchVerticesOffset);
+		GetTransferBufferForVertexBuffer(), false);
+	SDL_memcpy(transferData + bufferOffsetInVertices, _mFixed.BatchVertexBuffer + bufferOffsetInVertices, bufferLengthInBytes);
 
-	SDL_UnmapGPUTransferBuffer(_mFixed.DeviceHandle, _mFixed.TransferBufferForVertexBuffer);
+	SDL_UnmapGPUTransferBuffer(_mFixed.DeviceHandle, GetTransferBufferForVertexBuffer());
 
 	SDL_GPUTransferBufferLocation location;
 	Utils_memset(&location, 0, sizeof(SDL_GPUTransferBufferLocation));
-	location.transfer_buffer = _mFixed.TransferBufferForVertexBuffer;
-	location.offset = 0;
-
+	location.transfer_buffer = GetTransferBufferForVertexBuffer();
+	location.offset = bufferOffsetInBytes;
+	
 	SDL_GPUBufferRegion region;
 	Utils_memset(&region, 0, sizeof(SDL_GPUBufferRegion));
-	region.buffer = _mFixed.VertexBuffer;
-	region.offset = 0;
-	region.size = sizeof(VertexPositionColorTexture) * _mTemp.CurrentBatchVerticesOffset;
+	region.buffer = GetVertexBuffer();
+	region.offset = bufferOffsetInBytes;
+	region.size = bufferLengthInBytes;
 
 	SDL_UploadToGPUBuffer(_mTemp.CopyPass, &location, &region, false);
 }
@@ -900,8 +952,6 @@ static void FlushBatch(void)
 
 	SubmitVertices();
 
-	_mTemp.LastRenderVerticesOffset = 0;
-	_mTemp.CurrentBatchVerticesOffset = 0;
 	_mTemp.LastTextureUsed = NULL;
 }
 void Renderer_DrawVertexPositionColorTexture4(Texture* texture, const VertexPositionColorTexture4* sprite)
@@ -912,10 +962,16 @@ void Renderer_DrawVertexPositionColorTexture4(Texture* texture, const VertexPosi
 		return;
 	}
 
-	if ((_mTemp.CurrentBatchVerticesOffset + VERTICES_IN_SPRITE) >= MAX_VERTICES) //Just hard limiting vertexes for now anyway... //TODO
+	if ((_mFixed.CurrentVertexBufferOffset + VERTICES_IN_SPRITE) >= MAX_VERTICES) //Just hard limiting vertexes for now anyway... //TODO
 	{
-		Logger_LogWarning("Reached vertex buffer limit!");
-		return;
+		SubmitRender();
+		SubmitVertices();
+		SwitchToNextVertexBuffer();
+	}
+	else if ((_mTemp.LastTextureUsed != texture))
+	{
+		SubmitRender();
+		_mTemp.LastTextureUsed = texture;
 	}
 
 	if (_mTemp.LastTextureUsed == NULL)
@@ -923,44 +979,41 @@ void Renderer_DrawVertexPositionColorTexture4(Texture* texture, const VertexPosi
 		_mTemp.LastTextureUsed = texture;
 	}
 
-	if ((_mTemp.LastTextureUsed != texture))
-	{
-		SubmitRender();
-		_mTemp.LastTextureUsed = texture;
-	}
-
-	_mFixed.BatchVertexBuffer[_mTemp.CurrentBatchVerticesOffset + 0] =
+	_mFixed.BatchVertexBuffer[_mFixed.CurrentVertexBufferOffset + 0] =
 	{
 		sprite->Position0.X,  sprite->Position0.Y, sprite->Position0.Z,
 		sprite->Color0.R, sprite->Color0.G, sprite->Color0.B, sprite->Color0.A,
 		sprite->TextureCoordinate0.U, sprite->TextureCoordinate0.V
 	};
 
-	_mFixed.BatchVertexBuffer[_mTemp.CurrentBatchVerticesOffset + 1] =
+	_mFixed.BatchVertexBuffer[_mFixed.CurrentVertexBufferOffset + 1] =
 	{
 		sprite->Position1.X,  sprite->Position1.Y, sprite->Position1.Z,
 		sprite->Color1.R, sprite->Color1.G, sprite->Color1.B, sprite->Color1.A,
 		sprite->TextureCoordinate1.U, sprite->TextureCoordinate1.V
 	};
 
-	_mFixed.BatchVertexBuffer[_mTemp.CurrentBatchVerticesOffset + 2] =
+	_mFixed.BatchVertexBuffer[_mFixed.CurrentVertexBufferOffset + 2] =
 	{
 		sprite->Position2.X,  sprite->Position2.Y, sprite->Position2.Z,
 		sprite->Color2.R, sprite->Color2.G, sprite->Color2.B, sprite->Color2.A,
 		sprite->TextureCoordinate2.U, sprite->TextureCoordinate2.V
 	};
 
-	_mFixed.BatchVertexBuffer[_mTemp.CurrentBatchVerticesOffset + 3] =
+	_mFixed.BatchVertexBuffer[_mFixed.CurrentVertexBufferOffset + 3] =
 	{
 		sprite->Position3.X,  sprite->Position3.Y, sprite->Position3.Z,
 		sprite->Color3.R, sprite->Color3.G, sprite->Color3.B, sprite->Color3.A,
 		sprite->TextureCoordinate3.U, sprite->TextureCoordinate3.V
 	};
 
-	_mTemp.CurrentBatchVerticesOffset += VERTICES_IN_SPRITE;
+	_mFixed.CurrentVertexBufferOffset += VERTICES_IN_SPRITE;
 }
 void Renderer_AfterCommit(void)
 {
+	FlushBatch();
+
+	SDL_EndGPURenderPass(_mTemp.RenderPass);
 }
 void Renderer_StartImGuiFrame(void)
 {
@@ -1011,9 +1064,7 @@ static void DrawImGuiRenderPass(void)
 }
 void Renderer_AfterRender(void)
 {
-	FlushBatch();
-
-	SDL_EndGPURenderPass(_mTemp.RenderPass);
+	//SDL_EndGPURenderPass(_mTemp.RenderPass);
 
 	if (IsOffscreenTargetNeeded())
 	{
