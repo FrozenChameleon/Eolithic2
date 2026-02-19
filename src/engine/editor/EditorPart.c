@@ -10,6 +10,16 @@
 #include "../math/Math.h"
 #include "../utils/Logger.h"
 #include "../utils/Cvars.h"
+#include "EditorGlobals.h"
+#include "imgui.h"
+#include "../render/DrawTool.h"
+#include "../../third_party/stb_ds.h"
+#include "../render/SpriteBatch.h"
+#include "../render/Renderer.h"
+
+static const Color COLOR_SELECTION_RECTANGLE = { 255, 0, 0, 84 };
+static const Color COLOR_GRID_INSIDE = { 84, 84, 153, 255 };
+static const Color COLOR_GRID_OUTSIDE = { 118, 118, 172, 255 };
 
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
 
@@ -21,7 +31,7 @@ static Point _mCopyNodeAnchor;
 static Point _mSelectionRectangleAnchor;
 static Vector2 _mMovementSpaceBarAnchor;
 static bool _mIsSpaceBarMovement;
-static int _mSelectionState;
+static EditorSelectionState _mSelectionState;
 static Rectangle _mSelectionRectangle;
 static LevelPatch* arr_patches;
 static LevelPatch* _mPatch1;
@@ -114,20 +124,19 @@ void EditorPart_DefaultHandlePatches(void)
 }
 void EditorPart_DefaultDrawSingleSelectionSelectedTiles(SpriteBatch* spriteBatch)
 {
-	/*if (OeGui.IsAnythingHoveredOrAnyItemFocusedOrActive())
+	if (EditorGlobals_ImGuiIsAnyItemActiveOrFocusedOrHovered())
 	{
 		return;
 	}
 
-	if (!Cvars_GetAsBool(Cvars_EDITOR_SHOW_SINGLE_SELECTED_SQUARE))
+	if (!Cvars_GetAsBool(CVARS_EDITOR_SHOW_SINGLE_SELECTED_SQUARE))
 	{
 		return;
 	}
 
-	int tileSize = OeUtils.GetTileSize();
-	Point currentGrid = GetCurrentGrid();
-	OeDrawTool.DrawRectangleHollow(spriteBatch, OeColors.WHITE, 150, 
-		new Rectangle(currentGrid.X * tileSize, currentGrid.Y * tileSize, tileSize, tileSize), 0, false, 2);*/
+	Point currentGrid = EditorPart_GetCurrentGrid();
+	DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_WHITE, 150,
+		Rectangle_Create(currentGrid.X * TILE_SIZE, currentGrid.Y * TILE_SIZE, TILE_SIZE, TILE_SIZE), 0, false, 2);
 }
 void EditorPart_DefaultHandleColumnsAndRows(void)
 {
@@ -562,81 +571,107 @@ void EditorPart_DoDefaultEditorPartUpdateRoutine(double deltaTime)
 
 	EditorPart_DefaultUpdateCameraPosition();
 }
-/*void EditorPart_DoDefaultEditorPartDrawRoutine(SpriteBatch* spriteBatch, Action<OeSpriteBatch> drawSingleSelectionSelectedTiles);
+void EditorPart_DoDefaultEditorPartDrawRoutine(SpriteBatch* spriteBatch, EditorDrawFunc drawSingleSelectionSelectedTiles)
 {
-			_mManyRectangles.Clear();
+	//_mManyRectangles.Clear();
 
-			int tileSize = OeUtils.GetTileSize();
+	if (Cvars_GetAsBool(CVARS_EDITOR_SHOW_GRID))
+	{
+		EditorPart_DrawGrid(spriteBatch);
+	}
 
-			if (Cvars_GetAsBool(Cvars_EDITOR_SHOW_GRID))
+	/*
+	if (EditorPart_IsSelecting())
+	{
+		int x1 = AlignToGrid(_mSelectionRectangle.X) * tileSize;
+		int y1 = AlignToGrid(_mSelectionRectangle.Y) * tileSize;
+
+		int tileWidth = ((AlignToGrid(_mSelectionRectangle.Right) * tileSize)) - x1;
+		int tileHeight = ((AlignToGrid(_mSelectionRectangle.Bottom) * tileSize)) - y1;
+
+		//OeDrawTool.DrawRectangle(spriteBatch, _mColorSelectionRectangle, 110, x1, y1, tileWidth, tileHeight, 0, false);
+		if (!OeGui.IsAnythingHoveredOrAnyItemFocusedOrActive())
+		{
+			OeDrawTool.DrawRectangleHollow(spriteBatch, OeColors.WHITE, 111, new Rectangle(x1, y1, tileWidth, tileHeight), 0, false, 2);
+		}
+	}*/
+
+	if (Input_IsCtrlPressed2(true) && (_mCopyTiles != NULL))
+	{
+		//DrawTilesBorder(spriteBatch, _mCopyTiles);
+		//DrawCopyTiles(spriteBatch);
+	}
+	else
+	{
+		drawSingleSelectionSelectedTiles(spriteBatch);
+	}
+
+	/*
+	* 
+	* 	
+
+
+	if (Cvars_GetAsBool(Cvars_EDITOR_DRAW_SHOW_GRID))
+	{
+		ref OeComCamera camera = ref OeEditor.GetCamera();
+		int width = OeComCamera.GetScreenWidthInTiles(ref camera) + 2;
+		int height = OeComCamera.GetScreenHeightInTiles(ref camera) + 2;
+		int leftOfCamera = OeComCamera.GetLeft(ref camera);
+		int topOfCamera = OeComCamera.GetTop(ref camera);
+
+		for (int i = 0; i < width; i += 1)
+		{
+			for (int j = 0; j < height; j += 1)
 			{
-				DrawGrid(spriteBatch);
-			}
-
-			if (IsSelecting())
-			{
-				int x1 = AlignToGrid(_mSelectionRectangle.X) * tileSize;
-				int y1 = AlignToGrid(_mSelectionRectangle.Y) * tileSize;
-
-				int tileWidth = ((AlignToGrid(_mSelectionRectangle.Right) * tileSize)) - x1;
-				int tileHeight = ((AlignToGrid(_mSelectionRectangle.Bottom) * tileSize)) - y1;
-
-				//OeDrawTool.DrawRectangle(spriteBatch, _mColorSelectionRectangle, 110, x1, y1, tileWidth, tileHeight, 0, false);
-				if (!OeGui.IsAnythingHoveredOrAnyItemFocusedOrActive())
+				Point position = new Point(((leftOfCamera / tileSize) * tileSize) + (i * tileSize), ((topOfCamera / tileSize) * tileSize) + (j * tileSize));
+				if (position.X >= 0 && position.Y >= 0 && position.X < OeFunc.Get_LevelData().GetRealSizeX() && position.Y < OeFunc.Get_LevelData().GetRealSizeY())
 				{
-					OeDrawTool.DrawRectangleHollow(spriteBatch, OeColors.WHITE, 111, new Rectangle(x1, y1, tileWidth, tileHeight), 0, false, 2);
+					Color tempColor = Cvars_GetAsBool(Cvars_EDITOR_DRAW_GRID_BLACK) ? OeColors.WHITE : OeColors.BLACK;
+					_mManyRectangles.Add(new OeDrawRectangle(tempColor, new Rectangle(position.X, position.Y, tileSize / 5, 1)));
+					_mManyRectangles.Add(new OeDrawRectangle(tempColor, new Rectangle(position.X, position.Y, 1, tileSize / 5)));
 				}
 			}
+		}
+	}
 
-			if (Input_IsCtrlPressed(true) && _mCopyTiles != null)
-			{
-				DrawTilesBorder(spriteBatch, _mCopyTiles);
-				DrawCopyTiles(spriteBatch);
-			}
-			else
-			{
-				drawSingleSelectionSelectedTiles(spriteBatch);
-			}
-
-			if (Cvars_GetAsBool(Cvars_EDITOR_DRAW_SHOW_GRID))
-			{
-				ref OeComCamera camera = ref OeEditor.GetCamera();
-				int width = OeComCamera.GetScreenWidthInTiles(ref camera) + 2;
-				int height = OeComCamera.GetScreenHeightInTiles(ref camera) + 2;
-				int leftOfCamera = OeComCamera.GetLeft(ref camera);
-				int topOfCamera = OeComCamera.GetTop(ref camera);
-
-				for (int i = 0; i < width; i += 1)
-				{
-					for (int j = 0; j < height; j += 1)
-					{
-						Point position = new Point(((leftOfCamera / tileSize) * tileSize) + (i * tileSize), ((topOfCamera / tileSize) * tileSize) + (j * tileSize));
-						if (position.X >= 0 && position.Y >= 0 && position.X < OeFunc.Get_LevelData().GetRealSizeX() && position.Y < OeFunc.Get_LevelData().GetRealSizeY())
-						{
-							Color tempColor = Cvars_GetAsBool(Cvars_EDITOR_DRAW_GRID_BLACK) ? OeColors.WHITE : OeColors.BLACK;
-							_mManyRectangles.Add(new OeDrawRectangle(tempColor, new Rectangle(position.X, position.Y, tileSize / 5, 1)));
-							_mManyRectangles.Add(new OeDrawRectangle(tempColor, new Rectangle(position.X, position.Y, 1, tileSize / 5)));
-						}
-					}
-				}
-			}
-
-			spriteBatch.DrawManyRectangle(100, _mManyRectangles);
-}*/
+	spriteBatch.DrawManyRectangle(100, _mManyRectangles);*/
+}
 void EditorPart_DoDefaultEditorPartDrawHudRoutine(SpriteBatch* spriteBatch, const char* status)
 {
-	/*
-	Vector2 adjustedMouse = Input_GetCameraAdjustedMouse(ref OeEditor.GetCamera());
-	int mousePosX = (int)adjustedMouse.X;
-	int mousePosY = (int)adjustedMouse.Y;
-	int tileSize = OeUtils.GetTileSize();
+	Vector2 mouse = Input_GetMouse();
+	Vector2 adjustedMouse = Input_GetCameraAdjustedMouse(Editor_GetCamera());
 
-	string xTileDisplay = "|X-Tile:" + (mousePosX / tileSize);
-	string yTileDisplay = "|Y-Tile:" + (mousePosY / tileSize);
-	string xDisplay = "|X:" + (mousePosX);
-	string yDisplay = "|Y:" + (mousePosY);
-	string xLockedDisplay = "|X (Lock):" + ((mousePosX / tileSize) * tileSize);
-	string yLockedDisplay = "|Y (Lock):" + ((mousePosY / tileSize) * tileSize);
+	MString* mouseDisplay = NULL;
+	MString* adjustedMouseDisplay = NULL;
+	MString* xTileDisplay = NULL;
+	MString* yTileDisplay = NULL;
+	MString* xDisplay = NULL;
+	MString* yDisplay = NULL;
+
+	MString_AssignString(&mouseDisplay, "|Mouse:");
+	MString_AddAssignInt(&mouseDisplay, (int32_t)mouse.X);
+	MString_AddAssignString(&mouseDisplay, ",");
+	MString_AddAssignInt(&mouseDisplay, (int32_t)mouse.Y);
+
+	MString_AssignString(&adjustedMouseDisplay, "|AdjustedMouse:");
+	MString_AddAssignInt(&adjustedMouseDisplay, (int32_t)adjustedMouse.X);
+	MString_AddAssignString(&adjustedMouseDisplay, ",");
+	MString_AddAssignInt(&adjustedMouseDisplay, (int32_t)adjustedMouse.Y);
+
+	MString_AssignString(&xTileDisplay, "|X-Tile:");
+	MString_AddAssignInt(&xTileDisplay, (int32_t)(adjustedMouse.X / TILE_SIZE));
+
+	MString_AssignString(&yTileDisplay, "|Y-Tile:");
+	MString_AddAssignInt(&yTileDisplay, (int32_t)(adjustedMouse.Y / TILE_SIZE));
+
+	MString_AssignString(&xDisplay, "|X:");
+	MString_AddAssignInt(&xDisplay, (int32_t)(adjustedMouse.X));
+
+	MString_AssignString(&yDisplay, "|Y:");
+	MString_AddAssignInt(&yDisplay, (int32_t)(adjustedMouse.Y));
+
+	/*string xLockedDisplay = "|X (Lock):" + ((mousePosX / TILE_SIZE) * TILE_SIZE);
+	string yLockedDisplay = "|Y (Lock):" + ((mousePosY / TILE_SIZE) * TILE_SIZE);
 	string scaleDisplay = "|Scale:" + (OeEditor.GetCamera().mWorldZoom);
 	string parallaxDisplay = "";// "|Parallax:" + returnBoolean(EditorGlobals.SHOW_PARALLAX);
 	string collisionDisplay = "|Collision:" + (Cvars_GetAsBool(Cvars_EDITOR_SHOW_COLLISION));
@@ -648,12 +683,24 @@ void EditorPart_DoDefaultEditorPartDrawHudRoutine(SpriteBatch* spriteBatch, cons
 	string selectedX = (IsSelecting() ? "|Select X: " + (GetSelectionRectangleGridX2() - GetSelectionRectangleGridX1()) : "|Select X: 0");
 	string selectedY = (IsSelecting() ? "|Select Y: " + (GetSelectionRectangleGridY2() - GetSelectionRectangleGridY1()) : "|Select Y: 0");
 	string autoTilerDisplay = "|Auto:" + (Cvars_GetAsInt(Cvars_EDITOR_AUTO_TILER) == -1 ? "Off" : Cvars_Get(Cvars_EDITOR_AUTO_TILER));
-	string fpsDisplay = "|FPS:" + OeGameDrawer.GetFPS();
+	string fpsDisplay = "|FPS:" + OeGameDrawer.GetFPS();*/
 
-	OeDrawTool.DrawRectangle(spriteBatch, OeColors.BLACK, 100,
-		new Rectangle(0, OeGame.GetCurrentBackBufferHeight() - OeGui.MENU_ITEM_SIZE, OeGame.GetCurrentBackBufferWidth(), OeGui.MENU_ITEM_SIZE), 0, false);
-	spriteBatch.DrawString("editor", status + scaleDisplay + selectedX + selectedY + xTileDisplay + yTileDisplay + xDisplay + yDisplay + xLockedDisplay + yLockedDisplay + parallaxDisplay + collisionDisplay + thingDisplay
-		+ propDisplay + tileParallaxDisplay + gridDisplay + tileDisplay + autoTilerDisplay + fpsDisplay, OeColors.WHITE, 100, new Vector2(0, OeGame.GetCurrentBackBufferHeight() - OeGui.MENU_ITEM_SIZE));*/
+	Rectangle drawableSize = Renderer_GetDrawableSize();
+	DrawTool_DrawRectangle2(spriteBatch, COLOR_BLACK, 100,
+		Rectangle_Create(0, drawableSize.Height - EDITOR_GLOBALS_MENU_ITEM_SIZE, drawableSize.Width, EDITOR_GLOBALS_MENU_ITEM_SIZE), 0, false);
+
+	MString* finalString = NULL;
+	MString_AddAssignMString(&finalString, mouseDisplay);
+	MString_AddAssignMString(&finalString, adjustedMouseDisplay);
+	MString_AddAssignMString(&finalString, xTileDisplay);
+	MString_AddAssignMString(&finalString, yTileDisplay);
+	MString_AddAssignMString(&finalString, xDisplay);
+	MString_AddAssignMString(&finalString, yDisplay);
+
+	SpriteBatch_DrawString(spriteBatch, "editor", MString_Text(finalString), Color_White, 150, 
+		Vector2_Create(140, 32));
+		//spriteBatch.DrawString(, status + scaleDisplay + selectedX + selectedY + xTileDisplay + yTileDisplay + xDisplay + yDisplay + xLockedDisplay + yLockedDisplay + parallaxDisplay + collisionDisplay + thingDisplay
+		//+ propDisplay + tileParallaxDisplay + gridDisplay + tileDisplay + autoTilerDisplay + fpsDisplay, OeColors.WHITE, 100, new Vector2(0, OeGame.GetCurrentBackBufferHeight() - OeGui.MENU_ITEM_SIZE));*/
 }
 void EditorPart_DrawCopyTiles(SpriteBatch* spriteBatch)
 {
@@ -870,7 +917,50 @@ void EditorPart_HandleReverseCopy(void)
 }
 void EditorPart_DrawGrid(SpriteBatch* spriteBatch)
 {
-	//COPTY FEROM TOTHER //TODO
+	arrsetlen(arr_many_rectangles_grid, 0);
+
+	int margin = 2;
+
+	Camera* camera = Editor_GetCamera();
+	bool isCameraVeryZoomedOut = camera->mWorldZoom > 3;
+	int x1 = Camera_GetX1(camera);
+	int y1 = Camera_GetY1(camera);
+
+	LevelData* levelData = Get_LevelData();
+	int width = LevelData_GetGridSizeX(levelData);
+	int height = LevelData_GetGridSizeY(levelData);
+	if (levelData->_mIsMetaMap)
+	{
+		//width = levelData.GetMetaMap().GetTileMapWidth(); //TODO META MAP
+	   // height = levelData.GetMetaMap().GetTileMapHeight();
+	}
+
+	width = Camera_GetX2(camera, width);
+	height = Camera_GetY2(camera, height);
+
+	if (isCameraVeryZoomedOut)
+	{
+		int bigX = x1 * TILE_SIZE;
+		int bigY = y1 * TILE_SIZE;
+		int bigWidth = (width * TILE_SIZE) - bigX;
+		int bigHeight = (height * TILE_SIZE) - bigY;
+		arrput(arr_many_rectangles_grid, DrawRectangle_Create(COLOR_GRID_INSIDE, Rectangle_Create(bigX, bigY, bigWidth, bigHeight)));
+	}
+	else
+	{
+		for (int i = x1; i < width; i += 1)
+		{
+			for (int j = y1; j < height; j += 1)
+			{
+				arrput(arr_many_rectangles_grid, DrawRectangle_Create(COLOR_GRID_OUTSIDE,
+					Rectangle_Create(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE)));
+				arrput(arr_many_rectangles_grid, DrawRectangle_Create(COLOR_GRID_INSIDE,
+					Rectangle_Create(i * TILE_SIZE + (margin / 2), j * TILE_SIZE + (margin / 2), TILE_SIZE - margin, TILE_SIZE - margin)));
+			}
+		}
+	}
+
+	SpriteBatch_DrawManyRectangle(spriteBatch, 0, arr_many_rectangles_grid);
 }
 int32_t EditorPart_AlignToGridInt(int32_t pixelValue)
 {
@@ -1098,31 +1188,24 @@ bool EditorPart_IsMouseInsideSelectionRectangle(void)
 	int32_t currentMouseX = (int32_t)EditorPart_GetRestrainedMouseX();
 	int32_t currentMouseY = (int32_t)EditorPart_GetRestrainedMouseY();
 	return Rectangle_Contains(&_mSelectionRectangle, currentMouseX, currentMouseY);
-
 }
 void EditorPart_ResetSelectionRectangle(void)
 {
-	//TODO
-	/*
-	_mSelectionState = OeEditorSelectionState_NOTHING_SELECTED;
+	_mSelectionState = EDITOR_SELECTION_STATE_NOTHING;
 	_mSelectionRectangle = Rectangle_Empty;
-	_mSelectionRectangleAnchor = Point_Zero;*/
+	_mSelectionRectangleAnchor = Point_Zero;
 }
 bool EditorPart_HandleSelectionRectangle(void)
 {
-	return false;
-
-	//TODO
-	/*
-	if (_mSelectionState == OeEditorSelectionState.NOTHING_SELECTED)
+	if (_mSelectionState == EDITOR_SELECTION_STATE_NOTHING)
 	{
-		if (!IsMouseInsideSelectionRectangle() && !_mSelectionRectangle.IsEmpty)
+		if (!EditorPart_IsMouseInsideSelectionRectangle() && !Rectangle_IsEmpty(&_mSelectionRectangle))
 		{
 			if (Input_IsLeftMouseTapped() ||
 				Input_IsMiddleMouseTapped() ||
 				Input_IsRightMouseTapped())
 			{
-				ResetSelectionRectangle();
+				EditorPart_ResetSelectionRectangle();
 				return true;
 			}
 		}
@@ -1130,41 +1213,47 @@ bool EditorPart_HandleSelectionRectangle(void)
 
 	switch (_mSelectionState)
 	{
-	case OeEditorSelectionState.NOTHING_SELECTED:
+	case EDITOR_SELECTION_STATE_NOTHING:
 		if (Input_IsShiftTapped())
 		{
-			ResetSelectionRectangle();
-			_mSelectionRectangleAnchor = GetCurrentGrid();
-			_mSelectionState = OeEditorSelectionState.SELECTING;
+			EditorPart_ResetSelectionRectangle();
+			_mSelectionRectangleAnchor = EditorPart_GetCurrentGrid();
+			_mSelectionState = EDITOR_SELECTION_STATE_SELECTED;
 		}
 		break;
-	case OeEditorSelectionState.SELECTING:
-		OePointRectangle prect = new OePointRectangle();
+	case EDITOR_SELECTION_STATE_SELECTED:
+		PointRectangle prect = { 0 };
 		prect.mPointOne = _mSelectionRectangleAnchor;
-		prect.mPointTwo = GetCurrentGrid();
-		_mSelectionRectangle = OePointRectangle.GetRectangle(ref prect);
-		int tileSize = OeUtils.GetTileSize();
+		prect.mPointTwo = EditorPart_GetCurrentGrid();
+		_mSelectionRectangle = PointRectangle_GetRectangle(&prect);
 		_mSelectionRectangle.Width += 1;
 		_mSelectionRectangle.Height += 1;
-		OeGui.SetToolTip(_mSelectionRectangle.Width + "," + _mSelectionRectangle.Height);
-		_mSelectionRectangle.X *= tileSize;
-		_mSelectionRectangle.Y *= tileSize;
-		_mSelectionRectangle.Width *= tileSize;
-		_mSelectionRectangle.Height *= tileSize;
+		{
+			MString* tempString = NULL;
+			MString_AssignEmptyString(&tempString);
+			MString_AddAssignInt(&tempString, _mSelectionRectangle.Width);
+			MString_AddAssignString(&tempString, ",");
+			MString_AddAssignInt(&tempString, _mSelectionRectangle.Height);
+			ImGui::SetTooltip(MString_Text(tempString));
+			MString_Dispose(&tempString);
+		}
+		_mSelectionRectangle.X *= TILE_SIZE;
+		_mSelectionRectangle.Y *= TILE_SIZE;
+		_mSelectionRectangle.Width *= TILE_SIZE;
+		_mSelectionRectangle.Height *= TILE_SIZE;
 		if (!Input_IsShiftPressed())
 		{
-			if (_mSelectionRectangle.Width <= OeUtils.GetTileSize() && _mSelectionRectangle.Height <= OeUtils.GetTileSize())
+			if (_mSelectionRectangle.Width <= TILE_SIZE && _mSelectionRectangle.Height <= TILE_SIZE)
 			{
-				ResetSelectionRectangle();
+				EditorPart_ResetSelectionRectangle();
 			}
 			else
 			{
-				_mSelectionState = OeEditorSelectionState.NOTHING_SELECTED;
+				_mSelectionState = EDITOR_SELECTION_STATE_NOTHING;
 			}
 		}
 		break;
 	}
 
 	return false;
-	*/
 }

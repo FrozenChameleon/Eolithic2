@@ -18,10 +18,13 @@
 #include "../utils/MString.h"
 #include "../render/TilesetOffset.h"
 #include "../utils/Utils.h"
+#include "../../third_party/stb_ds.h"
 
 #define VERSION_LEVELDATA 12
 
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
+
+static DrawRectangle* arr_many_rectangles;
 
 LevelData* LevelData_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br)
 {
@@ -246,23 +249,27 @@ bool LevelData_LoadSetupTileData(LevelData* ld)
 		for (int32_t j = 0; j < gridHeight; j += 1)
 		{
 			int32_t gridPos = LevelData_GetTilePos1D(ld, i, j);
-			/*if (OeGlobals_IsDebugFileMode()) //UNUSED, DEBUG
+			int32_t tileLocInSaveTiles = map[gridPos];
+			Tile* tileToSet = tiles[tileLocInSaveTiles];
+			bool isDebugFileMode = true;
+			//if (OeGlobals_IsDebugFileMode()) //UNUSED, DEBUG//TODO
+			if (isDebugFileMode)
 			{
+				ld->mTileData[gridPos] = Tile_CreateClone(tileToSet);
+				/* //TODO
 				if (_mIsMetaMap && OeGlobals_DEBUG_IS_META_MAP_EDIT_TILE_MODE_AT_MAP_LOAD || !_mIsMetaMap) //if debug and editing, we use clones of tiles so they can be manipulated...
 				{
-					 mTileData[gridPos] = tiles[map[gridPos]].GetClone();
+					mTileData[gridPos] = tiles[map[gridPos]].GetClone();
 				}
 				else //otherwise we just use a reference...
 				{
 					mTileData[gridPos] = &tiles[map[gridPos]];
-				}
+				}*/
 			}
 			else
-			{*/
-			int32_t tileLocInSaveTiles = map[gridPos];
-			Tile* tileToSet = tiles[tileLocInSaveTiles];
-			ld->mTileData[gridPos] = tileToSet;
-			//}
+			{
+				ld->mTileData[gridPos] = tileToSet;
+			}
 		}
 	}
 
@@ -473,4 +480,60 @@ void LevelData_DrawProps2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camer
 			Tile_DrawProps2(t, spriteBatch, camera, i, j, false, drawInfo);
 		}
 	}
+}
+void LevelData_DrawCollision(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera)
+{
+	arrsetlen(arr_many_rectangles, 0);
+
+	if (!Cvars_GetAsBool(CVARS_EDITOR_SHOW_COLLISION) || !Globals_IsEditorActive())
+	{
+		return;
+	}
+
+	int x1 = Camera_GetX1( camera);
+	int x2 = Camera_GetX2( camera, LevelData_GetGridSizeX(ld));
+	int y1 = Camera_GetY1( camera);
+	int y2 = Camera_GetY2(camera, LevelData_GetGridSizeY(ld));
+
+	Rectangle rect = Rectangle_Empty;
+	int lastType = -1;
+	Tile** tileData = ld->mTileData;
+	for (int j = y1; j < y2; j++)
+	{
+		for (int i = x1; i < x2; i++)
+		{
+			Tile* tile = tileData[LevelData_GetTilePos1D(ld, i, j)];
+			int type = tile->mCollisionType;
+			if ((type != lastType) || type == 0)
+			{
+				if (!Rectangle_IsEmpty(&rect))
+				{
+					Color color = Utils_GetCollisionColor(lastType);
+					arrput(arr_many_rectangles, DrawRectangle_Create(color, rect));
+					rect = Rectangle_Empty;
+				}
+			}
+			if (type != 0)
+			{
+				if (type == lastType)
+				{
+					rect.Width += TILE_SIZE;
+				}
+				else
+				{
+					rect = Tile_GetCollisionRectangle(tile, i, j);
+				}
+			}
+			lastType = type;
+		}
+		if (!Rectangle_IsEmpty(&rect))
+		{
+			Color color = Utils_GetCollisionColor(lastType);
+			arrput(arr_many_rectangles, DrawRectangle_Create(color, rect));
+		}
+		rect = Rectangle_Empty;
+		lastType = -1;
+	}
+
+	SpriteBatch_DrawManyRectangle(spriteBatch, 150, arr_many_rectangles);
 }

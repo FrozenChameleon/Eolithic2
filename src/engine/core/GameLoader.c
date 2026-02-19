@@ -427,8 +427,9 @@ void GameLoader_Draw(SpriteBatch* spriteBatch)
 		tex = _mPreloaderTextureFinalB;
 	}
 
-	int32_t internalWidth = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_WIDTH);
-	int32_t internalHeight = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_HEIGHT);
+	Rectangle internalBounds = Utils_GetInternalBounds();
+	int32_t internalWidth = internalBounds.Width;
+	int32_t internalHeight = internalBounds.Height;
 	Vector2 offset = { (float)(-internalWidth / 2), (float)(-internalHeight / 2) };
 
 	if (_mStep == STEP_LOADING)

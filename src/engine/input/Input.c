@@ -47,6 +47,7 @@ static DoubleClickData _mLeftDoubleClick;
 static OverrideDeadzoneData _mOverrideDeadzoneData;
 static int32_t _mBlockMKBInputForFrames;
 static int32_t _mMasterRecordingState;
+static bool _mHackForceInvertCtrl;
 
 static void HandleDoubleClickData(DoubleClickData* data, bool tapValue)
 {
@@ -340,8 +341,17 @@ InputAction* Input_GetPlayerAction(int32_t playerNumber, const char* name)
 Vector2 Input_GetCameraAdjustedMouse(const Camera* camera)
 {
 	Vector2 temp;
-	temp.X = (Input_GetMouseX() * camera->mWorldZoom) + Camera_GetLeftFloat(camera);
-	temp.Y = (Input_GetMouseY() * camera->mWorldZoom) + Camera_GetTopFloat(camera);
+
+	float worldZoom = camera->mWorldZoom;
+
+	float mouseX = Input_GetMouseX();
+	float leftFloat = Camera_GetLeftFloat(camera);
+	temp.X = (mouseX * worldZoom) + leftFloat;
+
+	float mouseY = Input_GetMouseY();
+	float topFloat = Camera_GetTopFloat(camera);
+	temp.Y = (mouseY * worldZoom) + topFloat;
+
 	return temp;
 }
 bool Input_JustScrolledUp(void)
@@ -459,7 +469,16 @@ bool Input_IsMiddleMouseReleased(void)
 }
 bool Input_IsCtrlPressed(void)
 {
-	return KeyboardState_IsKeyPressed(KEYS_LEFTCONTROL) || KeyboardState_IsKeyPressed(KEYS_RIGHTCONTROL);
+	return Input_IsCtrlPressed2(false);
+}
+bool Input_IsCtrlPressed2(bool respectForceInvertCtrl)
+{
+	bool isCtrlPressed = KeyboardState_IsKeyPressed(KEYS_LEFTCONTROL) || KeyboardState_IsKeyPressed(KEYS_RIGHTCONTROL);;
+	if (_mHackForceInvertCtrl && respectForceInvertCtrl)
+	{
+		return !isCtrlPressed;
+	}
+	return isCtrlPressed;
 }
 bool Input_IsTabPressed(void)
 {

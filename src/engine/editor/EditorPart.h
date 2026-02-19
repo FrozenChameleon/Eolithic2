@@ -42,7 +42,7 @@ void EditorPart_DefaultUpdateCameraZoom(void);
 void EditorPart_DefaultUpdateCameraPosition(void);
 void EditorPart_DefaultHandleDeleteKey(void);
 void EditorPart_DoDefaultEditorPartUpdateRoutine(double deltaTime);
-//void EditorPart_DoDefaultEditorPartDrawRoutine(SpriteBatch* spriteBatch, Action<OeSpriteBatch> drawSingleSelectionSelectedTiles);
+void EditorPart_DoDefaultEditorPartDrawRoutine(SpriteBatch* spriteBatch, EditorDrawFunc drawSingleSelectionSelectedTiles);
 void EditorPart_DoDefaultEditorPartDrawHudRoutine(SpriteBatch* spriteBatch, const char* status);
 void EditorPart_DrawCopyTiles(SpriteBatch* spriteBatch);
 void EditorPart_DrawTilesAsEditor(Tile* tile, SpriteBatch* spriteBatch, int tileSize, int gridX, int gridY, 

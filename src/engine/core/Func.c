@@ -878,11 +878,8 @@ void Do_SetBlendStateNormal(Entity entity)
 }
 void Do_DrawFullscreenRectangle(SpriteBatch* spriteBatch, Color color)
 {
-	/*
-	DrawTool_DrawRectangle(spriteBatch, color, 100,
-		Rectangle(0, 0, Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_WIDTH), Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_HEIGHT)),
-		0, false);
-		*/
+	Rectangle internalBounds = Utils_GetInternalBounds();
+	DrawTool_DrawRectangle2(spriteBatch, color, 100, Rectangle_Create(0, 0, internalBounds.X, internalBounds.Y), 0, false);
 }
 void Do_SetAnimationTimeLimit(Entity entity, int32_t state, int32_t phase, int32_t time)
 {

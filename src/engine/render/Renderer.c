@@ -155,20 +155,19 @@ Rectangle Renderer_GetWantedBackBufferBounds(void)
 		return forcedBackBuffer;
 	}
 
-	int32_t internalRenderWidth = Utils_GetInternalRenderWidth();
-	int32_t internalRenderHeight = Utils_GetInternalRenderHeight();
-
 #ifdef DEBUG_DEF_FORCE_LOWEST_BACK_BUFFER_SIZE
 	int32_t mul = 1;
 #else
 	int32_t mul = Renderer_GetRenderTargetScale();
 #endif
 
+	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
+
 	Rectangle bounds;
 	bounds.X = 0;
 	bounds.Y = 0;
-	bounds.Width = mul * internalRenderWidth;
-	bounds.Height = mul * internalRenderHeight;
+	bounds.Width = mul * internalRenderBounds.Width;
+	bounds.Height = mul * internalRenderBounds.Height;
 	return bounds;
 }
 void Renderer_SetupVerticesForTTFont(VertexPositionColorTexture* vertices, Color fontColor, int32_t pos, const float* verts, const float* tcoords, const unsigned int* colors, int32_t nverts)
@@ -936,12 +935,13 @@ void Renderer_UpdateDisplayDimensions(void)
 	float currentWidth = (float)drawable.Width;
 	float currentHeight = (float)drawable.Height;
 
-	int32_t internalRenderWidth = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_WIDTH);
-	int32_t internalRenderHeight = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_HEIGHT);
+	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
+	int32_t internalRenderWidth = internalRenderBounds.Width;
+	int32_t internalRenderHeight = internalRenderBounds.Height;
 
 	if (Cvars_GetAsInt(CVARS_USER_DRAW_MODE) == RENDERER_DRAWMODE_PIXELPERFECT)
 	{
-		if (internalRenderWidth > currentWidth || internalRenderHeight > currentHeight)
+		if ((internalRenderWidth > currentWidth) || (internalRenderHeight > currentHeight))
 		{
 			Cvars_SetAsInt(CVARS_USER_DRAW_MODE, RENDERER_DRAWMODE_ASPECT);
 		}
@@ -1046,11 +1046,16 @@ void Renderer_SetupRenderState(void)
 	else
 	{
 		GameStateManager_Draw(&_mOrangeSpriteBatch);
-		GameStateManager_DrawHud(&_mOrangeSpriteBatchHud);
 #ifdef EDITOR_MODE
 		if (Globals_IsEditorActive())
 		{
 			Editor_Draw(&_mOrangeSpriteBatch);
+		}
+#endif
+		GameStateManager_DrawHud(&_mOrangeSpriteBatchHud);
+#ifdef EDITOR_MODE
+		if (Globals_IsEditorActive())
+		{
 			Editor_DrawHud(&_mOrangeSpriteBatchHud);
 		}
 #endif
@@ -1062,8 +1067,9 @@ int32_t Renderer_GetFPS(void)
 }
 int32_t Renderer_GetRenderTargetScale(void)
 {
-	int32_t internalRenderWidth = Utils_GetInternalRenderWidth();
-	int32_t internalRenderHeight = Utils_GetInternalRenderHeight();
+	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
+	int32_t internalRenderWidth = internalRenderBounds.Width;
+	int32_t internalRenderHeight = internalRenderBounds.Height;
 
 	int32_t mul = Cvars_GetAsInt(CVARS_USER_INTERNAL_RESOLUTION_MULTIPLE);
 	if (mul <= 0) //Auto

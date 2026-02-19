@@ -136,7 +136,7 @@ void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const  Camera* camera, i
 	{
 		PropInstance* propInstance = &t->arr_props[i];
 
-		/*Rectangle cameraCheck = PropInstance_GetRectangle(propInstance, position);
+		Rectangle cameraCheck = PropInstance_GetRectangle(propInstance, position);
 		//To compensate for possible rotation around its upper left, which is how it is done for some reason.
 		if (cameraCheck.Width < cameraCheck.Height)
 		{
@@ -151,7 +151,7 @@ void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const  Camera* camera, i
 		if (!Rectangle_Intersects(&cameraRect, &cameraCheck))
 		{
 			continue;
-		}*/
+		}
 
 		if (!overrideDepth)
 		{
@@ -167,4 +167,21 @@ void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const  Camera* camera, i
 		//color.A = 122;
 		//OeDrawTool_DrawRectangle(spriteBatch, color, 100, cameraCheck, 0, false);
 	}
+}
+Tile* Tile_CreateClone(Tile* t)
+{
+	Tile* clone = (Tile*)Utils_calloc(1, sizeof(Tile));
+	Utils_memcpy(clone, t, sizeof(Tile));
+	clone->arr_instances = NULL;
+	clone->arr_props = NULL;
+	for (int i = 0; i < arrlen(t->arr_props); i += 1)
+	{
+		arrput(clone->arr_props, t->arr_props[i]);
+	}
+	for (int i = 0; i < arrlen(t->arr_instances); i += 1)
+	{
+		ThingInstance* cloneThingInstance = ThingInstance_CreateClone(&t->arr_instances[i]);
+		arrput(clone->arr_instances, *cloneThingInstance);
+	}
+	return clone;
 }

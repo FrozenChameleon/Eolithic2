@@ -36,6 +36,7 @@ int32_t CollisionEngineSys_GetCollisionBit(CollisionEngine* data, float x, float
 int32_t CollisionEngineSys_GetCollisionBitSafe(CollisionEngine* data, float x, float y, int32_t returnValue);
 int32_t CollisionEngineSys_GetCollisionBitSafeGrid(CollisionEngine* data, int32_t x, int32_t y, int32_t returnValue);
 int32_t CollisionEngineSys_GetCollisionBitGrid(CollisionEngine* data, int32_t x, int32_t y);
+void CollisionEngineSys_SetCollisionBitSafeGrid(CollisionEngine* data, int32_t x, int32_t y, int32_t value);
 void CollisionEngineSys_SetupCollisionGrid(CollisionEngine* data, LevelData* level);
 bool CollisionEngineSys_DoPlatformCollision(Body* platformBody, Body* thingBody);
 Point CollisionEngineSys_GetCollisionGridPosition(float x, float y);

@@ -664,6 +664,15 @@ int32_t CollisionEngineSys_GetCollisionBitGrid(CollisionEngine* data, int32_t x,
 {
 	return data->mCollisionGrid[GetTilePos1D(x, y, data)];
 }
+void CollisionEngineSys_SetCollisionBitSafeGrid(CollisionEngine* data, int32_t x, int32_t y, int32_t value)
+{
+	if (!CollisionEngineSys_IsPointSafe(data, x, y))
+	{
+		return;
+	}
+
+	data->mCollisionGrid[GetTilePos1D(x, y, data)] = value;
+}
 void CollisionEngineSys_SetupCollisionGrid(CollisionEngine* data, LevelData* level)
 {
 	data->mCollisionGridSize.X = 0;
@@ -700,8 +709,7 @@ bool CollisionEngineSys_DoPlatformCollision(Body* platformBody, Body* thingBody)
 }
 Point CollisionEngineSys_GetCollisionGridPosition(float x, float y)
 {
-	Point temp = { (int32_t)(x / TILE_SIZE), (int32_t)(y / TILE_SIZE) };
-	return temp;
+	return Point_Create((int32_t)(x / TILE_SIZE), (int32_t)(y / TILE_SIZE));
 }
 bool CollisionEngineSys_CheckSurroundingCollision(CollisionEngine* data, int32_t bodyX, int32_t bodyY, int32_t xDirection, int32_t yDirection, 
 	const int32_t* collisionToCheck, int32_t collisionToCheckLen)

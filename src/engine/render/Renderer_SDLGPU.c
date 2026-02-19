@@ -91,8 +91,6 @@ static const char* SamplerNames[] =
 
 static bool IsOffscreenTargetNeeded(void)
 {
-	return false;
-
 	if (Globals_IsEditorActive())
 	{
 		return false;
@@ -217,6 +215,8 @@ typedef struct TempRenderState
 
 static FixedRenderState _mFixed;
 static TempRenderState _mTemp;
+Rectangle _mVirtualBufferBounds;
+Rectangle _mActualBufferBounds;
 static bool _mIsReadyToDrawImGui;
 
 static SDL_GPUTransferBuffer* GetTransferBufferForVertexBuffer()
@@ -847,13 +847,13 @@ void Renderer_BeforeCommit(void)
 	SDL_BindGPUGraphicsPipeline(_mTemp.RenderPass, GetPipelineToUse());
 
 	{ //Push current camera positions...
-		Vector2 cameraPos = Renderer_INTERNAL_GetCurrentCameraPosition();
-		cameraPos.X -= 640;
-		cameraPos.Y -= 360;
+		Vector2 cameraPos = Renderer_INTERNAL_GetCurrentCameraPosition(); //TODO MAKE THESE SCALE
+		cameraPos.X -= (_mActualBufferBounds.Width / 2);
+		cameraPos.Y -= (_mActualBufferBounds.Height / 2);
 		Matrix cameraMatrix = Matrix_CreateOrthographicOffCenter(
 			cameraPos.X,
-			cameraPos.X + 1280,
-			cameraPos.Y + 720,
+			cameraPos.X + _mActualBufferBounds.Width,
+			cameraPos.Y + _mActualBufferBounds.Height,
 			cameraPos.Y,
 			0,
 			1
@@ -887,7 +887,6 @@ static void SubmitRender(void)
 
 	uint32_t bufferOffsetInVertices = _mFixed.LastRenderVerticesOffset;
 	uint32_t bufferOffsetInSprites = bufferOffsetInVertices / 4;
-	uint32_t bufferOffsetInBytes = sizeof(VertexPositionColorTexture) * bufferOffsetInVertices;
 
 	{
 		SDL_GPUTextureSamplerBinding samplerBinding;
@@ -1171,28 +1170,25 @@ void Renderer_ResetBackBuffer(void)
 {
 	Rectangle wantedBackBufferBounds = Renderer_GetWantedBackBufferBounds();
 
-	Rectangle virtualBufferBounds = Rectangle_Empty;
-	Rectangle actualBufferBounds = Rectangle_Empty;
+	_mVirtualBufferBounds.Width = wantedBackBufferBounds.Width;
+	_mVirtualBufferBounds.Height = wantedBackBufferBounds.Height;
 
-	virtualBufferBounds.Width = wantedBackBufferBounds.Width;
-	virtualBufferBounds.Height = wantedBackBufferBounds.Height;
-
-	if (IsOffscreenTargetNeeded())
+	if (!IsOffscreenTargetNeeded())
 	{
-		actualBufferBounds = Renderer_GetDrawableSize();
+		_mActualBufferBounds = Renderer_GetDrawableSize();
 	}
 	else
 	{
-		actualBufferBounds = virtualBufferBounds;
+		_mActualBufferBounds = _mVirtualBufferBounds;
 	}
 
 	Logger_LogInformation("Back Buffer has been reset");
 	{
 		MString* tempString = NULL;
 		MString_AssignString(&tempString, "Actual buffer bounds: ");
-		MString_AddAssignInt(&tempString, actualBufferBounds.Width);
+		MString_AddAssignInt(&tempString, _mActualBufferBounds.Width);
 		MString_AddAssignString(&tempString, "x");
-		MString_AddAssignInt(&tempString, actualBufferBounds.Height);
+		MString_AddAssignInt(&tempString, _mActualBufferBounds.Height);
 		Logger_LogInformation(MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
@@ -1202,24 +1198,24 @@ void Renderer_ResetBackBuffer(void)
 		{
 			MString* tempString = NULL;
 			MString_AssignString(&tempString, "Virtual buffer bounds: ");
-			MString_AddAssignInt(&tempString, virtualBufferBounds.Width);
+			MString_AddAssignInt(&tempString, _mVirtualBufferBounds.Width);
 			MString_AddAssignString(&tempString, "x");
-			MString_AddAssignInt(&tempString, virtualBufferBounds.Height);
+			MString_AddAssignInt(&tempString, _mVirtualBufferBounds.Height);
 			Logger_LogInformation(MString_Text(tempString));
 			MString_Dispose(&tempString);
 		}
 
 		_mFixed.OffscreenTarget = (Texture*)Utils_calloc(1, sizeof(Texture));
 		MString_AssignString(&_mFixed.OffscreenTarget->mPath, "");
-		_mFixed.OffscreenTarget->mBounds.Width = virtualBufferBounds.Width;
-		_mFixed.OffscreenTarget->mBounds.Height = virtualBufferBounds.Height;
+		_mFixed.OffscreenTarget->mBounds.Width = _mVirtualBufferBounds.Width;
+		_mFixed.OffscreenTarget->mBounds.Height = _mVirtualBufferBounds.Height;
 
 		SDL_GPUTextureCreateInfo info;
 		Utils_memset(&info, 0, sizeof(SDL_GPUTextureCreateInfo));
 		info.type = SDL_GPU_TEXTURETYPE_2D;
 		info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-		info.width = virtualBufferBounds.Width;
-		info.height = virtualBufferBounds.Height;
+		info.width = _mVirtualBufferBounds.Width;
+		info.height = _mVirtualBufferBounds.Height;
 		info.layer_count_or_depth = 1;
 		info.num_levels = 1;
 		info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;

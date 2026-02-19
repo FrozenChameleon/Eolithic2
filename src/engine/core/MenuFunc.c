@@ -313,11 +313,12 @@ const char* MenuFunc_GetInternalResolutionMultipleString(void)
 		mul = Renderer_GetRenderTargetScale();
 		MString_AssignString(&_mTempString, "<Auto ");
 	}
+	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
 	MString_AddAssignInt(&_mTempString, mul);
 	MString_AddAssignString(&_mTempString, "x: ");
-	MString_AddAssignInt(&_mTempString, Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_WIDTH) * mul);
+	MString_AddAssignInt(&_mTempString, internalRenderBounds.Width * mul);
 	MString_AddAssignString(&_mTempString, "x");
-	MString_AddAssignInt(&_mTempString, Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_HEIGHT) * mul);
+	MString_AddAssignInt(&_mTempString, internalRenderBounds.Height * mul);
 	MString_AddAssignString(&_mTempString, ">");
 	return MString_Text(_mTempString);
 }

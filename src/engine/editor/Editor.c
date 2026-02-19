@@ -5,13 +5,15 @@
 #include "../components/CameraSys.h"
 #include "../render/Renderer.h"
 #include "../input/Input.h"
+#include "../utils/Cvars.h"
+#include "../utils/MString.h"
 #include "EditorPart.h"
 #include "ActivePart.h"
 #include "imgui.h"
 
 static Camera _mCamera;
-static bool _mHasInit;
 
+static bool _mHasInit;
 void Editor_Init(void)
 {
     if (_mHasInit)
@@ -19,9 +21,9 @@ void Editor_Init(void)
         return;
     }
 
-    Rectangle drawableSize = Renderer_GetDrawableSize();
 	CameraSys_InitCamera(&_mCamera);
-	Camera_Resize(&_mCamera, drawableSize.Width, drawableSize.Height);
+    Rectangle drawableSize = Renderer_GetDrawableSize();
+	Camera_Resize(&_mCamera, drawableSize.Width, drawableSize.Height); //TODO CHECK THIS?
 
     ActivePart_Init();
 
@@ -309,4 +311,13 @@ void Editor_DrawHud(SpriteBatch* spriteBatch)
 Camera* Editor_GetCamera(void)
 {
 	return &_mCamera;
+}
+const char* Editor_GetEditorCollisionName(int32_t index)
+{
+    MString* tempString = NULL;
+    MString_AssignString(&tempString, CVARS_ENGINE_COLLISION_NAME);
+	MString_AddAssignInt(&tempString, index);
+    const char* editorCollisionName = Cvars_GetAsString(MString_Text(tempString));
+	MString_Dispose(&tempString);
+	return editorCollisionName;
 }

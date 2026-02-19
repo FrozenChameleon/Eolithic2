@@ -98,6 +98,7 @@ bool Input_IsMiddleMousePressed(void);
 bool Input_IsMiddleMouseTapped(void);
 bool Input_IsMiddleMouseReleased(void);
 bool Input_IsCtrlPressed(void);
+bool Input_IsCtrlPressed2(bool respectForceInvertCtrl);
 bool Input_IsTabPressed(void);
 bool Input_IsShiftPressed(void);
 bool Input_IsShiftTapped(void);

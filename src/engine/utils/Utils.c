@@ -512,31 +512,13 @@ double Utils_GetInterpolated(double deltaTime, float current, float last)
 	double mul = deltaTime / Utils_GetNormalStepLength();
 	return last + (diff * mul);
 }
-Rectangle Utils_GetInternalRectangle(void)
+Rectangle Utils_GetInternalBounds(void)
 {
-	Rectangle rect = { 0, 0, Utils_GetInternalWidth(), Utils_GetInternalHeight() };
-	return rect;
+	return Rectangle_Create(0, 0, Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_WIDTH), Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_HEIGHT));
 }
-Rectangle Utils_GetInternalRenderRectangle(void)
+Rectangle Utils_GetInternalRenderBounds(void)
 {
-	Rectangle rect = { 0, 0, Utils_GetInternalRenderWidth(), Utils_GetInternalRenderHeight() };
-	return rect;
-}
-int32_t Utils_GetInternalWidth(void)
-{
-	return Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_WIDTH);
-}
-int32_t Utils_GetInternalHeight(void)
-{
-	return Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_HEIGHT);
-}
-int32_t Utils_GetInternalRenderWidth(void)
-{
-	return Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_WIDTH);
-}
-int32_t Utils_GetInternalRenderHeight(void)
-{
-	return Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_HEIGHT);
+	return Rectangle_Create(0, 0, Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_WIDTH), Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_HEIGHT));
 }
 float Utils_GetCurrentHardwareRatio(void)
 {
@@ -545,7 +527,8 @@ float Utils_GetCurrentHardwareRatio(void)
 }
 float Utils_GetCurrentInternalRatio(void)
 {
-	return (float)(Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_WIDTH)) / (float)(Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_HEIGHT));
+	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
+	return ((float)internalRenderBounds.Width / (float)internalRenderBounds.Height);
 }
 void Utils_SplitString(const char* str, size_t maxlen, char delim, IStringArray* addToThis)
 {
@@ -1048,7 +1031,8 @@ Rectangle Utils_GetProposedWindowSize(void)
 }
 int32_t Utils_GetWindowSizeMulWidth(void)
 {
-	int32_t width = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_WIDTH);
+	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
+	int32_t width = internalRenderBounds.Width;
 	int32_t overrideWidth = Cvars_GetAsInt(CVARS_ENGINE_OVERRIDE_INTERNAL_WINDOW_WIDTH);
 	if (overrideWidth > 0)
 	{
@@ -1058,7 +1042,8 @@ int32_t Utils_GetWindowSizeMulWidth(void)
 }
 int32_t Utils_GetWindowSizeMulHeight(void)
 {
-	int32_t height = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_HEIGHT);
+	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
+	int32_t height = internalRenderBounds.Height;
 	int32_t overrideHeight = Cvars_GetAsInt(CVARS_ENGINE_OVERRIDE_INTERNAL_WINDOW_HEIGHT);
 	if (overrideHeight > 0)
 	{
@@ -1086,8 +1071,9 @@ Rectangle* Utils_GetWindowResolutions(bool filterAspectRatio, int32_t* length)
 		return arr_resolutions;
 	}
 
-	int32_t internalWidth = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_WIDTH);
-	int32_t internalHeight = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_HEIGHT);
+	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
+	int32_t internalWidth = internalRenderBounds.Width;
+	int32_t internalHeight = internalRenderBounds.Height;
 
 	Rectangle* arrValids = NULL;
 	arrput(arrValids, Rectangle_Create(0, 0, internalWidth, internalHeight));

@@ -8,6 +8,7 @@
 #include "../../third_party/stb_ds.h"
 #include "../utils/Utils.h"
 #include "../render/DrawRectangle.h"
+#include "../render/Color.h"
 #include "../utils/Logger.h"
 #include "Editor.h"
 #include "PartFuncData.h"
@@ -16,15 +17,10 @@
 #include "EditorPart.h"
 #include "../input/Input.h"
 
-static const Color COLOR_SELECTION_RECTANGLE = { 255, 0, 0, 84 };
-static const Color COLOR_GRID_INSIDE = { 84, 84, 153, 255 };
-static const Color COLOR_GRID_OUTSIDE = { 118, 118, 172, 255 };
-
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
 
 static int32_t _mCurrentLayer;
 static int32_t _mCurrentPart;
-static DrawRectangle* arr_many_rectangles_grid;
 
 static PartFuncData _mEditorParts[8];
 
@@ -79,54 +75,6 @@ static PartFuncData _mEditorParts[8];
  {
 	 SetPart(EDITORPART_COLLISION);
  }
-
-static void DrawGrid(SpriteBatch* spriteBatch)
-{
-	arrsetlen(arr_many_rectangles_grid, 0);
-
-	int margin = 2;
-
-	Camera* camera = Editor_GetCamera();
-	bool isCameraVeryZoomedOut = camera->mWorldZoom > 3;
-	int x1 = Camera_GetX1(camera);
-	int y1 = Camera_GetY1(camera);
-
-	LevelData* levelData = Get_LevelData();
-	int width = LevelData_GetGridSizeX(levelData);
-    int height = LevelData_GetGridSizeY(levelData);
-	if (levelData->_mIsMetaMap)
-	{
-		//width = levelData.GetMetaMap().GetTileMapWidth(); //TODO META MAP
-	   // height = levelData.GetMetaMap().GetTileMapHeight();
-	}
-
-	width = Camera_GetX2(camera, width);
-	height = Camera_GetY2(camera, height);
-
-	if (isCameraVeryZoomedOut)
-	{
-        int bigX = x1 * TILE_SIZE;
-        int bigY = y1 * TILE_SIZE;
-        int bigWidth = (width * TILE_SIZE) - bigX;
-        int bigHeight = (height * TILE_SIZE) - bigY;
-		arrput(arr_many_rectangles_grid, DrawRectangle_Create(COLOR_GRID_INSIDE, Rectangle_Create(bigX, bigY, bigWidth, bigHeight)));
-    }
-    else
-	{
-		for (int i = x1; i < width; i += 1)
-		{
-			for (int j = y1; j < height; j += 1)
-			{
-				arrput(arr_many_rectangles_grid, DrawRectangle_Create(COLOR_GRID_OUTSIDE, 
-					Rectangle_Create(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE)));
-				arrput(arr_many_rectangles_grid, DrawRectangle_Create(COLOR_GRID_INSIDE, 
-					Rectangle_Create(i * TILE_SIZE + (margin / 2), j * TILE_SIZE + (margin / 2), TILE_SIZE - margin, TILE_SIZE - margin)));
-			}
-		}
-	}
-
-	SpriteBatch_DrawManyRectangle(spriteBatch, 0, arr_many_rectangles_grid);
-}
 
 void ActivePart_Init(void)
 {
@@ -197,7 +145,7 @@ void ActivePart_Draw(SpriteBatch* spriteBatch)
 {
     //Init();
 
-    //GetCurrentFuncData().Draw(spriteBatch);
+    ActivePart_GetCurrentPart().Draw(spriteBatch);
 
     if (_mCurrentPart == EDITORPART_META_MAP)
     {
@@ -206,17 +154,14 @@ void ActivePart_Draw(SpriteBatch* spriteBatch)
 	
 	LevelData* ld = Get_LevelData();
 
-	DrawGrid(spriteBatch);
-
 	bool useGameCamera = Cvars_GetAsBool(CVARS_EDITOR_USE_GAME_CAMERA);
-	LevelData_DrawTiles2(ld, spriteBatch, useGameCamera ? Get_Camera() : Editor_GetCamera(), ActivePart_GetCurrentLayer(), 2);
 	LevelData_DrawTiles2(ld, spriteBatch, useGameCamera ? Get_Camera() : Editor_GetCamera(), ActivePart_GetCurrentLayer(), 2);
 
 	LevelData_DrawProps(ld, spriteBatch, Editor_GetCamera());
 
-	/*
-	Get_LevelData().DrawCollision(spriteBatch, ref OeEditor.GetCamera());
+	LevelData_DrawCollision(ld, spriteBatch, Editor_GetCamera());
 
+	/*
 	if (_mCurrentPart != PART_LINE)
 	{
 		Get_LevelData().DrawLines(spriteBatch);
@@ -233,7 +178,7 @@ void ActivePart_Draw(SpriteBatch* spriteBatch)
 }
 void ActivePart_DrawHud(SpriteBatch* spriteBatch)
 {
-
+	ActivePart_GetCurrentPart().DrawHud(spriteBatch);
 }
 PartFuncData ActivePart_GetCurrentPart(void)
 {

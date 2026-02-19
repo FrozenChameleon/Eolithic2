@@ -8,6 +8,7 @@
 
 #include "../math/Math.h"
 #include "../utils/Cvars.h"
+#include "../utils/Utils.h"
 
 void CameraSys_UpdateLastRenderPositionRoutine(Camera* data)
 {
@@ -31,9 +32,8 @@ void CameraSys_InitCamera(Camera* data)
 	data->mHingeSpeedLimit.X = 3.0f;
 	data->mHingeSpeedLimit.Y = 3.0f;
 
-	int32_t width = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_WIDTH);
-	int32_t height = Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_HEIGHT);
-	Camera_Resize(data, width, height);
+	Rectangle internalBounds = Utils_GetInternalBounds();
+	Camera_Resize(data, internalBounds.Width, internalBounds.Height);
 }
 void CameraSys_UpdateRoutine(Entity owner, Camera* data)
 {

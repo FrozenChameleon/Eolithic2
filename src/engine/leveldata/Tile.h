@@ -34,3 +34,4 @@ void Tile_Write(Tile* t, DynamicByteBuffer* dbb);
 Rectangle Tile_GetCollisionRectangle(Tile* t, int32_t gridX, int32_t gridY);
 void Tile_DrawProps(Tile* t, SpriteBatch* spriteBatch, const Camera* camera, int32_t gridX, int32_t gridY, bool overrideDepth);
 void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const Camera* camera, int32_t gridX, int32_t gridY, bool overrideDepth, bool drawInfo);
+Tile* Tile_CreateClone(Tile* t);

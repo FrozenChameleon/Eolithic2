@@ -60,8 +60,9 @@ static void DrawHud(void* givenData, SpriteBatch* spriteBatch)
 		Rectangle rect = sheet->mRectangle;
 		rect.Width *= scale;
 		rect.Height *= scale;
+		Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
 		Sheet_Draw5(sheet, spriteBatch, COLOR_WHITE, 100, false, false,
-			NULL, Vector2_Create((float)(Cvars_GetAsInt(CVARS_ENGINE_INTERNAL_RENDER_WIDTH) - rect.Width + offsetX), (float)offsetY),
+			NULL, Vector2_Create((float)(internalRenderBounds.Width - rect.Width + offsetX), (float)offsetY),
 			Vector2_Create2((float)scale), 0, false, false, Vector2_Zero);
 	}
 }

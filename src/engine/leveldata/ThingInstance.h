@@ -51,3 +51,4 @@ int32_t ThingInstance_GetLeft(ThingInstance* ti, float positionX);
 int32_t ThingInstance_GetTop(ThingInstance* ti, float positionY);
 int32_t ThingInstance_GetWidth(ThingInstance* ti);
 int32_t ThingInstance_GetHeight(ThingInstance* ti);
+ThingInstance* ThingInstance_CreateClone(ThingInstance* ti);

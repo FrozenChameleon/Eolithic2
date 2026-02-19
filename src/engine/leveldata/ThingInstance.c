@@ -186,9 +186,6 @@ void ThingInstance_SetupSettings(ThingInstance* instance, bool ignoreWarnings)
 	}
 	*/
 }
-
-
-
 void ThingInstance_RemoveUnrelatedPairs(ThingInstance* instance, StringPair* arr_from, StringPair* arr_to, bool ignoreWarnings)
 {
 	/*for (int32_t i = 0; i < instance->mSettings.size(); i += 1) //UNUSED
@@ -370,4 +367,21 @@ int32_t ThingInstance_GetWidth(ThingInstance* ti)
 int32_t ThingInstance_GetHeight(ThingInstance* ti)
 {
 	return TILE_SIZE;
+}
+ThingInstance* ThingInstance_CreateClone(ThingInstance* ti)
+{
+	ThingInstance* clone = (ThingInstance*)Utils_calloc(1, sizeof(ThingInstance));
+	ThingInstance_Init(clone);
+	Utils_memcpy(clone, ti, sizeof(ThingInstance));
+	clone->arr_nodes = NULL;
+	clone->arr_settings = NULL;
+	for (int i = 0; i < arrlen(ti->arr_nodes); i += 1)
+	{
+		arrput(clone->arr_nodes, ti->arr_nodes[i]);
+	}
+	for (int i = 0; i < arrlen(ti->arr_settings); i += 1)
+	{
+		arrput(clone->arr_settings, ti->arr_settings[i]);
+	}
+	return clone;
 }

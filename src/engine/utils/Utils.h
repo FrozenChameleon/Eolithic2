@@ -95,12 +95,8 @@ int32_t Utils_StringFirstIndexOf(char findThis, const char* strInThis, size_t ma
 int32_t Utils_StringLastIndexOf(char findThis, const char* strInThis, size_t maxlen);
 double Utils_GetNormalStepLength(void);
 double Utils_GetInterpolated(double deltaTime, float current, float last);
-Rectangle Utils_GetInternalRectangle(void);
-Rectangle Utils_GetInternalRenderRectangle(void);
-int32_t Utils_GetInternalWidth(void);
-int32_t Utils_GetInternalHeight(void);
-int32_t Utils_GetInternalRenderWidth(void);
-int32_t Utils_GetInternalRenderHeight(void);
+Rectangle Utils_GetInternalBounds(void);
+Rectangle Utils_GetInternalRenderBounds(void);
 float Utils_GetCurrentHardwareRatio(void);
 float Utils_GetCurrentInternalRatio(void);
 void Utils_SplitString(const char* str, size_t maxlen, char delim, IStringArray* addToThis);

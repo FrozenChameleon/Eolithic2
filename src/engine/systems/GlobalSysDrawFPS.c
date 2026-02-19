@@ -64,7 +64,8 @@ static void DrawHud(void* givenData, SpriteBatch* spriteBatch)
 	Rectangle bounds = DrawTool_GetBounds(stringToDraw, _mFont);
 	int32_t shadowOffset = 1;
 	float x = (float)_mOffsetFromCorner;
-	float y = (float)(Utils_GetInternalRenderHeight() - bounds.Height - shadowOffset - _mOffsetFromCorner);
+	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
+	float y = (float)(internalRenderBounds.Height - bounds.Height - shadowOffset - _mOffsetFromCorner);
 	SpriteBatch_DrawString(spriteBatch, _mFont, stringToDraw, COLOR_BLACK, 200, Vector2_Create(x + shadowOffset, y + shadowOffset));
 	SpriteBatch_DrawString(spriteBatch, _mFont, stringToDraw, COLOR_WHITE, 200, Vector2_Create(x, y));
 }
