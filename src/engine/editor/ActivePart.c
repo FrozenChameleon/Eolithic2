@@ -16,8 +16,7 @@
 #include "EditorGlobals.h"
 #include "EditorPart.h"
 #include "../input/Input.h"
-
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
+#include "PartTile.h"
 
 static int32_t _mCurrentLayer;
 static int32_t _mCurrentPart;
@@ -40,10 +39,10 @@ static PartFuncData _mEditorParts[8];
 	 case EDITORPART_COLLISION:
 		 Logger_LogInformation("Mode: Collision");
 		 break;
-	 /*case PART_TILE_PICKER:
-		 OeLogger.LogInformation("Mode: Tile");
-		 break;
-	 case PART_THING:
+	case EDITORPART_TILE_PICKER:
+		 Logger_LogInformation("Mode: Tile");
+		 break;/*
+	 case PART_THING: 
 		 OeLogger.LogInformation("Mode: Thing");
 		 break;
 	 case PART_PROP:
@@ -71,10 +70,7 @@ static PartFuncData _mEditorParts[8];
 	 ActivePart_GetCurrentPart().JustChangedToThisPart();
  }
 
- static void SetPartToCollision()
- {
-	 SetPart(EDITORPART_COLLISION);
- }
+
 
 void ActivePart_Init(void)
 {
@@ -89,8 +85,8 @@ void ActivePart_Init(void)
 		_mEditorParts[i] = OeEditorPart.CreateDummyFuncData();
 	}
 	*/
-	_mEditorParts[0] = PartCollision_GetFuncData();/*
-	_mEditorParts[1] = OeEditorPartTile.GetFuncData();
+	_mEditorParts[0] = PartCollision_GetFuncData();
+	_mEditorParts[1] = PartTile_GetFuncData();/*
 	_mEditorParts[2] = OeEditorPartThing.GetFuncData();
 	_mEditorParts[3] = OeEditorPartProp.GetFuncData();
 	_mEditorParts[4] = OeEditorPartLine.GetFuncData();
@@ -100,14 +96,14 @@ void ActivePart_Init(void)
 
 	_mHasInit = true;
 
-	SetPartToCollision();
+	ActivePart_SetPartToCollision();
 }
 
 int32_t ActivePart_GetCurrentLayer(void)
 {
 	return _mCurrentLayer;
 }
-void ActivePart_Update(double deltaTime)
+void ActivePart_Update()
 {
 	ActivePart_GetCurrentPart().CreateWindows();
 
@@ -139,7 +135,7 @@ void ActivePart_Update(double deltaTime)
 		return;
 	}
 
-	ActivePart_GetCurrentPart().Update(deltaTime);
+	ActivePart_GetCurrentPart().Update();
 }
 void ActivePart_Draw(SpriteBatch* spriteBatch)
 {
@@ -183,4 +179,60 @@ void ActivePart_DrawHud(SpriteBatch* spriteBatch)
 PartFuncData ActivePart_GetCurrentPart(void)
 {
 	return _mEditorParts[_mCurrentPart];
+}
+
+void ActivePart_SetPartToCollision()
+{
+	SetPart(EDITORPART_COLLISION);
+}
+
+void ActivePart_SetPartToTile()
+{
+	SetPart(EDITORPART_TILE_PICKER);
+}
+
+void ActivePart_SetPartToThing()
+{
+	//SetPart(PART_THING);
+}
+
+void ActivePart_SetPartToProp()
+{
+	//SetPart(PART_PROP);
+}
+
+void ActivePart_SetPartToLine()
+{
+	/*if (!OeEditorGlobalDefs.EDITOR_GLOBAL_DEF_DISABLE_EDITOR_PART_LINE)
+	{
+		SetPart(PART_LINE);
+	}*/
+}
+
+void ActivePart_SetPartToCamera()
+{
+	/*if (!OeEditorGlobalDefs.EDITOR_GLOBAL_DEF_DISABLE_EDITOR_PART_CAMERA)
+	{
+		SetPart(PART_CAMERA);
+	}*/
+}
+
+void ActivePart_SetPartToDraw()
+{
+	//SetPart(PART_DRAW);
+}
+
+void ActivePart_SetPartToMetaMap()
+{
+	/*if (!Get_LevelData().IsMetaMap())
+	{
+		return;
+	}
+
+	if (OeGlobals.DebugIsMetaMapEditTileModeAtMapLoad())
+	{
+		return;
+	}
+
+	SetPart(PART_META_MAP);*/
 }

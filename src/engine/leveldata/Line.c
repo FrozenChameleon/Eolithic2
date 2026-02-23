@@ -18,9 +18,6 @@
 #include "../io/BufferReader.h"
 #include "../render/SpriteBatch.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-#define HALF_TILE_SIZE GLOBAL_DEF_HALF_TILE_SIZE
-
 enum
 {
 	LINE_DELAY = 16,

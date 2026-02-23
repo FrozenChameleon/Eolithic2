@@ -19,7 +19,15 @@ typedef enum EditorPartType
 
 void ActivePart_Init(void);
 int32_t ActivePart_GetCurrentLayer(void);
-void ActivePart_Update(double deltaTime);
+void ActivePart_Update();
 void ActivePart_Draw(SpriteBatch* spriteBatch);
 void ActivePart_DrawHud(SpriteBatch* spriteBatch);
 PartFuncData ActivePart_GetCurrentPart(void);
+void ActivePart_SetPartToCollision();
+void ActivePart_SetPartToTile();
+void ActivePart_SetPartToThing();
+void ActivePart_SetPartToProp();
+void ActivePart_SetPartToLine();
+void ActivePart_SetPartToCamera();
+void ActivePart_SetPartToDraw();
+void ActivePart_SetPartToMetaMap();

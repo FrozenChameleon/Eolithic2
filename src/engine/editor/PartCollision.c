@@ -11,6 +11,7 @@
 #include "../core/Func.h"
 #include "imgui.h"
 #include "../input/Input.h"
+#include "EditorGlobals.h"
 
 static int32_t _mType = 1;
 static MString* _mTempString;
@@ -18,7 +19,7 @@ static MString* _mTempString;
 void PartCollision_CreateWindows()
 {
 	bool test = false;
-	ImGui::SetNextWindowSize(ImVec2(300, 200));
+	ImGui::SetNextWindowSize(ImVec2(300, 500));
 	if (!ImGui::Begin("Collision Mode", &test, ImGuiWindowFlags_NoResize))
 	{
 		return;
@@ -41,43 +42,34 @@ void PartCollision_CreateWindows()
 
 	ImGui::End();
 }
-static void Operation(float x, float y, int type)
+
+static void Operation(int type)
 {
-	Tile* tile = EditorPart_GetGridTileFromPixel(Vector2_Create(x, y));
-	if (tile != NULL)
+	EditorGlobals_StallOperationCounter();
+
+	Rectangle gridBounds = EditorPart_GetSelectionRectangleAsGridBounds();
+	for (int j = gridBounds.Y; j < (gridBounds.Y + gridBounds.Height); j += 1)
 	{
-		tile->mCollisionType = type;
-		Point point = CollisionEngineSys_GetCollisionGridPosition(x, y);
-		if (Is_ComponentPackPresent(C_CollisionEngine))
+		for (int i = gridBounds.X; i < (gridBounds.X + gridBounds.Width); i += 1)
 		{
-			CollisionEngineSys_SetCollisionBitSafeGrid(Get_CollisionEngine(), point.X, point.Y, type);
+			Tile* tile = EditorPart_GetGridTile(i, j);
+			if (tile == NULL)
+			{
+				continue;
+			}
+
+			EditorPart_PushPatch(tile);
+
+			tile->mCollisionType = type;
+			Point point = CollisionEngineSys_GetCollisionGridPosition((float)i, (float)j);
+			if (Is_ComponentPackPresent(C_CollisionEngine))
+			{
+				CollisionEngineSys_SetCollisionBitSafeGrid(Get_CollisionEngine(), point.X, point.Y, type);
+			}
 		}
 	}
-}
-static void OperationHelper(int type)
-{
-	Operation(EditorPart_GetRestrainedMouseX(), EditorPart_GetRestrainedMouseY(), type);
-	/*if (!IsSelecting())
-	{
-	SetPatch1(GetPatchSingleSelection());
-	Operation(GetRestrainedMouseX(), GetRestrainedMouseY(), type);
-	SetPatch2(GetPatchSingleSelection());
-	}
-	else
-	{
-	SetPatch1(GetPatchSelectionRectangle());
-	Rectangle selectionRectangle = GetSelectionRectangle();
-	for (int i = selectionRectangle.Left; i < selectionRectangle.Right; i += OeUtils.GetHalfTileSize())
-	{
-	for (int j = selectionRectangle.Top; j < selectionRectangle.Bottom; j += OeUtils.GetHalfTileSize())
-	{
-	Operation(i, j, type);
-	}
-	}
-	SetPatch2(GetPatchSelectionRectangle());
-	}
 
-	CheckPatch();*/
+	EditorPart_FinishPatches();
 }
 void PartCollision_UpdateHelper()
 {
@@ -130,11 +122,11 @@ void PartCollision_UpdateHelper()
 
 	if (Input_IsLeftMousePressed())
 	{
-		OperationHelper(_mType);
+		Operation(_mType);
 	}
 	else if (Input_IsRightMousePressed())
 	{
-		OperationHelper(0);
+		Operation(0);
 	}
 
 	Cvars_SetAsBool(CVARS_EDITOR_SHOW_COLLISION, true);
@@ -155,14 +147,13 @@ void PartCollision_Draw(SpriteBatch* spriteBatch)
 {
 	EditorPart_DoDefaultEditorPartDrawRoutine(spriteBatch, EditorPart_DefaultDrawSingleSelectionSelectedTiles);
 }
-
 void PartCollision_JustChangedToThisPart()
 {
 	Cvars_SetAsBool(CVARS_EDITOR_SHOW_COLLISION, true);
 }
-void PartCollision_Update(double deltaTime)
+void PartCollision_Update()
 {
-	EditorPart_DoDefaultEditorPartUpdateRoutine(deltaTime);
+	EditorPart_DoDefaultEditorPartUpdateRoutine();
 
 	PartCollision_UpdateHelper();
 }

@@ -15,8 +15,6 @@
 #include "../io/BufferReader.h"
 #include "../io/DynamicByteBuffer.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 #define VERSION_ANIMTILE 7
 
 void AnimTile_Read(AnimTile* at, BufferReader* br)

@@ -110,18 +110,17 @@ typedef enum DrawMode
 	RENDERER_DRAWMODE_STRETCH = 3
 } DrawMode;
 
+typedef void (*Renderer_DrawFunc)(SpriteBatch* spriteBatch);
+
 void Renderer_SetGlobalShaderProgram(ShaderProgram* value);
 ShaderProgram* Renderer_GetGlobalShaderProgram(void);
 void Renderer_INTERNAL_SetCurrentShaderProgram(ShaderProgram* value);
 ShaderProgram* Renderer_INTERNAL_GetCurrentShaderProgram(void);
 void Renderer_INTERNAL_SetCurrentBlendState(BlendState value);
 BlendState Renderer_INTERNAL_GetCurrentBlendState(void);
-void Renderer_INTERNAL_SetCurrentCameraPosition(Vector2 value);
-Vector2 Renderer_INTERNAL_GetCurrentCameraPosition(void);
 void Renderer_INTERNAL_SetCurrentDepth(int32_t value);
 int32_t Renderer_INTERNAL_GetCurrentDepth(void);
-void Renderer_INTERNAL_SetCurrentZoom(float value);
-float Renderer_INTERNAL_GetCurrentZoom(void);
+Matrix Renderer_INTERNAL_GetCurrentTranslation();
 Rectangle Renderer_GetWantedBackBufferBounds(void);
 int32_t Renderer_Init(void* deviceWindowHandle);
 int32_t Renderer_InitSpriteBatch(void);
@@ -163,7 +162,7 @@ void Renderer_DrawManyRectangles(RenderCommandManyRectangle* draw);
 Rectangle Renderer_RenderBmFont(bool drawTheText, BmFont* bmf, const char* text, Color color, Vector2 position);
 void Renderer_DrawString(RenderCommandString* draw, double deltaTime);
 void Renderer_DrawTiles(RenderCommandTileLayer* draw);
-void Renderer_Commit(SpriteBatch* render, Vector2 cameraOffset, float cameraZoom, double deltaTime);
+void Renderer_Commit(SpriteBatch* render, Matrix translation, double deltaTime);
 void Renderer_BeforeRender(void);
 void Renderer_AfterRender(void);
 void Renderer_Render(double deltaTime);
@@ -185,3 +184,4 @@ int32_t Renderer_GetFPS(void);
 int32_t Renderer_GetRenderTargetScale(void);
 void Renderer_StartImGuiFrame(void);
 void Renderer_SetupImGuiRenderState(void);
+Texture* Renderer_RenderToTexture(int width, int height, Color clearColor, Renderer_DrawFunc draw);

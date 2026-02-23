@@ -17,19 +17,17 @@
 #include "../resources/ResourceManager.h"
 #include "../resources/ResourceManagerList.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 static Color SELECTBOX_COLOR = { 0, 0, 255, 76 };
 static Color SELECTBOX_COLOR_OFF = { 0, 255, 0, 153 };
 
 static Prop* GetThePropData(PropInstance* prop)
 {
-	if (prop->INTERNAL_mCachedPropData == NULL)
+	return (Prop*)ResourceManager_GetResourceData(ResourceManagerList_Prop(), prop->mName);
+	/*if (prop->INTERNAL_mCachedPropData == NULL)
 	{
 		prop->INTERNAL_mCachedPropData = (Prop*)ResourceManager_GetResourceData(ResourceManagerList_Prop(), prop->mName);
 	}
-
-	return prop->INTERNAL_mCachedPropData;
+	return prop->INTERNAL_mCachedPropData;*/
 }
 
 void PropInstance_Init(PropInstance* prop)
@@ -192,14 +190,9 @@ bool PropInstance_IsPropActuallyTouched(PropInstance* prop, Point relativeMouse)
 	}
 	return false;*/
 }
-bool PropInstance_IsEqualTo(PropInstance* pi, PropInstance* instance)
+bool PropInstance_EqualTo(const PropInstance* value1, const PropInstance* value2)
 {
-	if (Vector2_EqualTo(instance->mOffset, pi->mOffset) && (instance->mScale == pi->mScale) && (instance->mDepth == pi->mDepth) &&
-		(instance->mRotation == pi->mRotation) && Vector2_EqualTo(instance->mDrawOffset, pi->mDrawOffset) && (instance->mFlipX == pi->mFlipX) &&
-		(instance->mFlipY == pi->mFlipY) && (Utils_StringEqualTo(instance->mName, pi->mName)))
-	{
-		return true;
-	}
-
-	return false;
+	size_t offset = sizeof(Prop*);
+	size_t size = sizeof(PropInstance);
+	return (Utils_memcmp(value1, value2, size - offset) == 0); //Ignore INTERNAL_mCachedPropData.
 }

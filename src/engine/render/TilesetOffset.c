@@ -15,8 +15,6 @@
 #include "../../third_party/stb_ds.h"
 #include "../utils/IStringArray.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 typedef struct HmInnerMap
 {
 	int32_t key;
@@ -96,7 +94,7 @@ void TilesetOffset_Dispose(TilesetOffset* to)
 
 void TilesetOffset_LoadOffsetPoint(DrawTile* drawTile, const char* tilesetName)
 {
-	drawTile->mOffsetPoint = Point_Zero;
+	drawTile->INTERNAL_mCachedOffsetPoint = Point_Zero;
 
 	if (Utils_StringEqualTo(tilesetName, EE_STR_EMPTY))
 	{
@@ -135,5 +133,5 @@ void TilesetOffset_LoadOffsetPoint(DrawTile* drawTile, const char* tilesetName)
 	}
 
 	Point pointToReturn = hm_offset_map_ref[loc].value;
-	drawTile->mOffsetPoint = pointToReturn;
+	drawTile->INTERNAL_mCachedOffsetPoint = pointToReturn;
 }

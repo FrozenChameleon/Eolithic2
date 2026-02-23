@@ -44,8 +44,6 @@ static uint64_t _mMallocRefs;
 static int64_t _mSaveFrames;
 static Rectangle* arr_resolutions;
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 #define MISSING_NUMBER "?"
 
 #define NUMBERS_WITH_ZEROS_HUNDREDS_LEN 1000

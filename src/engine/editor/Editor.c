@@ -10,6 +10,8 @@
 #include "EditorPart.h"
 #include "ActivePart.h"
 #include "imgui.h"
+#include "EditorGlobals.h"
+#include "EditorDebugToggles.h"
 
 static Camera _mCamera;
 
@@ -292,13 +294,20 @@ static void MainMenuBar()
         ImGui::EndMainMenuBar();
     }
 }
-void Editor_Update(double deltaTime)
+void Editor_Update()
 {
+    EditorGlobals_Update();
+
 	CameraSys_UpdateCamera(&_mCamera);
 
 	MainMenuBar();
 
-    ActivePart_Update(deltaTime);
+    ActivePart_Update();
+
+    Rectangle drawableSize = Renderer_GetDrawableSize(); //TODO ONRESIZE
+    Camera_Resize(&_mCamera, drawableSize.Width, drawableSize.Height);
+
+    EditorDebugToggles_Update();
 }
 void Editor_Draw(SpriteBatch* spriteBatch)
 {

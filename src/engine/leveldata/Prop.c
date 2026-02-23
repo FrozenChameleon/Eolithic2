@@ -19,8 +19,6 @@
 #include "../render/BlendState.h"
 #include "../io/DynamicByteBuffer.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 #define VERSION_PROP 7
 
 void Prop_Init(Prop* p)

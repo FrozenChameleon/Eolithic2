@@ -22,6 +22,7 @@ typedef struct Vector3
 	float Z;
 } Vector3;
 
+Vector3 Vector3_Create(float x, float y, float z);
 void Vector3_Init(Vector3* vector, float x, float y, float z);
 void Vector3_Init2(Vector3* vector, float value);
 Vector3 Vector3_Normalize(Vector3 value);

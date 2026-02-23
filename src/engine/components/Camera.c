@@ -15,8 +15,6 @@
 #include "../utils/Utils.h"
 #include "CameraSys.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 void Camera_UpdateLastRenderPosition(Camera* camera)
 {
 	camera->mLastRenderedPosition = camera->mCurrentPosition;
@@ -55,9 +53,13 @@ Vector2 Camera_GetInterpCameraAsVector2(const Camera* camera, double deltaTime)
 Matrix Camera_GetInterpCamera(const Camera* camera, float offsetX, float offsetY, double deltaTime, int32_t scale)
 {
 	Vector2 pos = Camera_GetInterpCameraAsVector2(camera, deltaTime);
-	return Camera_GetTranslation(offsetX + pos.X, offsetY + pos.Y, 
-		camera->mWorldRotation, (1.0f / camera->mWorldZoom) * scale, 
-		(float)(camera->mWorldWidth * scale), (float)(camera->mWorldHeight * scale));
+	float translationX = offsetX + pos.X;
+	float translationY = offsetY + pos.Y;
+	float translationRotation = camera->mWorldRotation;
+	float translationZoom = (1.0f / camera->mWorldZoom) * scale;
+	float translationWidth = (float)(camera->mWorldWidth * scale);
+	float translationHeight = (float)(camera->mWorldHeight * scale);
+	return Camera_GetTranslation(translationX, translationY, translationRotation, translationZoom, translationWidth, translationHeight);
 }
 float Camera_GetRenderedInterpolatedX(const Camera* camera, double deltaTime)
 {
@@ -87,26 +89,16 @@ float Camera_GetRenderedInterpolatedY(const Camera* camera, double deltaTime)
 }
 Matrix Camera_GetTranslation(float x, float y, float rotation, float zoom, float width, float height)
 {
-	Vector3 temp;
+	Matrix translate = Matrix_CreateTranslation(Vector3_Create(-x, -y, 0));
+	Matrix rotate = Matrix_CreateRotationZ(rotation);
+	Matrix scale = Matrix_CreateScale(Vector3_Create(zoom, zoom, 0));
+	Matrix world = Matrix_CreateTranslation(Vector3_Create(width * 0.5f, height * 0.5f, 0));
 
-	temp.X = -x;
-	temp.Y = -y;
-	temp.Z = 0;
-	Matrix model = Matrix_CreateTranslation(temp);
-
-	Matrix rot = Matrix_CreateRotationZ(rotation);
-
-	temp.X = zoom;
-	temp.Y = zoom;
-	temp.Z = 0;
-	Matrix scale = Matrix_CreateScale(temp);
-
-	temp.X = width * 0.5f;
-	temp.Y = height * .5f;
-	temp.Z = 0;
-	Matrix world = Matrix_CreateTranslation(temp);
-
-	return Matrix_Mul(&model, Matrix_Mul(&rot, Matrix_Mul(&scale, world)));
+	Matrix result = Matrix_Multiply(translate, rotate);
+	result = Matrix_Multiply(result, scale);
+	result = Matrix_Multiply(result, world);
+	return result;
+	//return Matrix_Mul(&model, Matrix_Mul(&rot, Matrix_Mul(&scale, world)));
 }
 void Camera_Resize(Camera* camera, int32_t width, int32_t height)
 {

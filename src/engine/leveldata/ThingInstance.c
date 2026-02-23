@@ -9,7 +9,6 @@
 #include "../utils/Macros.h"
 #include "../utils/Utils.h"
 #include "../io/BufferReader.h"
-//#include "ThingSettings.h"
 #include "../render/SpriteBatch.h"
 #include "../math/Points.h"
 #include "../utils/Logger.h"
@@ -17,11 +16,7 @@
 #include "../core/Game.h"
 #include "../core/GameHelper.h"
 #include "../resources/ResourceManager.h"
-#include "../utils/Utils.h"
 #include "../../third_party/stb_ds.h"
-
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-#define HALF_TILE_SIZE GLOBAL_DEF_HALF_TILE_SIZE
 
 const char* THINGINSTANCE_SETTING_DTN_OFFSET_X = "DTN_OFFSET_X";
 const char* THINGINSTANCE_SETTING_DTN_OFFSET_Y = "DTN_OFFSET_Y";
@@ -368,20 +363,59 @@ int32_t ThingInstance_GetHeight(ThingInstance* ti)
 {
 	return TILE_SIZE;
 }
-ThingInstance* ThingInstance_CreateClone(ThingInstance* ti)
+ThingInstance ThingInstance_CreateClone(ThingInstance* ti)
 {
-	ThingInstance* clone = (ThingInstance*)Utils_calloc(1, sizeof(ThingInstance));
-	ThingInstance_Init(clone);
-	Utils_memcpy(clone, ti, sizeof(ThingInstance));
-	clone->arr_nodes = NULL;
-	clone->arr_settings = NULL;
+	ThingInstance clone = { 0 };
+	ThingInstance_Init(&clone);
+	Utils_memcpy(&clone, ti, sizeof(ThingInstance));
+	clone.arr_nodes = NULL;
+	clone.arr_settings = NULL;
 	for (int i = 0; i < arrlen(ti->arr_nodes); i += 1)
 	{
-		arrput(clone->arr_nodes, ti->arr_nodes[i]);
+		arrput(clone.arr_nodes, ti->arr_nodes[i]);
 	}
 	for (int i = 0; i < arrlen(ti->arr_settings); i += 1)
 	{
-		arrput(clone->arr_settings, ti->arr_settings[i]);
+		arrput(clone.arr_settings, ti->arr_settings[i]);
 	}
 	return clone;
+}
+bool ThingInstance_EqualTo(const ThingInstance* value1, const ThingInstance* value2)
+{
+	if (!Utils_StringEqualTo(value1->mName, value2->mName))
+	{
+		return false;
+	}
+
+	if (arrlen(value1->arr_nodes) == arrlen(value2->arr_nodes))
+	{
+		for (int i = 0; i < arrlen(value1->arr_nodes); i += 1)
+		{
+			if(!Point_EqualTo(value1->arr_nodes[i], value2->arr_nodes[i]))
+			{
+				return false;
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	if (arrlen(value1->arr_settings) == arrlen(value2->arr_settings))
+	{
+		for (int i = 0; i < arrlen(value1->arr_settings); i += 1)
+		{
+			if (!StringPair_EqualTo(&value1->arr_settings[i], &value2->arr_settings[i]))
+			{
+				return false;
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
 }

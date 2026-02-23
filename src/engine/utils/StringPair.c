@@ -9,6 +9,7 @@
 #include "../utils/Macros.h"
 #include "../io/BufferReader.h"
 #include "../io/DynamicByteBuffer.h"
+#include "../utils/Utils.h"
 
 const StringPair StringPair_Empty = { EE_STR_EMPTY, EE_STR_EMPTY };
 
@@ -17,8 +18,16 @@ void StringPair_Read(StringPair* pair, BufferReader* br)
 	BufferReader_ReadString(br, pair->mKey, EE_FILENAME_MAX);
 	BufferReader_ReadString(br, pair->mValue, EE_FILENAME_MAX);
 }
-void StringPair_Write(StringPair* pair, DynamicByteBuffer* dbb)
+void StringPair_Write(const StringPair* pair, DynamicByteBuffer* dbb)
 {
 	DynamicByteBuffer_WriteString(dbb, pair->mKey, EE_FILENAME_MAX);
 	DynamicByteBuffer_WriteString(dbb, pair->mValue, EE_FILENAME_MAX);
+}
+bool StringPair_EqualTo(const StringPair* value1, const StringPair* value2)
+{
+	if (!Utils_StringEqualTo(value1->mKey, value2->mKey) || !Utils_StringEqualTo(value1->mValue, value2->mValue))
+	{
+		return false;
+	}
+	return true;
 }

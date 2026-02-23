@@ -96,15 +96,19 @@ Color Color_ToColor(Color color, int32_t alpha)
 }
 float Color_RedF(Color color)
 {
-	return color.R / 255.0f;
+	return (float)color.R / 0xFF;
 }
 float Color_GreenF(Color color)
 {
-	return color.G / 255.0f;
+	return (float)color.G / 0xFF;
 }
 float Color_BlueF(Color color)
 {
-	return color.B / 255.0f;
+	return (float)color.B / 0xFF;
+}
+float Color_AlphaF(Color color)
+{
+	return (float)color.A / 0xFF;
 }
 Color Color_Create4(int32_t red, int32_t green, int32_t blue, int32_t alpha)
 {

@@ -22,15 +22,39 @@
 
 #define VERSION_LEVELDATA 12
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 static DrawRectangle* arr_many_rectangles;
+
+static int32_t LevelData_GetTilePos1D(LevelData* ld, int32_t i, int32_t j)
+{
+	return Utils_Get1DArrayPosFor2DArray(i, j, ld->tilemap.boundary.Width);
+}
 
 LevelData* LevelData_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br)
 {
 	LevelData* levelData = (LevelData*)Utils_calloc(1, sizeof(LevelData));
 	LevelData_Read(levelData, br);
 	return levelData;
+}
+void LevelData_Init(LevelData* ld)
+{
+	Utils_strlcpy(ld->mLevelName, EE_STR_NOT_SET, EE_FILENAME_MAX);
+	Utils_strlcpy(ld->mTilesetName, EE_STR_NOT_SET, EE_FILENAME_MAX);
+
+	for (int i = 0; i < LEVELDATA_STRING_DATA_LENGTH; i += 1)
+	{
+		Utils_strlcpy(ld->mStringData[i], EE_STR_NOT_SET, EE_FILENAME_MAX);
+	}
+
+	for (int i = 0; i < LEVELDATA_LAYER_DATA_LENGTH; i += 1)
+	{
+		ld->mLayerData[i].mDepth = (int32_t)(100 - (i * (100.0f / LEVELDATA_LAYER_DATA_LENGTH)));
+	}
+
+	int32_t defaultWidth = Cvars_GetAsInt(CVARS_ENGINE_DEFAULT_CHUNK_WIDTH);
+	int32_t defaultHeight = Cvars_GetAsInt(CVARS_ENGINE_DEFAULT_CHUNK_HEIGHT);
+	Rectangle tilemapBoundary = Rectangle_Create(0, 0, defaultWidth, defaultHeight);
+	Tilemap_Init(&ld->tilemap, tilemapBoundary);
+	Tilemap_FillWithNewTiles(&ld->tilemap);
 }
 void LevelData_Dispose(LevelData* ld)
 {
@@ -166,9 +190,9 @@ void LevelData_ReadData(int32_t version, LevelData* ld, BufferReader* reader)
 		arrput(ld->arr_save_tiles, tile);
 	}
 
-	ld->_mGridSize.Width = BufferReader_ReadI32(reader);
-	ld->_mGridSize.Height = BufferReader_ReadI32(reader);
-	ld->_mSaveTileMap = BufferReader_ReadIntArray2D(reader, ld->_mGridSize.Width, ld->_mGridSize.Height);
+	ld->tilemap.boundary.Width = BufferReader_ReadI32(reader);
+	ld->tilemap.boundary.Height = BufferReader_ReadI32(reader);
+	ld->_mSaveTileMap = BufferReader_ReadIntArray2D(reader, ld->tilemap.boundary.Width, ld->tilemap.boundary.Height);
 
 	int32_t cameraDataSize = BufferReader_ReadI32(reader);
 	for (int32_t i = 0; i < cameraDataSize; i += 1)
@@ -197,9 +221,9 @@ void LevelData_WriteData(LevelData* ld, DynamicByteBuffer* dbb)
 
 	DynamicByteBuffer_WriteNewline(dbb);
 
-	DynamicByteBuffer_WriteI32(dbb, ld->_mGridSize.Width);
-	DynamicByteBuffer_WriteI32(dbb, ld->_mGridSize.Height);
-	DynamicByteBuffer_WriteIntArray2D(dbb, ld->_mSaveTileMap, ld->_mGridSize.Width, ld->_mGridSize.Height);
+	DynamicByteBuffer_WriteI32(dbb, ld->tilemap.boundary.Width);
+	DynamicByteBuffer_WriteI32(dbb, ld->tilemap.boundary.Height);
+	DynamicByteBuffer_WriteIntArray2D(dbb, ld->_mSaveTileMap, ld->tilemap.boundary.Width, ld->tilemap.boundary.Height);
 
 	DynamicByteBuffer_WriteNewline(dbb);
 
@@ -240,10 +264,9 @@ bool LevelData_LoadSetupTileData(LevelData* ld)
 {
 	Tile** tiles = ld->arr_save_tiles;
 	int32_t* map = ld->_mSaveTileMap;
-	int32_t gridWidth = LevelData_GetGridSizeWidth(ld);
-	int32_t gridHeight = LevelData_GetGridSizeHeight(ld);
-	int32_t tileDataLen = gridWidth * gridHeight;
-	ld->mTileData = (Tile**)Utils_calloc(tileDataLen, sizeof(Tile*));
+	int32_t gridWidth = LevelData_GetBoundary(ld).Width;
+	int32_t gridHeight = LevelData_GetBoundary(ld).Height;
+	Tilemap_Init(&ld->tilemap, Rectangle_Create(0, 0, gridWidth, gridHeight));
 	for (int32_t i = 0; i < gridWidth; i += 1)
 	{
 		for (int32_t j = 0; j < gridHeight; j += 1)
@@ -255,7 +278,7 @@ bool LevelData_LoadSetupTileData(LevelData* ld)
 			//if (OeGlobals_IsDebugFileMode()) //UNUSED, DEBUG//TODO
 			if (isDebugFileMode)
 			{
-				ld->mTileData[gridPos] = Tile_CreateClone(tileToSet);
+				ld->tilemap.tiles[gridPos] = Tile_Clone(tileToSet);
 				/* //TODO
 				if (_mIsMetaMap && OeGlobals_DEBUG_IS_META_MAP_EDIT_TILE_MODE_AT_MAP_LOAD || !_mIsMetaMap) //if debug and editing, we use clones of tiles so they can be manipulated...
 				{
@@ -268,82 +291,28 @@ bool LevelData_LoadSetupTileData(LevelData* ld)
 			}
 			else
 			{
-				ld->mTileData[gridPos] = tileToSet;
+				ld->tilemap.tiles[gridPos] = tileToSet;
 			}
 		}
 	}
 
 	return true;
 }
-int32_t LevelData_GetGridSizeWidth(LevelData* ld)
+Rectangle LevelData_GetBoundary(LevelData* ld)
 {
-	return ld->_mGridSize.Width;
+	return ld->tilemap.boundary;
 }
-int32_t LevelData_GetGridSizeHeight(LevelData* ld)
+Rectangle LevelData_GetBoundaryInPixels(LevelData* ld)
 {
-	return ld->_mGridSize.Height;
+	return ld->tilemap.boundaryInPixels;
 }
-int32_t LevelData_GetGridSizeX(LevelData* ld)
+Tilemap* LevelData_GetTilemap(LevelData* ld)
 {
-	return ld->_mGridSize.Width;
-}
-int32_t LevelData_GetGridSizeY(LevelData* ld)
-{
-	return ld->_mGridSize.Height;
-}
-Rectangle LevelData_GetGridSize(LevelData* ld)
-{
-	return ld->_mGridSize;
-}
-int32_t LevelData_GetRealSizeWidth(LevelData* ld)
-{
-	return ld->_mGridSize.Width * TILE_SIZE;
-}
-int32_t LevelData_GetRealSizeHeight(LevelData* ld)
-{
-	return ld->_mGridSize.Height * TILE_SIZE;
-}
-Rectangle LevelData_GetRealSize(LevelData* ld)
-{
-	Rectangle temp;
-	temp.X = 0;
-	temp.Y = 0;
-	temp.Width = LevelData_GetRealSizeWidth(ld);
-	temp.Height = LevelData_GetRealSizeHeight(ld);
-	return temp;
-}
-int32_t LevelData_GetRealSizeX(LevelData* ld)
-{
-	return ld->_mGridSize.Width * TILE_SIZE;
-}
-int32_t LevelData_GetRealSizeY(LevelData* ld)
-{
-	return ld->_mGridSize.Height * TILE_SIZE;
-}
-int32_t LevelData_GetTilePos1D(LevelData* ld, int32_t i, int32_t j)
-{
-	return i + (j * ld->_mGridSize.Width);
+	return &ld->tilemap;
 }
 Tile* LevelData_GetTile(LevelData* ld, int32_t x, int32_t y)
 {
-	if (!LevelData_IsSafe(ld, x, y))
-	{
-		return NULL;
-	}
-
-	return ld->mTileData[LevelData_GetTilePos1D(ld, x, y)];
-}
-Tile* LevelData_GetTilePoint(LevelData* ld, Point p)
-{
-	return LevelData_GetTile(ld, p.X, p.Y);
-}
-bool LevelData_IsSafe(LevelData* ld, int32_t x, int32_t y)
-{
-	if ((x < 0) || (y < 0) || (x >= ld->_mGridSize.Width) || (y >= ld->_mGridSize.Height))
-	{
-		return false;
-	}
-	return true;
+	return Tilemap_GetTile(&ld->tilemap, x, y);
 }
 int32_t* LevelData_CreateCollisionArray(LevelData* ld)
 {
@@ -353,23 +322,19 @@ int32_t* LevelData_CreateCollisionArray(LevelData* ld)
 }
 int32_t* LevelData_CreateEmptyCollisionArray(LevelData* ld)
 {
-	return (int32_t*)Utils_CallocArena(ld->_mGridSize.Width * ld->_mGridSize.Height, sizeof(int32_t), UTILS_ALLOCATION_ARENA_JUST_THIS_LEVEL);
+	return (int32_t*)Utils_CallocArena(ld->tilemap.boundary.Width * ld->tilemap.boundary.Height, sizeof(int32_t), UTILS_ALLOCATION_ARENA_JUST_THIS_LEVEL);
 }
 void LevelData_ImprintToCollisionArray(LevelData* ld, int32_t x, int32_t y, int32_t* collisionArray)
 {
-	int32_t width = ld->_mGridSize.Width;
-	int32_t height = ld->_mGridSize.Height;
+	int32_t width = ld->tilemap.boundary.Width;
+	int32_t height = ld->tilemap.boundary.Height;
 	for (int32_t i = 0; i < width; i += 1)
 	{
 		for (int32_t j = 0; j < height; j += 1)
 		{
-			collisionArray[LevelData_GetTilePos1D(ld, x + i, y + j)] = ld->mTileData[LevelData_GetTilePos1D(ld, i, j)]->mCollisionType;
+			collisionArray[LevelData_GetTilePos1D(ld, x + i, y + j)] = ld->tilemap.tiles[LevelData_GetTilePos1D(ld, i, j)]->mCollisionType;
 		}
 	}
-}
-Rectangle LevelData_GetLevelBoundsRectangle(LevelData* ld)
-{
-	return Rectangle_Create(0, 0, LevelData_GetRealSizeX(ld), LevelData_GetRealSizeY(ld));
 }
 bool LevelData_IsTilesetNameSet(LevelData* ld)
 {
@@ -383,7 +348,7 @@ void LevelData_DrawTiles(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera
 {
 	LevelData_DrawTiles2(ld, spriteBatch, camera, -1, 1);
 }
-void LevelData_DrawTiles2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera, int32_t preferredLayer, float mul)
+void LevelData_DrawTiles2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera, int32_t preferredLayer, float cameraMul)
 {
 #ifdef EDITOR_MODE
 	if (!Cvars_GetAsBool(CVARS_EDITOR_SHOW_TILES))
@@ -407,10 +372,10 @@ void LevelData_DrawTiles2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camer
 		return;
 	}
 
-	int32_t x1 = Camera_GetX1Mul(camera, mul);
-	int32_t x2 = Camera_GetX2Mul(camera, ld->_mGridSize.Width, mul);
-	int32_t y1 = Camera_GetY1Mul(camera, mul);
-	int32_t y2 = Camera_GetY2Mul(camera, ld->_mGridSize.Height, mul);
+	int32_t x1 = Camera_GetX1Mul(camera, cameraMul);
+	int32_t x2 = Camera_GetX2Mul(camera, ld->tilemap.boundary.Width, cameraMul);
+	int32_t y1 = Camera_GetY1Mul(camera, cameraMul);
+	int32_t y2 = Camera_GetY2Mul(camera, ld->tilemap.boundary.Height, cameraMul);
 
 	for (int32_t i = 0; i < LEVELDATA_LAYER_DATA_LENGTH; i += 1)
 	{
@@ -434,7 +399,7 @@ void LevelData_DrawTiles2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camer
 #endif
 		if (showLayer)
 		{
-			SpriteBatch_DrawLayer(spriteBatch, texture, color, ld->mTileData, ld->_mGridSize, depth, i, x1, x2, y1, y2);
+			SpriteBatch_DrawLayer(spriteBatch, texture, color, ld->tilemap.tiles, ld->tilemap.boundary, depth, i, x1, x2, y1, y2);
 		}
 	}
 
@@ -467,16 +432,17 @@ void LevelData_DrawProps2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camer
 
 	int32_t dist = Cvars_GetAsInt(CVARS_ENGINE_PROP_DISTANCE);
 
+	Rectangle boundary = LevelData_GetBoundary(ld);
 	int32_t x1 = Camera_GetX1Mul(camera, (float)dist);
-	int32_t x2 = Camera_GetX2Mul(camera, LevelData_GetGridSizeWidth(ld), (float)dist);
+	int32_t x2 = Camera_GetX2Mul(camera, boundary.Width, (float)dist);
 	int32_t y1 = Camera_GetY1Mul(camera, (float)dist);
-	int32_t y2 = Camera_GetY2Mul(camera, LevelData_GetGridSizeHeight(ld), (float)dist);
+	int32_t y2 = Camera_GetY2Mul(camera, boundary.Height, (float)dist);
 
 	for (int32_t i = x1; i < x2; i += 1)
 	{
 		for (int32_t j = y1; j < y2; j += 1)
 		{
-			Tile* t = ld->mTileData[LevelData_GetTilePos1D(ld, i, j)];
+			Tile* t = ld->tilemap.tiles[LevelData_GetTilePos1D(ld, i, j)];
 			Tile_DrawProps2(t, spriteBatch, camera, i, j, false, drawInfo);
 		}
 	}
@@ -490,14 +456,15 @@ void LevelData_DrawCollision(LevelData* ld, SpriteBatch* spriteBatch, Camera* ca
 		return;
 	}
 
-	int x1 = Camera_GetX1( camera);
-	int x2 = Camera_GetX2( camera, LevelData_GetGridSizeX(ld));
-	int y1 = Camera_GetY1( camera);
-	int y2 = Camera_GetY2(camera, LevelData_GetGridSizeY(ld));
+	Rectangle boundary = LevelData_GetBoundary(ld);
+	int x1 = Camera_GetX1(camera);
+	int x2 = Camera_GetX2(camera, boundary.Width);
+	int y1 = Camera_GetY1(camera);
+	int y2 = Camera_GetY2(camera, boundary.Height);
 
 	Rectangle rect = Rectangle_Empty;
 	int lastType = -1;
-	Tile** tileData = ld->mTileData;
+	Tile** tileData = ld->tilemap.tiles;
 	for (int j = y1; j < y2; j++)
 	{
 		for (int i = x1; i < x2; i++)

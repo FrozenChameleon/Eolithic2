@@ -43,6 +43,7 @@
 #include "RenderTTFont.h"
 #include "SDL3/SDL.h"
 #include "ImagePixelData.h"
+#include "../../third_party/stb_ds.h"
 #ifdef EDITOR_MODE
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
@@ -209,6 +210,7 @@ typedef struct TempRenderState
 	SDL_GPUCommandBuffer* CommandUpload;
 	SDL_GPURenderPass* RenderPass;
 	SDL_GPUTexture* SwapchainTexture;
+	SDL_GPUTexture* TextureToRenderTo;
 	SDL_GPUCopyPass* CopyPass;
 	Texture* LastTextureUsed;
 }TempRenderState;
@@ -218,6 +220,8 @@ static TempRenderState _mTemp;
 Rectangle _mVirtualBufferBounds;
 Rectangle _mActualBufferBounds;
 static bool _mIsReadyToDrawImGui;
+
+static Texture** arr_dispose_me_later;
 
 static SDL_GPUTransferBuffer* GetTransferBufferForVertexBuffer()
 {
@@ -814,6 +818,8 @@ void Renderer_BeforeRender(void)
 		return;
 	}
 
+	_mTemp.TextureToRenderTo = GetTextureToRenderTo();
+
 	{
 		SDL_FColor clearColor;
 		Utils_memset(&clearColor, 0, sizeof(SDL_FColor));
@@ -824,7 +830,7 @@ void Renderer_BeforeRender(void)
 
 		SDL_GPUColorTargetInfo colorTargetInfo;
 		Utils_memset(&colorTargetInfo, 0, sizeof(SDL_GPUColorTargetInfo));
-		colorTargetInfo.texture = GetTextureToRenderTo();
+		colorTargetInfo.texture = _mTemp.TextureToRenderTo;
 		colorTargetInfo.clear_color = clearColor;
 		colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
 		colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
@@ -838,7 +844,7 @@ void Renderer_BeforeCommit(void)
 	{
 		SDL_GPUColorTargetInfo colorTargetInfo;
 		Utils_memset(&colorTargetInfo, 0, sizeof(SDL_GPUColorTargetInfo));
-		colorTargetInfo.texture = GetTextureToRenderTo();
+		colorTargetInfo.texture = _mTemp.TextureToRenderTo;
 		colorTargetInfo.load_op = SDL_GPU_LOADOP_LOAD;
 		colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
 		_mTemp.RenderPass = SDL_BeginGPURenderPass(_mTemp.CommandRender, &colorTargetInfo, 1, NULL);
@@ -847,22 +853,9 @@ void Renderer_BeforeCommit(void)
 	SDL_BindGPUGraphicsPipeline(_mTemp.RenderPass, GetPipelineToUse());
 
 	{ //Push current camera positions...
-		Vector2 cameraPos = Renderer_INTERNAL_GetCurrentCameraPosition(); //TODO MAKE THESE SCALE
-		cameraPos.X -= (_mActualBufferBounds.Width / 2);
-		cameraPos.Y -= (_mActualBufferBounds.Height / 2);
-		Matrix cameraMatrix = Matrix_CreateOrthographicOffCenter(
-			cameraPos.X,
-			cameraPos.X + _mActualBufferBounds.Width,
-			cameraPos.Y + _mActualBufferBounds.Height,
-			cameraPos.Y,
-			0,
-			1
-		);
-		float cameraZoom = Renderer_INTERNAL_GetCurrentZoom();
-		Vector3 matrixScaleValue = { (1.0f / cameraZoom), (1.0f / cameraZoom), 1.0f };
-		Matrix matrixScale = Matrix_CreateScale(matrixScaleValue);
-		cameraMatrix = Matrix_Mul(&cameraMatrix, matrixScale);
-		SDL_PushGPUVertexUniformData(_mTemp.CommandRender, 0, &cameraMatrix, sizeof(Matrix));
+		Matrix cameraMatrix = Matrix_CreateOrthographicOffCenter(0, _mActualBufferBounds.Width, _mActualBufferBounds.Height, 0, 0, 1);
+		Matrix result = Matrix_Multiply(Renderer_INTERNAL_GetCurrentTranslation(), cameraMatrix);
+		SDL_PushGPUVertexUniformData(_mTemp.CommandRender, 0, &result, sizeof(Matrix));
 	}
 
 	{ //Bind index buffer
@@ -1032,6 +1025,87 @@ void Renderer_SetupImGuiRenderState(void)
 	_mIsReadyToDrawImGui = true;
 #endif
 }
+Texture* Renderer_RenderToTexture(int width, int height, Color clearColor, Renderer_DrawFunc draw)
+{
+	SDL_FColor gpuClearColor;
+	Utils_memset(&gpuClearColor, 0, sizeof(SDL_FColor));
+	gpuClearColor.r = Color_RedF(clearColor);
+	gpuClearColor.g = Color_GreenF(clearColor);
+	gpuClearColor.b = Color_BlueF(clearColor);
+	gpuClearColor.a = Color_AlphaF(clearColor);
+
+	SpriteBatch spriteBatch;
+	SpriteBatch_Init(&spriteBatch);
+
+	Texture* tempRender = (Texture*)Utils_calloc(1, sizeof(Texture));
+	tempRender->mBounds.Width = width;
+	tempRender->mBounds.Height = height;
+
+	SDL_GPUTextureCreateInfo info;
+	Utils_memset(&info, 0, sizeof(SDL_GPUTextureCreateInfo));
+	info.type = SDL_GPU_TEXTURETYPE_2D;
+	info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+	info.width = width;
+	info.height = height;
+	info.layer_count_or_depth = 1;
+	info.num_levels = 1;
+	info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+	SDL_PropertiesID temp = SDL_CreateProperties();
+	SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_R_FLOAT, gpuClearColor.r);
+	SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_G_FLOAT, gpuClearColor.g);
+	SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_B_FLOAT, gpuClearColor.b);
+	SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_A_FLOAT, gpuClearColor.a);
+	info.props = temp;
+	tempRender->mTextureData = SDL_CreateGPUTexture(_mFixed.DeviceHandle, &info); //TODO LEAK
+
+	_mTemp.TextureToRenderTo = (SDL_GPUTexture*)tempRender->mTextureData;
+
+	_mTemp.CommandUpload = SDL_AcquireGPUCommandBuffer(_mFixed.DeviceHandle);
+	if (_mTemp.CommandUpload == NULL)
+	{
+		SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
+		return NULL;
+	}
+
+	_mTemp.CopyPass = SDL_BeginGPUCopyPass(_mTemp.CommandUpload);
+	if (_mTemp.CopyPass == NULL)
+	{
+		SDL_Log("SDL_BeginGPUCopyPass failed: %s", SDL_GetError());
+		return NULL;
+	}
+
+	_mTemp.CommandRender = SDL_AcquireGPUCommandBuffer(_mFixed.DeviceHandle);
+	if (_mTemp.CommandRender == NULL)
+	{
+		SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
+		return NULL;
+	}
+
+	SDL_GPUColorTargetInfo colorTargetInfo;
+	Utils_memset(&colorTargetInfo, 0, sizeof(SDL_GPUColorTargetInfo));
+	colorTargetInfo.texture = _mTemp.TextureToRenderTo;
+	colorTargetInfo.clear_color = gpuClearColor;
+	colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
+	colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
+	_mTemp.RenderPass = SDL_BeginGPURenderPass(_mTemp.CommandRender, &colorTargetInfo, 1, NULL);
+	SDL_EndGPURenderPass(_mTemp.RenderPass);
+
+	draw(&spriteBatch);
+
+	Renderer_Commit(&spriteBatch, Camera_GetTranslation(0, 0, 0, 1, 0, 0), 0);
+
+	SDL_EndGPUCopyPass(_mTemp.CopyPass);
+
+	SDL_SubmitGPUCommandBuffer(_mTemp.CommandUpload);
+
+	SDL_SubmitGPUCommandBuffer(_mTemp.CommandRender);
+
+	Utils_memset(&_mTemp, 0, sizeof(TempRenderState));
+
+	arrput(arr_dispose_me_later, tempRender);
+
+	return tempRender;
+}
 static void DrawImGuiRenderPass(void)
 {
 #ifdef EDITOR_MODE
@@ -1193,40 +1267,42 @@ void Renderer_ResetBackBuffer(void)
 		MString_Dispose(&tempString);
 	}
 
-	if (IsOffscreenTargetNeeded())
+	if (!IsOffscreenTargetNeeded())
 	{
-		{
-			MString* tempString = NULL;
-			MString_AssignString(&tempString, "Virtual buffer bounds: ");
-			MString_AddAssignInt(&tempString, _mVirtualBufferBounds.Width);
-			MString_AddAssignString(&tempString, "x");
-			MString_AddAssignInt(&tempString, _mVirtualBufferBounds.Height);
-			Logger_LogInformation(MString_Text(tempString));
-			MString_Dispose(&tempString);
-		}
-
-		_mFixed.OffscreenTarget = (Texture*)Utils_calloc(1, sizeof(Texture));
-		MString_AssignString(&_mFixed.OffscreenTarget->mPath, "");
-		_mFixed.OffscreenTarget->mBounds.Width = _mVirtualBufferBounds.Width;
-		_mFixed.OffscreenTarget->mBounds.Height = _mVirtualBufferBounds.Height;
-
-		SDL_GPUTextureCreateInfo info;
-		Utils_memset(&info, 0, sizeof(SDL_GPUTextureCreateInfo));
-		info.type = SDL_GPU_TEXTURETYPE_2D;
-		info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-		info.width = _mVirtualBufferBounds.Width;
-		info.height = _mVirtualBufferBounds.Height;
-		info.layer_count_or_depth = 1;
-		info.num_levels = 1;
-		info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
-		SDL_PropertiesID temp = SDL_CreateProperties();
-		SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_R_FLOAT, 0.0f);
-		SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_G_FLOAT, 0.0f);
-		SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_B_FLOAT, 0.0f);
-		SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_A_FLOAT, 1.0f);
-		info.props = temp;
-		_mFixed.OffscreenTarget->mTextureData = SDL_CreateGPUTexture(_mFixed.DeviceHandle, &info); //TODO LEAK
+		return;
 	}
+
+	{
+		MString* tempString = NULL;
+		MString_AssignString(&tempString, "Virtual buffer bounds: ");
+		MString_AddAssignInt(&tempString, _mVirtualBufferBounds.Width);
+		MString_AddAssignString(&tempString, "x");
+		MString_AddAssignInt(&tempString, _mVirtualBufferBounds.Height);
+		Logger_LogInformation(MString_Text(tempString));
+		MString_Dispose(&tempString);
+	}
+
+	_mFixed.OffscreenTarget = (Texture*)Utils_calloc(1, sizeof(Texture));
+	MString_AssignString(&_mFixed.OffscreenTarget->mPath, "");
+	_mFixed.OffscreenTarget->mBounds.Width = _mVirtualBufferBounds.Width;
+	_mFixed.OffscreenTarget->mBounds.Height = _mVirtualBufferBounds.Height;
+
+	SDL_GPUTextureCreateInfo info;
+	Utils_memset(&info, 0, sizeof(SDL_GPUTextureCreateInfo));
+	info.type = SDL_GPU_TEXTURETYPE_2D;
+	info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+	info.width = _mVirtualBufferBounds.Width;
+	info.height = _mVirtualBufferBounds.Height;
+	info.layer_count_or_depth = 1;
+	info.num_levels = 1;
+	info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+	SDL_PropertiesID temp = SDL_CreateProperties();
+	SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_R_FLOAT, 0.0f);
+	SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_G_FLOAT, 0.0f);
+	SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_B_FLOAT, 0.0f);
+	SDL_SetFloatProperty(temp, SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_A_FLOAT, 1.0f);
+	info.props = temp;
+	_mFixed.OffscreenTarget->mTextureData = SDL_CreateGPUTexture(_mFixed.DeviceHandle, &info); //TODO LEAK
 }
 Rectangle Renderer_GetDrawableSize(void)
 {

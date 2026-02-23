@@ -79,9 +79,6 @@
 //#include "../components/MoveGetterSys.h" //UNUSED
 //#include "../utils/Tuning.h" //UNUSED
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-#define HALF_TILE_SIZE GLOBAL_DEF_HALF_TILE_SIZE
-
 static int32_t _mAttackIdCounter;
 
 static Point* Get_ArrGridNodes(Entity entity)
@@ -251,8 +248,8 @@ void Do_SetCompleteCameraDataToPermanentlyComplete(void)
 Vector2 Do_FindThingPositionInTileData(const char* name)
 {
 	LevelData* levelData = Get_LevelData();
-	int32_t x2 = LevelData_GetGridSizeWidth(levelData);
-	int32_t y2 = LevelData_GetGridSizeHeight(levelData);
+	int32_t x2 = LevelData_GetBoundary(levelData).Width;
+	int32_t y2 = LevelData_GetBoundary(levelData).Height;
 	for (int32_t i = 0; i < x2; i += 1)
 	{
 		for (int32_t j = 0; j < y2; j += 1)
@@ -281,7 +278,7 @@ Vector2 Do_FindThingPositionInTileData(const char* name)
 void Do_InitAllPermanentThings(void)
 {
 	LevelData* levelData = Get_LevelData();
-	Do_InitPermanentThingsByGridCoordinates(0, 0, LevelData_GetGridSizeWidth(levelData), LevelData_GetGridSizeHeight(levelData));
+	Do_InitPermanentThingsByGridCoordinates(0, 0, LevelData_GetBoundary(levelData).Width, LevelData_GetBoundary(levelData).Height);
 }
 void Do_InitPermanentThingsByRealCoordinates(float realX1, float realY1, float realX2, float realY2, bool startThings)
 {
@@ -2958,7 +2955,7 @@ bool Is_IntersectingCamera2(Camera* camera, int32_t posX, int32_t posY, int32_t 
 }
 Rectangle Get_LevelBoundsRectangle(void)
 {
-	return LevelData_GetLevelBoundsRectangle(Get_LevelData());
+	return LevelData_GetBoundaryInPixels(Get_LevelData());
 }
 bool Is_InLevelBounds(Entity entity)
 {

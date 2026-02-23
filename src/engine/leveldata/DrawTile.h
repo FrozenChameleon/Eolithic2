@@ -30,8 +30,10 @@ typedef struct DrawTile
 	Point mPoint;
 	bool mFlipX;
 	bool mFlipY;
+	bool INTERNAL_PADDING0;
+	bool INTERNAL_PADDING1;
 	float mRotation;
-	Point mOffsetPoint;
+	Point INTERNAL_mCachedOffsetPoint;
 } DrawTile;
 
 void DrawTile_Init(DrawTile* drawTile);
@@ -41,7 +43,7 @@ void DrawTile_LoadSheet(DrawTile* drawTile, int32_t x, int32_t y);
 void DrawTile_LoadAnimation(DrawTile* drawTile, const char* animation);
 void DrawTile_Draw(DrawTile* drawTile, SpriteBatch* spriteBatch, Texture* texture, Color color, int32_t depth, int32_t x, int32_t y);
 Point DrawTile_GetCorrectPoint(DrawTile* drawTile);
-bool DrawTile_IsZero(DrawTile* drawTile);
-bool DrawTile_IsAnimation(DrawTile* drawTile);
-bool DrawTile_IsSheet(DrawTile* drawTile);
-bool DrawTile_IsEqualTo(DrawTile* drawTile, DrawTile* otherDrawTile);
+bool DrawTile_IsZero(const DrawTile* drawTile);
+bool DrawTile_IsAnimation(const DrawTile* drawTile);
+bool DrawTile_IsSheet(const DrawTile* drawTile);
+bool DrawTile_EqualTo(const DrawTile* value1, const DrawTile* value2);

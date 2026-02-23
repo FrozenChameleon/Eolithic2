@@ -15,10 +15,15 @@
 #include "../utils/Utils.h"
 #include "../../third_party/stb_ds.h"
 #include "../io/DynamicByteBuffer.h"
+#include "ThingInstance.h"
+#include "../utils/Logger.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-#define HALF_TILE_SIZE GLOBAL_DEF_HALF_TILE_SIZE
-
+Tile* Tile_Create()
+{
+	Tile* tile = (Tile*)Utils_calloc(1, sizeof(Tile));
+	Tile_Init(tile);
+	return tile;
+}
 void Tile_Init(Tile* t)
 {
 	Utils_memset(t, 0, sizeof(Tile));
@@ -56,7 +61,6 @@ void Tile_Read(int32_t version, Tile* t, BufferReader* br)
 		arrput(t->arr_props, instance);
 	}
 }
-
 void Tile_Write(Tile* t, DynamicByteBuffer* dbb)
 {
 	DynamicByteBuffer_WriteI32(dbb, t->mCollisionType);
@@ -88,7 +92,6 @@ void Tile_Write(Tile* t, DynamicByteBuffer* dbb)
 		PropInstance_Write(&t->arr_props[i], dbb);
 	}
 }
-
 Rectangle Tile_GetCollisionRectangle(Tile* t, int32_t gridX, int32_t gridY)
 {
 	int32_t rectX = gridX * TILE_SIZE;
@@ -168,20 +171,116 @@ void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const  Camera* camera, i
 		//OeDrawTool_DrawRectangle(spriteBatch, color, 100, cameraCheck, 0, false);
 	}
 }
-Tile* Tile_CreateClone(Tile* t)
+Tile* Tile_Clone(Tile* t)
 {
 	Tile* clone = (Tile*)Utils_calloc(1, sizeof(Tile));
-	Utils_memcpy(clone, t, sizeof(Tile));
-	clone->arr_instances = NULL;
-	clone->arr_props = NULL;
-	for (int i = 0; i < arrlen(t->arr_props); i += 1)
-	{
-		arrput(clone->arr_props, t->arr_props[i]);
-	}
-	for (int i = 0; i < arrlen(t->arr_instances); i += 1)
-	{
-		ThingInstance* cloneThingInstance = ThingInstance_CreateClone(&t->arr_instances[i]);
-		arrput(clone->arr_instances, *cloneThingInstance);
-	}
+	Tile_CopyTo(clone, t, false);
 	return clone;
+}
+void Tile_CopyTo(Tile* toThis, Tile* fromThis, bool respectCopyCvars)
+{
+	if ((toThis == NULL) || (fromThis == NULL))
+	{
+		Logger_LogWarning("Tile_CopyTo was handed NULL tiles!");
+		return;
+	}
+
+	if (!respectCopyCvars || Cvars_GetAsBool(CVARS_EDITOR_COPY_COLLISION))
+	{
+		toThis->mCollisionType = fromThis->mCollisionType;
+	}
+
+	if (!respectCopyCvars || Cvars_GetAsBool(CVARS_EDITOR_COPY_TILES))
+	{
+		Utils_memcpy(toThis->mDrawTiles, fromThis->mDrawTiles, TILE_DRAW_LAYER_LENGTH * sizeof(DrawTile));
+	}
+
+	if (!respectCopyCvars || Cvars_GetAsBool(CVARS_EDITOR_COPY_THINGS))
+	{
+		arrsetlen(toThis->arr_instances, 0);
+		for (int i = 0; i < arrlen(fromThis->arr_instances); i += 1)
+		{
+			arrput(toThis->arr_instances, ThingInstance_CreateClone(&fromThis->arr_instances[i]));
+		}
+	}
+
+	if (!respectCopyCvars || Cvars_GetAsBool(CVARS_EDITOR_COPY_PROPS))
+	{
+		arrsetlen(toThis->arr_props, 0);
+		for (int i = 0; i < arrlen(fromThis->arr_props); i += 1)
+		{
+			arrput(toThis->arr_props, fromThis->arr_props[i]);
+		}
+	}
+}
+bool Tile_EqualTo(Tile* value1, Tile* value2)
+{
+	if (value1->mCollisionType != value2->mCollisionType)
+	{
+		return false;
+	}
+
+	for (int i = 0; i < TILE_DRAW_LAYER_LENGTH; i += 1)
+	{
+		if (!DrawTile_EqualTo(&value1->mDrawTiles[i], &value2->mDrawTiles[i]))
+		{
+			return false;
+		}
+	}
+
+	//THING INSTANCES
+	if (arrlen(value1->arr_instances) == arrlen(value2->arr_instances))
+	{
+		for (int i = 0; i < arrlen(value1->arr_instances); i += 1)
+		{
+			if (!ThingInstance_EqualTo(&value1->arr_instances[i], &value2->arr_instances[i]))
+			{
+				return false;
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	//PROPS
+	if (arrlen(value1->arr_props) == arrlen(value2->arr_props))
+	{
+		for (int i = 0; i < arrlen(value1->arr_props); i += 1)
+		{
+			if (!PropInstance_EqualTo(&value1->arr_props[i], &value2->arr_props[i]))
+			{
+				return false;
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+bool Tile_TilesEqualTo(Tile** src, Rectangle srcBounds, Tile** dst, Rectangle dstBounds)
+{
+	if ((srcBounds.Width != dstBounds.Width) || (srcBounds.Height != dstBounds.Height))
+	{
+		return false;
+	}
+
+	for (int j = 0; j < srcBounds.Height; j += 1)
+	{
+		for (int i = 0; i < srcBounds.Width; i += 1)
+		{
+			Tile* tile1 = src[Utils_Get1DArrayPosFor2DArray(srcBounds.X + i, srcBounds.Y + j, srcBounds.Width)];
+			Tile* tile2 = dst[Utils_Get1DArrayPosFor2DArray(dstBounds.X + i, dstBounds.Y + j, dstBounds.Width)];
+			if (!Tile_EqualTo(tile1, tile2))
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
 }

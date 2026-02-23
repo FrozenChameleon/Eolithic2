@@ -21,8 +21,6 @@
 #include "../../third_party/stb_ds.h"
 #include "../render/SpriteBatch.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 #define RESOLUTION_LIMIT 40
 #define CORNER_CHECKS_LEN 8
 
@@ -677,8 +675,8 @@ void CollisionEngineSys_SetupCollisionGrid(CollisionEngine* data, LevelData* lev
 {
 	data->mCollisionGridSize.X = 0;
 	data->mCollisionGridSize.Y = 0;
-	data->mCollisionGridSize.Width = LevelData_GetGridSizeWidth(level);
-	data->mCollisionGridSize.Height = LevelData_GetGridSizeHeight(level);
+	data->mCollisionGridSize.Width = LevelData_GetBoundary(level).Width;
+	data->mCollisionGridSize.Height = LevelData_GetBoundary(level).Height;
 
 	if (level->_mIsMetaMap)
 	{
@@ -1149,9 +1147,9 @@ void CollisionEngineSys_DebugGenerateDebugRectangles(CollisionEngine* data)
 	LevelData* levelData = Get_LevelData();
 	Camera* camera = Get_Camera();
 	int32_t x1 = Camera_GetX1(camera);
-	int32_t x2 = Camera_GetX2(camera, LevelData_GetGridSizeX(levelData));
+	int32_t x2 = Camera_GetX2(camera, LevelData_GetBoundary(levelData).Width);
 	int32_t y1 = Camera_GetY1(camera);
-	int32_t y2 = Camera_GetY2(camera, LevelData_GetGridSizeY(levelData));
+	int32_t y2 = Camera_GetY2(camera, LevelData_GetBoundary(levelData).Height);
 	for (int32_t i = x1; i < x2; i += 1)
 	{
 		for (int32_t j = y1; j < y2; j += 1)

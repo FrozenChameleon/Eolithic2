@@ -18,6 +18,14 @@
 #include "MathHelper.h"
 #include "Math.h"
 
+Vector3 Vector3_Create(float x, float y, float z)
+{
+	Vector3 temp;
+	temp.X = x;
+	temp.Y = y;
+	temp.Z = z;
+	return temp;
+}
 void Vector3_Init(Vector3* vector, float x, float y, float z)
 {
 	vector->X = x;

@@ -296,7 +296,7 @@ static void Tick(void)
 	Cheats();
 	if (Globals_IsEditorActive())
 	{
-		Editor_Update(1.0f / 60.0f);
+		Editor_Update();
 		Renderer_SetupRenderState();
 	}
 #endif

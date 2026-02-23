@@ -20,4 +20,5 @@ typedef struct StringPair
 extern const StringPair StringPair_Empty;
 
 void StringPair_Read(StringPair* pair, BufferReader* br);
-void StringPair_Write(StringPair* pair, DynamicByteBuffer* dbb);
+void StringPair_Write(const StringPair* pair, DynamicByteBuffer* dbb);
+bool StringPair_EqualTo(const StringPair* value1, const StringPair* value2);

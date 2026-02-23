@@ -13,9 +13,6 @@
 #include "../io/BufferReader.h"
 #include "../io/DynamicByteBuffer.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-#define HALF_TILE_SIZE GLOBAL_DEF_HALF_TILE_SIZE
-
 const Point Points_MinValue = {INT_MIN, INT_MIN};
 const Point Points_MaxValue = {INT_MAX, INT_MAX};
 const Point Points_NegativeOne = {-1, -1};

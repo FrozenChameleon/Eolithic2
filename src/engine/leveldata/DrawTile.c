@@ -18,14 +18,12 @@
 #include "../render/Color.h"
 #include "../utils/Utils.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 void DrawTile_Init(DrawTile* drawTile)
 {
 	Utils_memset(drawTile, 0, sizeof(DrawTile));
 	Utils_strlcpy(drawTile->mAnimation, EE_STR_EMPTY, EE_FILENAME_MAX);
 	drawTile->mPoint = Points_NegativeOne;
-	drawTile->mOffsetPoint = Points_NegativeOne;
+	drawTile->INTERNAL_mCachedOffsetPoint = Points_NegativeOne;
 }
 void DrawTile_Read(int32_t version, DrawTile* drawTile, BufferReader* reader)
 {
@@ -84,14 +82,14 @@ Point DrawTile_GetCorrectPoint(DrawTile* drawTile)
 	/* //DEBUG ONLY FOR NOW TODO
 	if (!Globals_IsDebugFileMode() || GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS)
 	{
-		return drawTile->mOffsetPoint;
+		return drawTile->mCachedOffsetPoint;
 	}
 	else
 	{
 		return drawTile->mPoint;
 	}*/
 }
-bool DrawTile_IsZero(DrawTile* drawTile)
+bool DrawTile_IsZero(const DrawTile* drawTile)
 {
 	if (Utils_StringEqualTo(drawTile->mAnimation, EE_STR_EMPTY) &&
 		(drawTile->mPoint.X == -1) &&
@@ -101,7 +99,7 @@ bool DrawTile_IsZero(DrawTile* drawTile)
 	}
 	return false;
 }
-bool DrawTile_IsAnimation(DrawTile* drawTile)
+bool DrawTile_IsAnimation(const DrawTile* drawTile)
 {
 	if (Utils_StringEqualTo(drawTile->mAnimation, EE_STR_EMPTY))
 	{
@@ -109,7 +107,7 @@ bool DrawTile_IsAnimation(DrawTile* drawTile)
 	}
 	return true;
 }
-bool DrawTile_IsSheet(DrawTile* drawTile)
+bool DrawTile_IsSheet(const DrawTile* drawTile)
 {
 	if ((drawTile->mPoint.X == -1) &&
 		(drawTile->mPoint.Y == -1))
@@ -118,7 +116,9 @@ bool DrawTile_IsSheet(DrawTile* drawTile)
 	}
 	return true;
 }
-bool DrawTile_IsEqualTo(DrawTile* drawTile, DrawTile* otherDrawTile)
+bool DrawTile_EqualTo(const DrawTile* value1, const DrawTile* value2)
 {
-	return (Utils_memcmp(drawTile, otherDrawTile, sizeof(DrawTile)) == 0);
+	size_t offset = sizeof(Point);
+	size_t size = sizeof(DrawTile);
+	return (Utils_memcmp(value1, value2, size - offset) == 0); //Ignore INTERNAL_mCachedOffsetPoint.
 }

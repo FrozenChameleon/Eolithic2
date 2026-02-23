@@ -49,8 +49,6 @@
 #include "../editor/Editor.h"
 #endif
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 static const float _mCornerOffsetX[4] = { 0.0f ,1.0f, 0.0f, 1.0f };
 static const float _mCornerOffsetY[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
 
@@ -68,8 +66,7 @@ static bool _mIndexBufferDataSet;
 static uint16_t _mIndexBufferData[MAX_INDICES];
 
 static int32_t _mCurrentDepth;
-static float _mCurrentCameraZoom = 1.0f;
-static Vector2 _mCurrentCameraPosition;
+static Matrix _mCurrentTranslation;
 static BlendState _mCurrentBlendState;
 static ShaderProgram* _mCurrentShaderProgram;
 static ShaderProgram* _mGlobalShaderProgram;
@@ -123,14 +120,6 @@ BlendState Renderer_INTERNAL_GetCurrentBlendState(void)
 {
 	return _mCurrentBlendState;
 }
-void Renderer_INTERNAL_SetCurrentCameraPosition(Vector2 value)
-{
-	_mCurrentCameraPosition = value;
-}
-Vector2 Renderer_INTERNAL_GetCurrentCameraPosition(void)
-{
-	return _mCurrentCameraPosition;
-}
 void Renderer_INTERNAL_SetCurrentDepth(int32_t value)
 {
 	_mCurrentDepth = value;
@@ -139,13 +128,9 @@ int32_t Renderer_INTERNAL_GetCurrentDepth(void)
 {
 	return _mCurrentDepth;
 }
-void Renderer_INTERNAL_SetCurrentZoom(float value)
+Matrix Renderer_INTERNAL_GetCurrentTranslation()
 {
-	_mCurrentCameraZoom = value;
-}
-float Renderer_INTERNAL_GetCurrentZoom(void)
-{
-	return _mCurrentCameraZoom;
+	return _mCurrentTranslation;
 }
 Rectangle Renderer_GetWantedBackBufferBounds(void)
 {
@@ -812,10 +797,11 @@ static void DrawEverythingBackwards(std_vector<std_vector<DrawInstance>>& draws,
 	}
 }
 */
-void Renderer_Commit(SpriteBatch* render, Vector2 cameraOffset, float cameraZoom, double deltaTime)
+void Renderer_Commit(SpriteBatch* render, Matrix translation, double deltaTime)
 {
-	_mCurrentCameraPosition = cameraOffset;
-	_mCurrentCameraZoom = cameraZoom;
+	_mCurrentTranslation = translation;
+	//_mCurrentCameraPosition = cameraOffset;
+	//_mCurrentCameraZoom = cameraZoom;
 	_mCurrentBlendState = BLENDSTATE_NONPREMULTIPLIED;
 	_mCurrentShaderProgram = NULL;
 	
@@ -1014,7 +1000,7 @@ void Renderer_SetupCommit(double deltaTime)
 
 	if (GameLoader_IsLoading())
 	{
-		Renderer_Commit(&_mOrangeSpriteBatchHud, Vector2_Zero, 1.0f, 1.0);
+		Renderer_Commit(&_mOrangeSpriteBatchHud, Camera_GetTranslation(0, 0, 0, 1, 0, 0), 1.0);
 		return;
 	}
 
@@ -1028,9 +1014,10 @@ void Renderer_SetupCommit(double deltaTime)
 	{
 		drawDeltaTime = GameUpdater_GetDeltaAccumulator();
 	}
+
 	Camera* camera = GameStateManager_GetCurrentRenderCamera();
-	Renderer_Commit(&_mOrangeSpriteBatch, Camera_GetInterpCameraAsVector2(camera, drawDeltaTime), camera->mWorldZoom, drawDeltaTime);
-	Renderer_Commit(&_mOrangeSpriteBatchHud, Vector2_Create(camera->mWorldWidth / 2.0f, camera->mWorldHeight / 2.0f), 1.0f, drawDeltaTime);
+	Renderer_Commit(&_mOrangeSpriteBatch, Camera_GetInterpCamera(camera, 0, 0, drawDeltaTime, 1), drawDeltaTime);
+	Renderer_Commit(&_mOrangeSpriteBatchHud, Camera_GetTranslation(0, 0, 0, 1, 0, 0), drawDeltaTime);
 }
 void Renderer_SetupRenderState(void)
 {

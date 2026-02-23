@@ -74,6 +74,7 @@ Color Color_ToColor(Color color, int32_t alpha);
 float Color_RedF(Color color);
 float Color_GreenF(Color color);
 float Color_BlueF(Color color);
+float Color_AlphaF(Color color);
 Color Color_Create4(int32_t red, int32_t green, int32_t blue, int32_t alpha);
 Color Color_Create3(int32_t red, int32_t green, int32_t blue);
 Color Color_Create2(Color color, int32_t alpha);

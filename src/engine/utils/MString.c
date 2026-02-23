@@ -203,6 +203,11 @@ void MString_AssignString(MString** str, const char* toThis)
 	CheckAndReplaceNullString(str);
 	//
 
+	if (toThis == NULL)
+	{
+		toThis = _mEmptyString;
+	}
+
 	MString* currentString = *str;
 	size_t newLen = ClearStringBufferAndThenCopyToIt(toThis);
 	size_t newCapacity = newLen + 1;
@@ -324,6 +329,11 @@ void MString_AddAssignMString(MString** str, const MString* addThisStr)
 void MString_AddAssignString(MString** str, const char* addThisStr)
 {
 	CheckAndReplaceNullString(str);
+
+	if (addThisStr == NULL)
+	{
+		addThisStr = _mEmptyString;
+	}
 
 	MString* currentString = *str;
 	size_t addThisStrLen = ClearStringBufferAndThenCopyToIt(addThisStr);

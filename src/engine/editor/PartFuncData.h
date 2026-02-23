@@ -4,7 +4,7 @@
 
 typedef struct SpriteBatch SpriteBatch;
 
-typedef void (*EditorActionDeltaTimeFunc)(double deltaTime);
+typedef void (*EditorActionDeltaTimeFunc)();
 typedef void (*EditorActionFunc)();
 typedef void (*EditorDrawFunc)(SpriteBatch* spriteBatch);
 

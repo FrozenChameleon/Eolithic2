@@ -17,15 +17,18 @@ typedef struct SpriteBatch SpriteBatch;
 
 typedef struct PropInstance
 {
-	Prop* INTERNAL_mCachedPropData;
+	bool mFlipX;
+	bool mFlipY;
+	bool INTERNAL_PADDING0;
+	bool INTERNAL_PADDING1;
 	int32_t mDepth;
 	float mScale;
 	float mRotation;
-	bool mFlipX;
-	bool mFlipY;
 	char mName[EE_FILENAME_MAX];
 	Vector2 mOffset;
 	Vector2 mDrawOffset;
+	int64_t INTERNAL_PADDING2;
+	Prop* INTERNAL_mCachedPropData;
 } PropInstance;
 
 void PropInstance_Init(PropInstance* prop);
@@ -39,4 +42,4 @@ Prop* PropInstance_GetPropData(PropInstance* prop);
 bool PropInstance_IsPropValid(PropInstance* prop);
 Rectangle PropInstance_GetRectangle(PropInstance* prop, Vector2 position);
 bool PropInstance_IsPropActuallyTouched(PropInstance* prop, Point relativeMouse);
-bool PropInstance_IsEqualTo(PropInstance* prop, PropInstance* instance);
+bool PropInstance_EqualTo(const PropInstance* value1, const PropInstance* value2);

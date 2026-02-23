@@ -22,8 +22,6 @@
 #include "../utils/Logger.h"
 #include "../render/BlendState.h"
 
-#define TILE_SIZE GLOBAL_DEF_TILE_SIZE
-
 static Animation EmptyAnimation;
 static ImageDataInstance EmptyRender;
 

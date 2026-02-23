@@ -28,10 +28,14 @@ typedef struct Tile
 	PropInstance* arr_props;
 } Tile;
 
+Tile* Tile_Create();
 void Tile_Init(Tile* t);
 void Tile_Read(int32_t version, Tile* t, BufferReader* br);
 void Tile_Write(Tile* t, DynamicByteBuffer* dbb);
 Rectangle Tile_GetCollisionRectangle(Tile* t, int32_t gridX, int32_t gridY);
 void Tile_DrawProps(Tile* t, SpriteBatch* spriteBatch, const Camera* camera, int32_t gridX, int32_t gridY, bool overrideDepth);
 void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const Camera* camera, int32_t gridX, int32_t gridY, bool overrideDepth, bool drawInfo);
-Tile* Tile_CreateClone(Tile* t);
+Tile* Tile_Clone(Tile* t);
+void Tile_CopyTo(Tile* toThis, Tile* fromThis, bool respectCopyCvars);
+bool Tile_EqualTo(Tile* value1, Tile* value2);
+bool Tile_TilesEqualTo(Tile** src, Rectangle srcBounds, Tile** dst, Rectangle dstBounds);
