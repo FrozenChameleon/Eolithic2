@@ -9,13 +9,19 @@
 #include "WindowTilePicker.h"
 #include "../leveldata/LevelData.h"
 #include "../core/Func.h"
+#include "../../third_party/stb_ds.h"
+#include "../input/Input.h"
+#include "../math/Math.h"
+#include "../render/DrawTool.h"
+#include "EditorGlobals.h"
+#include "WindowAnimTilePicker.h"
 
 static int _mRotation;
 static bool _mIsAnimation;
 static bool _mFlipX;
 static bool _mFlipY;
-//Color _mColorFade = OeColors.ToColor(OeColors.WHITE, 127);
-//List<Point> _mBucketPoints = new List<Point>();
+static Color _mColorFade = { 255, 255, 255, 127 };
+static Point* _mBucketPoints;
 
 PartFuncData PartTile_GetFuncData()
 {
@@ -49,16 +55,15 @@ void PartTile_CreateWindows()
         return;
     }
 
-    /*if (OeWindowAnimTilePicker.CreateWindow())
+    if (WindowAnimTilePicker_CreateWindow())
     {
         _mFlipX = false;
         _mFlipY = false;
         _mRotation = 0;
         _mIsAnimation = true;
-    }*/
+    }
 
-
-    ImGui::Text("Rotation: " + _mRotation);
+	ImGui::InputInt("Rotation: ", &_mRotation);
     ImGui::Checkbox("Flip X", & _mFlipX);
 	ImGui::Checkbox("Flip Y", &_mFlipY);
     ImGui::Text("Auto Tile (Ctrl + Num9)");
@@ -145,18 +150,18 @@ void PartTile_AutoTilerPass()
 }
 void PartTile_DrawSingleSelectionSelectedTiles(SpriteBatch* spriteBatch)
 {
-    /*int tileSize = Utils_GetTileSize();
+    Point currentGrid = EditorPart_GetCurrentGrid();
+    int x = currentGrid.X * TILE_SIZE;
+    int y = currentGrid.Y * TILE_SIZE;
+	Rectangle pickerBoundaryInPixels = WindowTilePicker_GetSelectedBoundaryInPixels();
+    int width = pickerBoundaryInPixels.Width;
+	int height = pickerBoundaryInPixels.Height;
 
-    Point currentGrid = GetCurrentGrid();
-    int x = currentGrid.X * tileSize;
-    int y = currentGrid.Y * tileSize;
-    int width = OeWindowTilePicker.GetSelectedRealWidth();
-    int height = OeWindowTilePicker.GetSelectedRealHeight();
+	Rectangle levelBoundaryInPixels = LevelData_GetBoundaryInPixels(Get_LevelData());
+    width = Math_MinInt(width, levelBoundaryInPixels.Width - x);
+    height = Math_MinInt(height, levelBoundaryInPixels.Height - y);
 
-    width = OeMath.Min(width, GetLevelData().GetRealSizeX() - x);
-    height = OeMath.Min(height, GetLevelData().GetRealSizeY() - y);
-
-    OeDrawTool.DrawRectangleHollow(spriteBatch, OeColors.WHITE, 200, new Rectangle(x, y, width, height), 0, false, 2);*/
+    DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_WHITE, 200, Rectangle_Create(x, y, width, height), 0, false, 2);
 }
 void PartTile_BucketFill(DrawTile* givenDraw, int x, int y)
 {
@@ -204,29 +209,29 @@ void PartTile_Update()
 }
 void PartTile_UpdateHelper()
 {
-    /*HandleCurrentLayerSelection();
+    EditorPart_HandleCurrentLayerSelection();
 
-    _mBucketPoints.Clear();
+	arrsetlen(_mBucketPoints, 0);
 
-    Cvars_Set(Cvars_EDITOR_SHOW_TILES, true);
+    Cvars_SetAsBool(CVARS_EDITOR_SHOW_TILES, true);
 
-    if (!OeInput.IsModifierPressed())
+    if (!Input_IsModifierPressed())
     {
-        if (OeInput.IsKeyTapped(Keys.OemMinus))
+        if (Input_IsKeyTapped(KEYS_OEMMINUS))
         {
             _mFlipX = false;
             _mFlipY = false;
             _mRotation = 0;
         }
-        if (OeInput.IsKeyTapped(Keys.Z))
+        if (Input_IsKeyTapped(KEYS_Z))
         {
             _mFlipX = !_mFlipX;
         }
-        if (OeInput.IsKeyTapped(Keys.X))
+        if (Input_IsKeyTapped(KEYS_X))
         {
             _mFlipY = !_mFlipY;
         }
-        if (OeInput.IsKeyTapped(Keys.R))
+        if (Input_IsKeyTapped(KEYS_R))
         {
             _mRotation += 90;
             if (_mRotation > 270)
@@ -236,29 +241,29 @@ void PartTile_UpdateHelper()
         }
     }
 
-    if (OeInput.IsLeftMousePressed())
+    if (Input_IsLeftMousePressed())
     {
-        OperationHelper(false, false, false);
+        PartTile_OperationHelper(false, false, false);
     }
 
-    if (OeInput.IsMiddleMouseTapped())
+    if (Input_IsMiddleMouseTapped())
     {
-        OperationHelper(false, false, true);
+        PartTile_OperationHelper(false, false, true);
     }
 
-    if (OeInput.IsRightMousePressed())
+    if (Input_IsRightMousePressed())
     {
-        OperationHelper(true, false, false);
+        PartTile_OperationHelper(true, false, false);
     }
 
-    if (OeInput.IsKeyTapped(Keys.B))
+    if (Input_IsKeyTapped(KEYS_B))
     {
-        Point currentGrid = GetCurrentGrid();
+        Point currentGrid = EditorPart_GetCurrentGrid();
         int gridX = currentGrid.X;
         int gridY = currentGrid.Y;
-        OeTile currentTile = GetGridTile(gridX, gridY);
-        BucketFill(currentTile.mDrawTiles[GetCurrentLayer()], gridX, gridY);
-    }*/
+        Tile* currentTile = EditorPart_GetGridTile(gridX, gridY);
+        PartTile_BucketFill(&currentTile->mDrawTiles[EditorPart_GetCurrentLayer()], gridX, gridY);
+    }
 }
 void PartTile_Draw(SpriteBatch* spriteBatch)
 {
@@ -272,8 +277,8 @@ void PartTile_DrawHud(SpriteBatch* spriteBatch)
 }
 void PartTile_DrawHudHelper(SpriteBatch* spriteBatch)
 {
-    /*int locX = OeInput.GetMouseX();
-    int locY = OeInput.GetMouseY();
+    /*int locX = Input_GetMouseX();
+    int locY = Input_GetMouseY();
     if (_mIsAnimation)
     {
         if (OeWindowAnimTilePicker.GetAnimTileResource() != null)
@@ -299,60 +304,30 @@ void PartTile_DrawHudHelper(SpriteBatch* spriteBatch)
 }
 void PartTile_OperationHelper(bool reset, bool resetAll, bool grabTile)
 {
-    /*int x1;
-    int y1;
-    int x2;
-    int y2;
-    int width = 1;
-    int height = 1;
+    EditorGlobals_StallOperationCounter();
+
+	Rectangle selection = EditorPart_GetSelectionRectangleAsGridBounds();
     if (!_mIsAnimation)
     {
-        width = OeWindowTilePicker.GetSelectedGridWidth();
-        height = OeWindowTilePicker.GetSelectedGridHeight();
+		Rectangle tilePickerBoundary = WindowTilePicker_GetSelectedBoundary();
+        selection.Width = tilePickerBoundary.Width;
+        selection.Height = tilePickerBoundary.Height;
     }
 
-    if (!IsSelecting())
-    {
-        Point currentGrid = GetCurrentGrid();
-        x1 = currentGrid.X;
-        y1 = currentGrid.Y;
-        x2 = x1 + width;
-        y2 = y1 + height;
-    }
-    else
-    {
-        x1 = GetSelectionRectangleGridX1();
-        y1 = GetSelectionRectangleGridY1();
-        x2 = GetSelectionRectangleGridX2();
-        y2 = GetSelectionRectangleGridY2();
-    }
+	Rectangle levelBoundary = LevelData_GetBoundary(Get_LevelData());
+    selection.Width = Math_MinInt(selection.Width, levelBoundary.Width);
+    selection.Height = Math_MinInt(selection.Height, levelBoundary.Height);
 
-    x2 = OeMath.Min(x2, GetLevelData().GetGridSizeX());
-    y2 = OeMath.Min(y2, GetLevelData().GetGridSizeY());
-
-    SetPatch1(GetPatch(x1, x2, y1, y2, x1, y1));
-    Operation(x1, x2, y1, y2, reset, resetAll, grabTile);
-    SetPatch2(GetPatch(x1, x2, y1, y2, x1, y1));
-
-    CheckPatch();*/
+    PartTile_Operation(selection, reset, resetAll, grabTile);
 }
-void PartTile_Operation(int x1, int x2, int y1, int y2, bool resetTile, bool resetAll, bool grabTile)
+void PartTile_Operation(Rectangle selection, bool resetTile, bool resetAll, bool grabTile)
 {
-    /*int tileSize = OeUtils.GetTileSize();
-
-    int counterX = 0;
-    int counterY = 0;
-    int width = 1;
-    int height = 1;
-    if (!_mIsAnimation)
-    {
-        width = OeWindowTilePicker.GetSelectedGridWidth();
-        height = OeWindowTilePicker.GetSelectedGridHeight();
-    }
-    int counterLimitX = width - 1;
-    int counterLimitY = height - 1;
     int incX = 1;
     int incY = 1;
+    int counterX = 0;
+    int counterY = 0;
+    int counterLimitX = selection.Width - 1;
+    int counterLimitY = selection.Width - 1;
 
     if (_mFlipX)
     {
@@ -366,53 +341,56 @@ void PartTile_Operation(int x1, int x2, int y1, int y2, bool resetTile, bool res
         incY = -1;
     }
 
-    for (int i = x1; i < x2; i += 1)
+	EditorPart_PushPatches(selection);
+
+	for (int i = selection.X; i < (selection.X + selection.Width); i += 1)
     {
-        for (int j = y1; j < y2; j += 1)
+		for (int j = selection.Y; j < (selection.Y + selection.Height); j += 1)
         {
-            bool autoTile = Cvars_GetAsInt(Cvars_EDITOR_AUTO_TILER) != -1;
+            bool autoTile = Cvars_GetAsInt(CVARS_EDITOR_AUTO_TILER) != -1;
             if (_mIsAnimation)
             {
                 autoTile = false;
             }
 
-            int selectedTextureX = OeWindowTilePicker.GetTexturePositionX() + (counterX * tileSize);
-            int selectedTextureY = OeWindowTilePicker.GetTexturePositionY() + (counterY * tileSize);
+			Point texturePos = WindowTilePicker_GetTexturePosition();
+            Point selectedTexture = Point_Create(texturePos.X + (counterX * TILE_SIZE), texturePos.Y + (counterY * TILE_SIZE));
 
-            OeDrawTile[] draws = GetLevelData().GetTile(i, j).mDrawTiles;
+			DrawTile* draws = LevelData_GetTile(Get_LevelData(), i, j)->mDrawTiles;
+            DrawTile* currentLayerDt = &draws[EditorPart_GetCurrentLayer()];
             if (resetAll)
             {
-                for (int k = 0; k < draws.Length; k += 1)
+                for (int k = 0; k < TILE_DRAW_LAYER_LENGTH; k += 1)
                 {
-                    OeDrawTile.Init(out draws[k]);
+					DrawTile_Init(&draws[k]);
                 }
             }
             else if (resetTile)
             {
                 if (autoTile)
                 {
-                    OeEditorAutoTiler.AutoTile(Cvars_GetAsInt(Cvars_EDITOR_AUTO_TILER), GetLevelData().GetTileData(),
+                    /*OeEditorAutoTiler.AutoTile(Cvars_GetAsInt(Cvars_EDITOR_AUTO_TILER), GetLevelData().GetTileData(),
                         GetLevelData().mTilesetName, tileSize, i, j, GetCurrentLayer(),
-                        new Rectangle(selectedTextureX, selectedTextureY, tileSize, tileSize), false, false);
+                        new Rectangle(selectedTextureX, selectedTextureY, tileSize, tileSize), false, false);*/
                 }
-                OeDrawTile.Init(out draws[GetCurrentLayer()]);
+                DrawTile_Init(currentLayerDt);
             }
             else if (grabTile)
             {
-                if (!OeDrawTile.IsZero(ref draws[GetCurrentLayer()]))
+				if (!DrawTile_IsZero(currentLayerDt))
                 {
-                    _mRotation = (int)draws[GetCurrentLayer()].mRotation;
-                    _mFlipX = draws[GetCurrentLayer()].mFlipX;
-                    _mFlipY = draws[GetCurrentLayer()].mFlipY;
-                    if (!OeDrawTile.IsAnimation(ref draws[GetCurrentLayer()]))
+                    _mRotation = (int)currentLayerDt->mRotation;
+                    _mFlipX = currentLayerDt->mFlipX;
+                    _mFlipY = currentLayerDt->mFlipY;
+					if (!DrawTile_IsAnimation(currentLayerDt))
                     {
-                        OeWindowTilePicker.SetTexturePositionX(draws[GetCurrentLayer()].mPoint.X);
-                        OeWindowTilePicker.SetTexturePositionY(draws[GetCurrentLayer()].mPoint.Y);
+                        Point newTexturePosition = currentLayerDt->mPoint;
+                        WindowTilePicker_SetTexturePosition(newTexturePosition);
                         _mIsAnimation = false;
                     }
                     else
                     {
-                        OeWindowAnimTilePicker.SetAnimTile(draws[GetCurrentLayer()].mAnimation);
+                        WindowAnimTilePicker_SetAnimTile(currentLayerDt->mAnimation);
                         _mIsAnimation = true;
                     }
                 }
@@ -421,31 +399,32 @@ void PartTile_Operation(int x1, int x2, int y1, int y2, bool resetTile, bool res
             {
                 if (autoTile)
                 {
-                    OeEditorAutoTiler.AutoTile(Cvars_GetAsInt(Cvars_EDITOR_AUTO_TILER), GetLevelData().GetTileData(),
+                    /*OeEditorAutoTiler.AutoTile(Cvars_GetAsInt(CVARS_EDITOR_AUTO_TILER), GetLevelData().GetTileData(),
                         GetLevelData().mTilesetName, tileSize, i, j, GetCurrentLayer(),
-                        new Rectangle(selectedTextureX, selectedTextureY, tileSize, tileSize), false, true);
+                        new Rectangle(selectedTextureX, selectedTextureY, tileSize, tileSize), false, true);*/
                 }
                 else
                 {
                     if (!_mIsAnimation)
                     {
-                        draws[GetCurrentLayer()].mRotation = _mRotation;
-                        draws[GetCurrentLayer()].mFlipX = _mFlipX;
-                        draws[GetCurrentLayer()].mFlipY = _mFlipY;
-                        OeDrawTile.LoadSheet(ref draws[GetCurrentLayer()], selectedTextureX, selectedTextureY);
-                    }
-                    else
-                    {
-                        if (OeWindowAnimTilePicker.GetAnimTileResource() != null)
-                        {
-                            draws[GetCurrentLayer()].mRotation = _mRotation;
-                            draws[GetCurrentLayer()].mFlipX = _mFlipX;
-                            draws[GetCurrentLayer()].mFlipY = _mFlipY;
-                            OeDrawTile.LoadAnimation(ref draws[GetCurrentLayer()], OeWindowAnimTilePicker.GetAnimTileResource().GetName());
-                        }
-                    }
-                }
-            }
+                        currentLayerDt->mRotation = (float)_mRotation;
+                        currentLayerDt->mFlipX = _mFlipX;
+                        currentLayerDt->mFlipY = _mFlipY;
+						DrawTile_LoadSheet(currentLayerDt, selectedTexture.X, selectedTexture.Y);
+					}
+					else
+					{
+                        Resource* animTileRes = WindowAnimTilePicker_GetAnimTileResource();
+						if (animTileRes != NULL)
+						{
+                            currentLayerDt->mRotation = _mRotation;
+                            currentLayerDt->mFlipX = _mFlipX;
+                            currentLayerDt->mFlipY = _mFlipY;
+							DrawTile_LoadAnimation(currentLayerDt, Resource_GetFilenameWithoutExtension(animTileRes));
+						}
+					}
+				}
+			}
 
             counterY += incY;
             if (!_mFlipY)
@@ -487,7 +466,9 @@ void PartTile_Operation(int x1, int x2, int y1, int y2, bool resetTile, bool res
                 counterX = counterLimitX;
             }
         }
-    }*/
+    }
+
+	EditorPart_FinishPatches();
 }
 const char* PartTile_GetStatus()
 {

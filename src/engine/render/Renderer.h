@@ -185,3 +185,4 @@ int32_t Renderer_GetRenderTargetScale(void);
 void Renderer_StartImGuiFrame(void);
 void Renderer_SetupImGuiRenderState(void);
 Texture* Renderer_RenderToTexture(int width, int height, Color clearColor, Renderer_DrawFunc draw);
+void Renderer_DisposeTexture(Texture* texture);

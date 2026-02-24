@@ -7,6 +7,7 @@
 #include "imgui.h"
 #include "../render/Renderer.h"
 #include "../render/DrawTool.h"
+#include "ImGuiHelper.h"
 
 static int _mState = 1;
 static bool _mIsDragHold;
@@ -42,6 +43,7 @@ bool WindowTilePicker_CreateWindow(Texture* texture)
     bool whatever = false;
 	if (!ImGui::Begin("Tile Picker", &whatever, flags))
     {
+        ImGui::End();
         return false;
     }
 
@@ -86,11 +88,7 @@ bool WindowTilePicker_CreateWindow(Texture* texture)
 
     bool returnValue = WindowTilePicker_FindPoint(width, height, scale);
 
-	bool isTilePickerLocked = Cvars_GetAsBool(CVARS_EDITOR_IS_TILE_PICKER_LOCKED);
-    if (ImGui::Checkbox("Locked?", &isTilePickerLocked))
-    {
-		Cvars_SetAsBool(CVARS_EDITOR_IS_TILE_PICKER_LOCKED, isTilePickerLocked);
-    }
+	ImGuiHelper_CvarCheckbox("Locked?", CVARS_EDITOR_IS_TILE_PICKER_LOCKED);
 
 	ImGui::End();
 
@@ -203,7 +201,8 @@ void WindowTilePicker_DrawHud(SpriteBatch* spriteBatch)
     int wrapperWidth = _mTexture->mBounds.Width;
     int wrapperHeight = _mTexture->mBounds.Height;
     SpriteBatch_Draw(spriteBatch, _mTexture, COLOR_WHITE, myDepth, NULL, Vector2_Create(_mBounds.X - offsetX, _mBounds.Y - offsetY),
-		Rectangle_Create(0, 0, wrapperWidth, wrapperHeight), Vector2_Create2(scale), 0, false, false, Vector2_DivFloat(Vector2_Create(wrapperWidth, wrapperHeight), 2.0f));
+		Rectangle_Create(0, 0, wrapperWidth, wrapperHeight), 
+        Vector2_Create2(scale), 0, false, false, Vector2_DivFloat(Vector2_Create((float)wrapperWidth, (float)wrapperHeight), 2.0f));
 	Rectangle boundaryInPixels = WindowTilePicker_GetSelectedBoundaryInPixels();
     int width = boundaryInPixels.Width;
     int height = boundaryInPixels.Height;

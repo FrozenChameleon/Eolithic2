@@ -18,7 +18,6 @@ typedef struct Texture
 	Rectangle mBounds;
 } Texture;
 
-void Texture_Dispose(Texture* tex);
 Texture* Texture_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);
 int32_t Texture_GetWidth(Texture* tex);
 int32_t Texture_GetHeight(Texture* tex);

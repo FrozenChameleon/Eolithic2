@@ -857,7 +857,7 @@ void EditorPart_AddPatch(LevelPatch* patch)
 }
 bool EditorPart_IsSelecting(void)
 {
-	return !Rectangle_IsEmpty(&_mSelectionRectangle);
+	return (_mSelectionState != EDITOR_SELECTION_STATE_NOTHING);
 }
 void EditorPart_ReverseCopy(bool isFlipY)
 {

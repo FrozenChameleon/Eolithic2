@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../utils/Macros.h"
+#include "../math/Rectangle.h"
 #include "PartFuncData.h"
 
 typedef struct SpriteBatch SpriteBatch;
@@ -17,6 +18,6 @@ void PartTile_Draw(SpriteBatch* spriteBatch);
 void PartTile_DrawHud(SpriteBatch* spriteBatch);
 void PartTile_DrawHudHelper(SpriteBatch* spriteBatch);
 void PartTile_OperationHelper(bool reset, bool resetAll, bool grabTile);
-void PartTile_Operation(int x1, int x2, int y1, int y2, bool resetTile, bool resetAll, bool grabTile);
+void PartTile_Operation(Rectangle selection, bool resetTile, bool resetAll, bool grabTile);
 const char* PartTile_GetStatus();
 void PartTile_JustChangedToThisPart();

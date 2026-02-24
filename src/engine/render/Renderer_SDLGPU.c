@@ -187,6 +187,7 @@ static SDL_GPUShader* LoadShader(
 
 typedef struct FixedRenderState
 {
+	uint64_t RenderFrameCounter;
 	uint64_t VertexBufferCounter;
 	SDL_Window* WindowHandle;
 	SDL_GPUDevice* DeviceHandle;
@@ -213,15 +214,23 @@ typedef struct TempRenderState
 	SDL_GPUTexture* TextureToRenderTo;
 	SDL_GPUCopyPass* CopyPass;
 	Texture* LastTextureUsed;
+	Rectangle ProjectionBounds;
+	SDL_GPUGraphicsPipeline* CurrentPipeline;
 }TempRenderState;
 
 static FixedRenderState _mFixed;
 static TempRenderState _mTemp;
-Rectangle _mVirtualBufferBounds;
-Rectangle _mActualBufferBounds;
+static Rectangle _mVirtualBufferBounds;
+static Rectangle _mActualBufferBounds;
 static bool _mIsReadyToDrawImGui;
 
-static Texture** arr_dispose_me_later;
+typedef struct DisposeThisTexture
+{
+	uint64_t frame_created;
+	Texture* texture;
+}DisposeThisTexture;
+
+static DisposeThisTexture* arr_dispose_me_later;
 
 static SDL_GPUTransferBuffer* GetTransferBufferForVertexBuffer()
 {
@@ -761,6 +770,19 @@ static SDL_GPUGraphicsPipeline* GetPipelineToUse()
 	}
 	return pipelineToUse;
 }
+static Rectangle GetProjectionBounds()
+{
+	Rectangle rect;
+	if (IsOffscreenTargetNeeded())
+	{
+		rect = _mFixed.OffscreenTarget->mBounds;
+	}
+	else
+	{
+		rect = _mActualBufferBounds;
+	}
+	return rect;
+}
 static SDL_GPUTexture* GetTextureToRenderTo()
 {
 	SDL_GPUTexture* textureToRenderTo = NULL;
@@ -783,6 +805,18 @@ static void SwitchToNextVertexBuffer()
 }
 void Renderer_BeforeRender(void)
 {
+	_mFixed.RenderFrameCounter += 1;
+	for (int i = 0; i < arrlen(arr_dispose_me_later); i += 1)
+	{
+		DisposeThisTexture* disposeThis = &arr_dispose_me_later[i];
+		if (Math_abs((int32_t)(_mFixed.RenderFrameCounter - disposeThis->frame_created)) > 60)
+		{
+			Renderer_DisposeTexture(disposeThis->texture);
+			arrdel(arr_dispose_me_later, i);
+			i -= 1;
+		}
+	}
+
 	Utils_memset(&_mTemp, 0, sizeof(TempRenderState));
 
 	SwitchToNextVertexBuffer();
@@ -818,6 +852,8 @@ void Renderer_BeforeRender(void)
 		return;
 	}
 
+	_mTemp.CurrentPipeline = GetPipelineToUse();
+	_mTemp.ProjectionBounds = GetProjectionBounds();
 	_mTemp.TextureToRenderTo = GetTextureToRenderTo();
 
 	{
@@ -850,10 +886,10 @@ void Renderer_BeforeCommit(void)
 		_mTemp.RenderPass = SDL_BeginGPURenderPass(_mTemp.CommandRender, &colorTargetInfo, 1, NULL);
 	}
 
-	SDL_BindGPUGraphicsPipeline(_mTemp.RenderPass, GetPipelineToUse());
+	SDL_BindGPUGraphicsPipeline(_mTemp.RenderPass, _mTemp.CurrentPipeline);
 
 	{ //Push current camera positions...
-		Matrix cameraMatrix = Matrix_CreateOrthographicOffCenter(0, _mActualBufferBounds.Width, _mActualBufferBounds.Height, 0, 0, 1);
+		Matrix cameraMatrix = Matrix_CreateOrthographicOffCenter(0, (float)_mTemp.ProjectionBounds.Width, (float)_mTemp.ProjectionBounds.Height, 0, 0, 1);
 		Matrix result = Matrix_Multiply(Renderer_INTERNAL_GetCurrentTranslation(), cameraMatrix);
 		SDL_PushGPUVertexUniformData(_mTemp.CommandRender, 0, &result, sizeof(Matrix));
 	}
@@ -1058,7 +1094,10 @@ Texture* Renderer_RenderToTexture(int width, int height, Color clearColor, Rende
 	info.props = temp;
 	tempRender->mTextureData = SDL_CreateGPUTexture(_mFixed.DeviceHandle, &info); //TODO LEAK
 
+	_mTemp.ProjectionBounds = Rectangle_Create(0, 0, tempRender->mBounds.Width, tempRender->mBounds.Height);
 	_mTemp.TextureToRenderTo = (SDL_GPUTexture*)tempRender->mTextureData;
+
+	_mTemp.CurrentPipeline = _mFixed.PipelineForRTT;
 
 	_mTemp.CommandUpload = SDL_AcquireGPUCommandBuffer(_mFixed.DeviceHandle);
 	if (_mTemp.CommandUpload == NULL)
@@ -1102,9 +1141,26 @@ Texture* Renderer_RenderToTexture(int width, int height, Color clearColor, Rende
 
 	Utils_memset(&_mTemp, 0, sizeof(TempRenderState));
 
-	arrput(arr_dispose_me_later, tempRender);
+	DisposeThisTexture disposeThis;
+	disposeThis.frame_created = _mFixed.RenderFrameCounter;
+	disposeThis.texture = tempRender;
+	arrput(arr_dispose_me_later, disposeThis);
 
 	return tempRender;
+}
+void Renderer_DisposeTexture(Texture* texture)
+{
+	if (texture->mTextureData != NULL)
+	{
+		SDL_ReleaseGPUTexture(_mFixed.DeviceHandle, (SDL_GPUTexture*)texture->mTextureData);
+		texture->mTextureData = NULL;
+	}
+	if (texture->mPath != NULL)
+	{
+		MString_Dispose(&texture->mPath);
+		texture->mPath = NULL;
+	}
+	Utils_free(texture);
 }
 static void DrawImGuiRenderPass(void)
 {
@@ -1185,7 +1241,6 @@ void Renderer_AfterRender(void)
 
 	Utils_memset(&_mTemp, 0, sizeof(TempRenderState));
 }
-
 void Renderer_FlushBatch(void)
 {
 }

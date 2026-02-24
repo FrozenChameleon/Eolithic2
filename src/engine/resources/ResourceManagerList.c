@@ -113,7 +113,7 @@ void ResourceManagerList_Init(void)
 		Utils_strlcpy(textureMan->_mDirectories[2], MString_Text(tempString), EE_PATH_MAX);
 
 		textureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
-		textureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
+		//textureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
 		textureMan->_mReadFromDirectory = true;
 		textureMan->_mDelayLoading = true;
 	}
@@ -127,7 +127,7 @@ void ResourceManagerList_Init(void)
 		File_PathCombine2(&tempString, "data", "fonts");
 		Utils_strlcpy(fontTextureMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		fontTextureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
-		fontTextureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
+		//fontTextureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
 		fontTextureMan->_mReadFromDirectory = true;
 	}
 
@@ -140,7 +140,7 @@ void ResourceManagerList_Init(void)
 		File_PathCombine3(&tempString, "data", "gfx", "movies");
 		Utils_strlcpy(movieTextureMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
 		movieTextureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
-		movieTextureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
+		//movieTextureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
 		movieTextureMan->_mReadFromDirectory = true;
 		movieTextureMan->_mDelayLoading = true;
 	}
