@@ -105,11 +105,11 @@ void EditorDebugToggles_Update()
         }
         if (Input_IsKeyTapped(KEYS_F3))
         {
-          //  OeEditorActivePart.SetPartToThing();
+			ActivePart_SetPartToThing();
         }
         if (Input_IsKeyTapped(KEYS_F4))
         {
-          //  OeEditorActivePart.SetPartToProp();
+			ActivePart_SetPartToProp();
         }
         if (Input_IsKeyTapped(KEYS_F5))
         {

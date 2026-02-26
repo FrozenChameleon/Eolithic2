@@ -22,6 +22,7 @@ void PartCollision_CreateWindows()
 	ImGui::SetNextWindowSize(ImVec2(300, 500));
 	if (!ImGui::Begin("Collision Mode", &test, ImGuiWindowFlags_NoResize))
 	{
+		ImGui::End();
 		return;
 	}
 

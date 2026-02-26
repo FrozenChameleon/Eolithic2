@@ -64,3 +64,5 @@ void ResourceManager_WriteAll(ResourceManager* rm, bool isWritingText);
 void ResourceManager_Read(ResourceManager* rm, const char* filenameWithoutExtension, bool isReadingText);
 void ResourceManager_ReadAll(ResourceManager* rm, bool isReadingText);
 void ResourceManager_LoadAllFromDirectories(ResourceManager* rm, bool isReadingText);
+//Pointer that is returned must be freed!
+const char** ResourceManager_CreateArrayWithAllResourceFilenames(ResourceManager* rm, int32_t* out_array_length);

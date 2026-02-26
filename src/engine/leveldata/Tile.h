@@ -39,3 +39,4 @@ Tile* Tile_Clone(Tile* t);
 void Tile_CopyTo(Tile* toThis, Tile* fromThis, bool respectCopyCvars);
 bool Tile_EqualTo(Tile* value1, Tile* value2);
 bool Tile_TilesEqualTo(Tile** src, Rectangle srcBounds, Tile** dst, Rectangle dstBounds);
+void Tile_DrawThings(Tile* t, SpriteBatch* spriteBatch, Camera* camera, int gridX, int gridY, bool overrideDepth);

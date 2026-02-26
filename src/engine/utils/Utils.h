@@ -150,3 +150,7 @@ Point Utils_AlignToTileGridPoint(Point value, UtilsRoundingMode roundingMode, bo
 int32_t Utils_AlignToTileGridFloat(float value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
 Point Utils_AlignToTileGridVector2(Vector2 value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
 int32_t Utils_AlignToTileGridDouble(double value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
+double Utils_fmod(double x, double y);
+float Utils_fmodf(float x, float y);
+int32_t Utils_toupper(int x);
+int32_t Utils_tolower(int x);

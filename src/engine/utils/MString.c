@@ -342,6 +342,26 @@ void MString_AddAssignString(MString** str, const char* addThisStr)
 	GrowMStringIfNeeded(currentString, newCapacity);
 	currentString->len = (int32_t)Utils_strlcat(currentString->text, _mStringBuffer, newCapacity);
 }
+void MString_ToLower(MString** str)
+{
+	CheckAndReplaceNullString(str);
+
+	MString* currentString = *str;
+	for (int i = 0; i < currentString->len; i += 1)
+	{
+		currentString->text[i] = Utils_tolower(currentString->text[i]);
+	}
+}
+void MString_ToUpper(MString** str)
+{
+	CheckAndReplaceNullString(str);
+
+	MString* currentString = *str;
+	for (int i = 0; i < currentString->len; i += 1)
+	{
+		currentString->text[i] = Utils_toupper(currentString->text[i]);
+	}
+}
 void MString_Truncate(MString** str, int32_t newLength)
 {
 	CheckAndReplaceNullString(str);

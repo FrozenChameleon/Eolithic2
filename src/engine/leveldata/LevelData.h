@@ -64,3 +64,4 @@ Texture* LevelData_GetTilesetTexture(LevelData* ld);
 void LevelData_DrawProps(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera);
 void LevelData_DrawProps2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera, bool drawInfo);
 void LevelData_DrawCollision(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera);
+void LevelData_DrawThings(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera);

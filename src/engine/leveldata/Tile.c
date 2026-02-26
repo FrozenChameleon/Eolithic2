@@ -18,6 +18,8 @@
 #include "ThingInstance.h"
 #include "../utils/Logger.h"
 
+#define OVERRIDE_DEPTH 190
+
 Tile* Tile_Create()
 {
 	Tile* tile = (Tile*)Utils_calloc(1, sizeof(Tile));
@@ -283,4 +285,23 @@ bool Tile_TilesEqualTo(Tile** src, Rectangle srcBounds, Tile** dst, Rectangle ds
 	}
 
 	return true;
+}
+void Tile_DrawThings(Tile* t, SpriteBatch* spriteBatch, Camera* camera, int gridX, int gridY, bool overrideDepth)
+{
+	if (arrlen(t->arr_instances) == 0)
+	{
+		return;
+	}
+
+	for (int k = 0; k < arrlen(t->arr_instances); k += 1)
+	{
+		if (!overrideDepth)
+		{
+			ThingInstance_Draw(&t->arr_instances[k], spriteBatch, COLOR_WHITE, Point_Create(gridX * TILE_SIZE, gridY * TILE_SIZE), false);
+		}
+		else
+		{
+			ThingInstance_Draw2(&t->arr_instances[k], spriteBatch, COLOR_WHITE, OVERRIDE_DEPTH, Point_Create(gridX * TILE_SIZE, gridY * TILE_SIZE), false);
+		}
+	}
 }

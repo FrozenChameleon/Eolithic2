@@ -11,6 +11,9 @@
 #include "../math/Vector2.h"
 #include "../utils/MString.h"
 
+#define PROPINSTANCE_SELECTBOX_COLOR Color_Create4(0, 0, 255, 76)
+#define PROPINSTANCE_SELECTBOX_COLOR_OFF Color_Create4(0, 255, 0, 153)
+
 typedef struct BufferReader BufferReader;
 typedef struct DynamicByteBuffer DynamicByteBuffer;
 typedef struct SpriteBatch SpriteBatch;

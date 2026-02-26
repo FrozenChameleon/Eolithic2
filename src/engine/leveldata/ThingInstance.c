@@ -15,16 +15,13 @@
 #include "../utils/Cvars.h"
 #include "../core/Game.h"
 #include "../core/GameHelper.h"
-#include "../resources/ResourceManager.h"
+#include "../resources/ResourceManagerList.h"
 #include "../../third_party/stb_ds.h"
-
-const char* THINGINSTANCE_SETTING_DTN_OFFSET_X = "DTN_OFFSET_X";
-const char* THINGINSTANCE_SETTING_DTN_OFFSET_Y = "DTN_OFFSET_Y";
-
-const char* THINGINSTANCE_SETTING_BLN_DIFFICULTY_EASY = "BLN_DIFFICULTY_EASY";
-const char* THINGINSTANCE_SETTING_BLN_DIFFICULTY_NORMAL = "BLN_DIFFICULTY_NORMAL";
-const char* THINGINSTANCE_SETTING_BLN_DIFFICULTY_HARD = "BLN_DIFFICULTY_HARD";
-const char* THINGINSTANCE_SETTING_BLN_DIFFICULTY_VERY_HARD = "BLN_DIFFICULTY_VERY_HARD";
+#include "../render/DrawTool.h"
+#include "ThingSettings.h"
+#include "../render/Sheet.h"
+#include "../render/Color.h"
+#include "../globals/Align.h"
 
 //static std_vector<OeStringPair> _mPairs;
 
@@ -278,72 +275,75 @@ bool ThingInstance_IsEqualTo(ThingInstance* ti, ThingInstance* instance)
 }
 ThingSettings* ThingInstance_GetThingSettings(ThingInstance* ti)
 {
-	return NULL;
-	//return OeResourceManagers_ThingSettingsManager.GetResourceData(mName); //UNUSED
+	ResourceManager* rmThings = ResourceManagerList_ThingSettings();
+	return (ThingSettings*)ResourceManager_GetResourceData(rmThings, ti->mName);
 }
 void ThingInstance_Draw(ThingInstance* ti, SpriteBatch* spriteBatch, Color color, Point position, bool isSelected)
 {
-	//Draw(spriteBatch, color, 100, position, isSelected); //UNUSED
+	ThingInstance_Draw2(ti, spriteBatch, color, 100, position, isSelected);
 }
 void ThingInstance_Draw2(ThingInstance* ti, SpriteBatch* spriteBatch, Color color, int32_t depth, Point position, bool isSelected)
 {
-	//WILLNOTDO 05152023 //UNUSED
-	/*
-	OeDrawTool.DrawRectangle(spriteBatch, color, depth - 1, new Rectangle(position.X, position.Y, GetWidth(), GetHeight()), 0, false);
+	DrawTool_DrawRectangle2(spriteBatch, color, depth - 1, 
+		Rectangle_Create(position.X, position.Y, ThingInstance_GetWidth(ti), ThingInstance_GetHeight(ti)), 0, false);
 
-	OeThingSettings settings = GetThingSettings();
-	string sheetName;
-	if (settings == null)
+	ThingSettings* settings = ThingInstance_GetThingSettings(ti);
+	const char* sheetName;
+	if (settings == NULL)
 	{
-		sheetName = OeUtils.NOT_SET;
+		sheetName = EE_STR_NOT_SET;
 	}
 	else
 	{
-		sheetName = settings.mPreviewSheet;
+		sheetName = settings->mPreviewSheet;
 	}
 
-	Point center = position + OePoints.HalfTileSize();
+	Point center = Point_Add(position, Points_HalfTileSize());
 
-	OeSheet.Draw(ref OeSheet.GetSheet(sheetName), spriteBatch, OeColors.WHITE, depth, true, true, null, new Vector2(center.X, center.Y), Vector2.One, 0);
+	Sheet_Draw3(Sheet_GetSheet(sheetName), spriteBatch, COLOR_WHITE, depth, true, true, NULL, Vector2_Create(center.X, center.Y), Vector2_One, 0);
 
-	if (isSelected)
+	if (!isSelected)
 	{
-		int32_t tileSize = TILE_SIZE
-		int32_t halfTileSize = OeUtils.GetHalfTileSize();
-		for (int32_t i = 0; i < mNodes.Count; i += 1)
+		return;
+	}
+
+	for (int32_t i = 0; i < arrlen(ti->arr_nodes); i += 1)
+	{
+		Point nodeOne = ti->arr_nodes[i];
+
+		int32_t nodeOnePositionX = position.X + nodeOne.X * TILE_SIZE + HALF_TILE_SIZE;
+		int32_t nodeOnePositionY = position.Y + nodeOne.Y * TILE_SIZE + HALF_TILE_SIZE;
+
+		DrawTool_DrawRectangle2(spriteBatch, COLOR_PINK, depth + 5, Rectangle_Create(nodeOnePositionX, nodeOnePositionY, TILE_SIZE, TILE_SIZE), 0, true);
+		SpriteBatch_DrawString2(spriteBatch, "editor", Utils_IntToStringGlobalBuffer(i), COLOR_BLUE, 200,
+			Vector2_Create(nodeOnePositionX, nodeOnePositionY), ALIGN_CENTER, ALIGN_CENTER);
+
+		int32_t size = 1;
+		if (i == 0)
 		{
-			Point nodeOne = mNodes[i];
-
-			int32_t nodeOnePositionX = position.X + nodeOne.X * tileSize + halfTileSize;
-			int32_t nodeOnePositionY = position.Y + nodeOne.Y * tileSize + halfTileSize;
-
-			OeDrawTool.DrawRectangle(spriteBatch, OeColors.PINK, depth + 5, new Rectangle(nodeOnePositionX, nodeOnePositionY, tileSize, tileSize), 0, true);
-			spriteBatch.DrawString("editor", i.ToString(), OeColors.BLUE, 200,
-				new Vector2(nodeOnePositionX, nodeOnePositionY), OeAlign.CENTER, OeAlign.CENTER);
-
-			int32_t size = 1;
-			if (i == 0)
-			{
-				OeDrawTool.DrawLine(spriteBatch, OeColors.RED, 100, 4, 0, size, nodeOnePositionX, nodeOnePositionY, center.X, center.Y);
-			}
-			else if (i > 0)
-			{
-				Point nodeTwo = mNodes[i - 1];
-				int32_t nodeTwoPositionX = position.X + nodeTwo.X * tileSize + halfTileSize;
-				int32_t nodeTwoPositionY = position.Y + nodeTwo.Y * tileSize + halfTileSize;
-				OeDrawTool.DrawLine(spriteBatch, OeColors.BLUE, 100, 4, 0, size, nodeOnePositionX, nodeOnePositionY, nodeTwoPositionX, nodeTwoPositionY);
-			}
-			if (i == mNodes.Count - 1 && mNodes.Count > 1)
-			{
-				OeDrawTool.DrawLine(spriteBatch, OeColors.YELLOW, 100, 4, 0, size, nodeOnePositionX, nodeOnePositionY, center.X, center.Y);
-			}
+			DrawTool_DrawLine3(spriteBatch, COLOR_RED, 100, 4, 0, size, nodeOnePositionX, nodeOnePositionY, center.X, center.Y);
+		}
+		else if (i > 0)
+		{
+			Point nodeTwo = ti->arr_nodes[i - 1];
+			int32_t nodeTwoPositionX = position.X + nodeTwo.X * TILE_SIZE + HALF_TILE_SIZE;
+			int32_t nodeTwoPositionY = position.Y + nodeTwo.Y * TILE_SIZE + HALF_TILE_SIZE;
+			DrawTool_DrawLine3(spriteBatch, COLOR_BLUE, 100, 4, 0, size, nodeOnePositionX, nodeOnePositionY, nodeTwoPositionX, nodeTwoPositionY);
+		}
+		if ((i == (arrlen(ti->arr_nodes) - 1)) && (arrlen(ti->arr_nodes) > 1))
+		{
+			DrawTool_DrawLine3(spriteBatch, COLOR_YELLOW, 100, 4, 0, size, nodeOnePositionX, nodeOnePositionY, center.X, center.Y);
 		}
 	}
-	*/
 }
 const char* ThingInstance_GetName(ThingInstance* ti)
 {
 	return ti->mName;
+}
+Rectangle ThingInstance_GetRectangle(ThingInstance* ti, float positionX, float positionY)
+{
+	return Rectangle_Create(ThingInstance_GetLeft(ti, positionX), ThingInstance_GetTop(ti, positionY),
+		ThingInstance_GetWidth(ti), ThingInstance_GetHeight(ti));;
 }
 int32_t ThingInstance_GetLeft(ThingInstance* ti, float positionX)
 {

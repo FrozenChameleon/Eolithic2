@@ -504,3 +504,30 @@ void LevelData_DrawCollision(LevelData* ld, SpriteBatch* spriteBatch, Camera* ca
 
 	SpriteBatch_DrawManyRectangle(spriteBatch, 150, arr_many_rectangles);
 }
+void LevelData_DrawThings(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera)
+{
+#if EDITOR_MODE
+	if (!Cvars_GetAsBool(CVARS_EDITOR_SHOW_THINGS))
+	{
+		return;
+	}
+#endif
+
+	Rectangle levelBoundary = LevelData_GetBoundary(ld);
+	int x1 = Camera_GetX1(camera);
+	int x2 = Camera_GetX2(camera, levelBoundary.Width);
+	int y1 = Camera_GetY1(camera);
+	int y2 = Camera_GetY2(camera, levelBoundary.Height);
+
+	for (int i = x1; i < x2; i += 1)
+	{
+		for (int j = y1; j < y2; j += 1)
+		{
+			Tile* tile = LevelData_GetTile(ld, i, j);
+			if (arrlen(tile->arr_instances) != 0)
+			{
+				Tile_DrawThings(tile, spriteBatch, camera, i, j, false);
+			}
+		}
+	}
+}

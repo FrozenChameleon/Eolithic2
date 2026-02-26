@@ -1562,3 +1562,19 @@ int32_t Utils_AlignToTileGridDouble(double value, UtilsRoundingMode roundingMode
 		return tempInt;
 	}
 }
+double Utils_fmod(double x, double y)
+{
+	return SDL_fmod(x, y);
+}
+float Utils_fmodf(float x, float y)
+{
+	return SDL_fmodf(x, y);
+}
+int32_t Utils_toupper(int x)
+{
+	return SDL_toupper(x);
+}
+int32_t Utils_tolower(int x)
+{
+	return SDL_toupper(x);
+}

@@ -113,6 +113,7 @@ bool PropInstance_IsPropValid(PropInstance* prop)
 	{
 		return false;
 	}
+
 	return true;
 }
 
@@ -150,9 +151,8 @@ Rectangle PropInstance_GetRectangle(PropInstance* prop, Vector2 position)
 }
 bool PropInstance_IsPropActuallyTouched(PropInstance* prop, Point relativeMouse)
 {
-	return false;
-
-	/*OeProp* propData = GetThePropData(prop); //UNUSED
+	return true; //TODO MUST DO THIS 20260225
+	/*OeProp* propData = GetThePropData(prop);
 	if (propData != nullptr)
 	{
 		//WILLNOTDO 05152023

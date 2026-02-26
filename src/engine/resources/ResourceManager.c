@@ -385,3 +385,15 @@ void ResourceManager_LoadAllFromDirectories(ResourceManager* rm, bool isReadingT
 		LoadAllFromDirectoriesHelper(rm, isReadingText, rm->_mDirectories[i]);
 	}
 }
+const char** ResourceManager_CreateArrayWithAllResourceFilenames(ResourceManager* rm, int32_t* out_array_length)
+{
+	int64_t length = ResourceManager_Length(rm);
+	const char** allFilenames = (const char**)Utils_calloc(length, sizeof(const char*));
+	for (int i = 0; i < length; i += 1)
+	{
+		Resource* res = ResourceManager_GetResourceByIndex(rm, i);
+		allFilenames[i] = Resource_GetFilenameWithoutExtension(res);
+	}
+	*out_array_length = (int32_t)length;
+	return allFilenames;
+}

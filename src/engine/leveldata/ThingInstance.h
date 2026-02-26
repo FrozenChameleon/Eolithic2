@@ -9,6 +9,7 @@
 #include "../math/Point.h"
 #include "../utils/StringPair.h"
 #include "../render/Color.h"
+#include "../math/Rectangle.h"
 
 typedef struct MString MString;
 typedef struct BufferReader BufferReader;
@@ -16,13 +17,13 @@ typedef struct DynamicByteBuffer DynamicByteBuffer;
 typedef struct ThingSettings ThingSettings;
 typedef struct SpriteBatch SpriteBatch;
 
-extern const char* THINGINSTANCE_SETTING_DTN_OFFSET_X;
-extern const char* THINGINSTANCE_SETTING_DTN_OFFSET_Y;
+#define THINGINSTANCE_SETTING_DTN_OFFSET_X "DTN_OFFSET_X"
+#define THINGINSTANCE_SETTING_DTN_OFFSET_Y "DTN_OFFSET_Y"
 
-extern const char* THINGINSTANCE_SETTING_BLN_DIFFICULTY_EASY;
-extern const char* THINGINSTANCE_SETTING_BLN_DIFFICULTY_NORMAL;
-extern const char* THINGINSTANCE_SETTING_BLN_DIFFICULTY_HARD;
-extern const char* THINGINSTANCE_SETTING_BLN_DIFFICULTY_VERY_HARD;
+#define THINGINSTANCE_SETTING_BLN_DIFFICULTY_EASY "BLN_DIFFICULTY_EASY"
+#define THINGINSTANCE_SETTING_BLN_DIFFICULTY_NORMAL "BLN_DIFFICULTY_NORMAL"
+#define THINGINSTANCE_SETTING_BLN_DIFFICULTY_HARD "BLN_DIFFICULTY_HARD"
+#define THINGINSTANCE_SETTING_BLN_DIFFICULTY_VERY_HARD "BLN_DIFFICULTY_VERY_HARD"
 
 typedef struct ThingInstance
 {
@@ -47,6 +48,7 @@ ThingSettings* ThingInstance_GetThingSettings(ThingInstance* ti);
 void ThingInstance_Draw(ThingInstance* ti, SpriteBatch* spriteBatch, Color color, Point position, bool isSelected);
 void ThingInstance_Draw2(ThingInstance* ti, SpriteBatch* spriteBatch, Color color, int32_t depth, Point position, bool isSelected);
 const char* ThingInstance_GetName(ThingInstance* ti);
+Rectangle ThingInstance_GetRectangle(ThingInstance* ti, float positionX, float positionY);
 int32_t ThingInstance_GetLeft(ThingInstance* ti, float positionX);
 int32_t ThingInstance_GetTop(ThingInstance* ti, float positionY);
 int32_t ThingInstance_GetWidth(ThingInstance* ti);

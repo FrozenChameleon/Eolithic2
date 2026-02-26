@@ -17,6 +17,8 @@
 #include "EditorPart.h"
 #include "../input/Input.h"
 #include "PartTile.h"
+#include "PartProp.h"
+#include "PartThing.h"
 
 static int32_t _mCurrentLayer;
 static int32_t _mCurrentPart;
@@ -41,13 +43,13 @@ static PartFuncData _mEditorParts[8];
 		 break;
 	case EDITORPART_TILE_PICKER:
 		 Logger_LogInformation("Mode: Tile");
+		 break;
+	 case EDITORPART_THING: 
+		 Logger_LogInformation("Mode: Thing");
+		 break;
+	 case EDITORPART_PROP:
+		 Logger_LogInformation("Mode: Prop");
 		 break;/*
-	 case PART_THING: 
-		 OeLogger.LogInformation("Mode: Thing");
-		 break;
-	 case PART_PROP:
-		 OeLogger.LogInformation("Mode: Prop");
-		 break;
 	 case PART_LINE:
 		 OeLogger.LogInformation("Mode: Line");
 		 break;
@@ -70,8 +72,6 @@ static PartFuncData _mEditorParts[8];
 	 ActivePart_GetCurrentPart().JustChangedToThisPart();
  }
 
-
-
 void ActivePart_Init(void)
 {
 	if (_mHasInit)
@@ -86,9 +86,9 @@ void ActivePart_Init(void)
 	}
 	*/
 	_mEditorParts[0] = PartCollision_GetFuncData();
-	_mEditorParts[1] = PartTile_GetFuncData();/*
-	_mEditorParts[2] = OeEditorPartThing.GetFuncData();
-	_mEditorParts[3] = OeEditorPartProp.GetFuncData();
+	_mEditorParts[1] = PartTile_GetFuncData();
+	_mEditorParts[2] = PartThing_GetFuncData();
+	_mEditorParts[3] = PartProp_GetFuncData();/*
 	_mEditorParts[4] = OeEditorPartLine.GetFuncData();
 	_mEditorParts[5] = OeEditorPartCamera.GetFuncData();
 	_mEditorParts[6] = OeEditorPartMetaMap.GetFuncData();
@@ -157,13 +157,13 @@ void ActivePart_Draw(SpriteBatch* spriteBatch)
 
 	LevelData_DrawCollision(ld, spriteBatch, Editor_GetCamera());
 
+	LevelData_DrawThings(ld, spriteBatch, Editor_GetCamera());
+
 	/*
 	if (_mCurrentPart != PART_LINE)
 	{
 		Get_LevelData().DrawLines(spriteBatch);
 	}
-
-	Get_LevelData().DrawThings(spriteBatch, ref OeEditor.GetCamera());
 
 	Get_LevelData().DrawCamera(spriteBatch);
 
@@ -180,27 +180,22 @@ PartFuncData ActivePart_GetCurrentPart(void)
 {
 	return _mEditorParts[_mCurrentPart];
 }
-
 void ActivePart_SetPartToCollision()
 {
 	SetPart(EDITORPART_COLLISION);
 }
-
 void ActivePart_SetPartToTile()
 {
 	SetPart(EDITORPART_TILE_PICKER);
 }
-
 void ActivePart_SetPartToThing()
 {
-	//SetPart(PART_THING);
+	SetPart(EDITORPART_THING);
 }
-
 void ActivePart_SetPartToProp()
 {
-	//SetPart(PART_PROP);
+	SetPart(EDITORPART_PROP);
 }
-
 void ActivePart_SetPartToLine()
 {
 	/*if (!OeEditorGlobalDefs.EDITOR_GLOBAL_DEF_DISABLE_EDITOR_PART_LINE)
@@ -208,7 +203,6 @@ void ActivePart_SetPartToLine()
 		SetPart(PART_LINE);
 	}*/
 }
-
 void ActivePart_SetPartToCamera()
 {
 	/*if (!OeEditorGlobalDefs.EDITOR_GLOBAL_DEF_DISABLE_EDITOR_PART_CAMERA)
@@ -216,12 +210,10 @@ void ActivePart_SetPartToCamera()
 		SetPart(PART_CAMERA);
 	}*/
 }
-
 void ActivePart_SetPartToDraw()
 {
 	//SetPart(PART_DRAW);
 }
-
 void ActivePart_SetPartToMetaMap()
 {
 	/*if (!Get_LevelData().IsMetaMap())

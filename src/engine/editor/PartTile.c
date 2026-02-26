@@ -52,6 +52,7 @@ void PartTile_CreateWindows()
     ImGui::SetNextWindowSize(ImVec2(300, 500));
     if (!ImGui::Begin("Tile Mode", &whatever, ImGuiWindowFlags_NoResize))
     {
+        ImGui::End();
         return;
     }
 
