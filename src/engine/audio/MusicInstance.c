@@ -10,7 +10,7 @@
 #include "MusicInstance.h"
 #include "../utils/Timer.h"
 #include "../utils/Utils.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "Music.h"
 
 void MusicInstance_HandleFadeIn(MusicInstance* mi, float musicVolume)
@@ -105,7 +105,7 @@ void MusicInstance_Play(MusicInstance* mi, const char* nextTrack, bool isLooping
 
 	MusicInstance_Stop(mi);
 
-	Music* data = (Music*)ResourceManager_GetResourceData(ResourceManagerList_Music(), mi->_mCurrentTrack);
+	Music* data = (Music*)ResourceMan_GetResourceData(ResourceList_Music(), mi->_mCurrentTrack);
 	if (data == NULL)
 	{
 		return; //TODO LOGGING

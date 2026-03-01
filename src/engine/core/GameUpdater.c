@@ -262,6 +262,8 @@ static void Cheats(void)
 static void Tick(void)
 {
 	Utils_FreeArena(UTILS_ALLOCATION_ARENA_JUST_THIS_FRAME);
+	MString_DisposeJustThisFrameAllocations();
+	IStringArray_DisposeJustThisFrameAllocations();
 
 	Renderer_StartImGuiFrame();
 
@@ -596,7 +598,7 @@ void GameUpdater_DebugReloadMap(void)
 	
 	{
 		MString* tempString = NULL;
-		MString_Combine5(&tempString, "Map Reloaded (Full) [", Resource_GetFilenameWithoutExtension(Get_LevelDataResource()), "][", Get_LevelFileName(), "]");
+		MString_Combine5(&tempString, "Map Reloaded (Full) [", Resource_GetName(Get_LevelDataResource()), "][", Get_LevelFileName(), "]");
 		Logger_LogInformation(MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}

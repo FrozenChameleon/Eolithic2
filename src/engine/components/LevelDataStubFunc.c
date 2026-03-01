@@ -7,7 +7,7 @@
 #include "LevelDataStubFunc.h"
 
 #include "../leveldata/LevelData.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 
 LevelData* LevelDataStubFunc_GetLevelData(const LevelDataStub* data)
 {
@@ -23,5 +23,5 @@ LevelData* LevelDataStubFunc_GetLevelData(const LevelDataStub* data)
 }
 Resource* LevelDataStubFunc_GetLevelDataResource(const LevelDataStub* data)
 {
-	return ResourceManager_GetResource(ResourceManagerList_LevelData(), data->mLevelName);
+	return ResourceMan_GetResource(ResourceList_LevelData(), data->mLevelName);
 }

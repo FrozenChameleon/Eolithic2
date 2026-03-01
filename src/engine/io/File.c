@@ -34,10 +34,9 @@ void File_GetFilenames(IStringArray* addToThis, const char* path, const char* pa
 	char** files = NULL;
 
 	{
-		MString* tempString = NULL;
+		MString* tempString = MString_CreateForJustThisFrame();
 		File_PathCombine2(&tempString, File_GetBasePath(), path);
 		files = SDL_GlobDirectory(MString_Text(tempString), pattern, 0, &count);
-		MString_Dispose(&tempString);
 	}
 
 	if (files == NULL)
@@ -51,10 +50,9 @@ void File_GetFilenames(IStringArray* addToThis, const char* path, const char* pa
 		char* filename = files[i];
 		if (removeTheExtension)
 		{
-			MString* filenameWithoutExtension = NULL;
+			MString* filenameWithoutExtension = MString_CreateForJustThisFrame();
 			File_GetFileNameWithoutExtension(&filenameWithoutExtension, filename);
 			IStringArray_Add(addToThis, MString_Text(filenameWithoutExtension));
-			MString_Dispose(&filenameWithoutExtension);
 		}
 		else
 		{
@@ -69,10 +67,9 @@ void File_GetFilePaths(IStringArray* addToThis, const char* path, const char* on
 	char** files = NULL;
 
 	{
-		MString* tempString = NULL;
+		MString* tempString = MString_CreateForJustThisFrame();
 		File_PathCombine2(&tempString, File_GetBasePath(), path);
 		files = SDL_GlobDirectory(MString_Text(tempString), NULL, 0, &count);
-		MString_Dispose(&tempString);
 	}
 
 	if (files == NULL)
@@ -99,10 +96,9 @@ FixedByteBuffer* File_ReadAll(const char* path)
 {
 	SDL_IOStream* rwops = NULL;
 	{
-		MString* tempString = NULL;
+		MString* tempString = MString_CreateForJustThisFrame();
 		File_PathCombine2(&tempString, File_GetBasePath(), path);
 		rwops = SDL_IOFromFile(MString_Text(tempString), "rb");
-		MString_Dispose(&tempString);
 	}
 	if (rwops == NULL)
 	{
@@ -122,10 +118,9 @@ void File_WriteAll(const char* path, FixedByteBuffer* fbb)
 {
 	SDL_IOStream* rwops = NULL;
 	{
-		MString* tempString = NULL;
+		MString* tempString = MString_CreateForJustThisFrame();
 		File_PathCombine2(&tempString, File_GetBasePath(), path);
 		rwops = SDL_IOFromFile(MString_Text(tempString), "w+");
-		MString_Dispose(&tempString);
 	}
 	if (rwops == NULL)
 	{
@@ -145,10 +140,9 @@ bool File_Exists(const char* path)
 {
 	SDL_IOStream* file = NULL;
 	{
-		MString* tempString = NULL;
+		MString* tempString = MString_CreateForJustThisFrame();
 		File_PathCombine2(&tempString, File_GetBasePath(), path);
 		file = SDL_IOFromFile(MString_Text(tempString), "r");
-		MString_Dispose(&tempString);
 	}
 	if (file != NULL)
 	{
@@ -234,18 +228,17 @@ void File_GetFileNameWithoutExtension(MString** assignToThis, const char* path)
 {
 	File_GetFileNameHelper(assignToThis, path, true);
 }
-IStringArray* File_ReadAllToStrings(BufferReader* br)
+void File_ReadAllToStrings(BufferReader* br, IStringArray* addToThis)
 {
 	uint64_t len = BufferReader_GetSize(br);
 	uint8_t* bufferData = BufferReader_GetBufferData(br);
-	IStringArray* sa = IStringArray_Create();
 	int32_t counter = 0;
 	for (int32_t i = 0; i < (len + 1); i += 1) //Add +1 to len because...
 	{
 		if (counter >= LARGE_CHAR_BUFFER_LEN)
 		{
 			Exception_Run("Buffer overflow in read all strings...", false);
-			return sa;
+			return;
 		}
 
 		bool isAtEndOfString = false;
@@ -274,12 +267,11 @@ IStringArray* File_ReadAllToStrings(BufferReader* br)
 		if (isAtEndOfString)
 		{
 			_mLargeCharBuffer[counter] = '\0';
-			IStringArray_Add(sa, _mLargeCharBuffer);
+			IStringArray_Add(addToThis, _mLargeCharBuffer);
 			Utils_memset(_mLargeCharBuffer, 0, LARGE_CHAR_BUFFER_LEN);
 			counter = 0;
 		}
 	}
-	return sa;
 }
 
 static void CombineHelper(MString** assignToThis, const char* addedPath)

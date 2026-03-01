@@ -14,11 +14,10 @@ MovieTiming* MovieTiming_FromStream(const char* path, const char* filenameWithou
 {
 	MovieTiming* mt = (MovieTiming*)Utils_calloc(1, sizeof(MovieTiming));
 	{
-		IStringArray* lotsOfStrings = NULL;
+		IStringArray* lotsOfStrings = IStringArray_CreateForJustThisFrame();
 		{
 			MString* bigString = NULL;
 			File_ReadAllToBigString(&bigString, br);
-			lotsOfStrings = IStringArray_Create();
 			Utils_SplitString(MString_Text(bigString), MString_Capacity(bigString), ',', lotsOfStrings);
 			MString_Dispose(&bigString);
 		}
@@ -30,8 +29,6 @@ MovieTiming* MovieTiming_FromStream(const char* path, const char* filenameWithou
 			int32_t theTiming = Utils_ParseInt(IStringArray_Get(lotsOfStrings, i));
 			mt->timings[i] = theTiming;
 		}
-		
-		IStringArray_Dispose(lotsOfStrings);
 	}
 	return mt;
 }

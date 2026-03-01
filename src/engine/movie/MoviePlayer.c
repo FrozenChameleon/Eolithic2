@@ -24,7 +24,7 @@
 #include "../render/Color.h"
 #include "../movie/Movie.h"
 #include "../movie/MovieTiming.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../../third_party/stb_ds.h"
 #include "MovieGlobals.h"
 
@@ -264,7 +264,7 @@ static void OperationPan(IStringArray* arguments)
 static void OperationClear(void)
 {
 	{
-		IStringArray* removeThese = IStringArray_Create();
+		IStringArray* removeThese = IStringArray_CreateForJustThisFrame();
 		for (int32_t i = 0; i < shlen(_mData->sh_images); i += 1)
 		{
 			if (!_mData->sh_images[i].value->mIsPermanent)
@@ -279,8 +279,6 @@ static void OperationClear(void)
 		}
 
 		arrsetlen(_mData->arr_operations, 0);
-
-		IStringArray_Dispose(removeThese);
 	}
 }
 static void OperationPlaySound(IStringArray* arguments)
@@ -886,18 +884,18 @@ void MoviePlayer_Init(bool useSwappedImages, int32_t scale, const char* movieNam
 
 	_mData->_mScale = scale;
 
-	ResourceManager* movieMan = ResourceManagerList_Movie();
-	if (!ResourceManager_HasResource(movieMan, movieName))
+	ResourceMan* movieMan = ResourceList_Movie();
+	if (!ResourceMan_HasResource(movieMan, movieName))
 	{
 		_mData->_mIsComplete = true;
 	}
 	else
 	{
-		_mData->_mReader = ((Movie*)ResourceManager_GetResourceData(movieMan, movieName))->mMovieData;
-		ResourceManager* movieTimingMan = ResourceManagerList_MovieTiming();
-		if (ResourceManager_HasResource(movieTimingMan, movieName))
+		_mData->_mReader = ((Movie*)ResourceMan_GetResourceData(movieMan, movieName))->mMovieData;
+		ResourceMan* movieTimingMan = ResourceList_MovieTiming();
+		if (ResourceMan_HasResource(movieTimingMan, movieName))
 		{
-			_mData->_mTimingsToUse = (MovieTiming*)ResourceManager_GetResourceData(movieTimingMan, movieName);
+			_mData->_mTimingsToUse = (MovieTiming*)ResourceMan_GetResourceData(movieTimingMan, movieName);
 		}
 	}
 }
@@ -993,17 +991,13 @@ void MoviePlayer_Update2(bool doNotAllowMovieSkip)
 						int32_t firstIndex = Utils_StringIndexOf('(', line, lineSize, false);
 						//int32_t secondIndex = OeUtils_StringIndexOf(line, ')');
 						{
-							MString* operation = NULL;
-							MString* argumentString = NULL;
-							IStringArray* arguments = NULL;
+							MString* operation = MString_CreateForJustThisFrame();
+							MString* argumentString = MString_CreateForJustThisFrame();
+							IStringArray* arguments = IStringArray_CreateForJustThisFrame();
 							MString_AssignSubString(&operation, line, 0, firstIndex);
 							MString_AssignSubString(&argumentString, line, firstIndex + 1, (int32_t)(lineSize - firstIndex - 2));
-							arguments = IStringArray_Create();
 							Utils_GetSplitCSV(MString_Text(argumentString), arguments);
 							AddOperation(MString_Text(operation), arguments);
-							MString_Dispose(&operation);
-							MString_Dispose(&argumentString);
-							IStringArray_Dispose(arguments);
 						}
 					}
 				}

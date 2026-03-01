@@ -11,7 +11,7 @@
 #include "Renderer.h"
 #include "../globals/Align.h"
 #include "../font/BmFont.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../utils/MString.h"
 #include "../../third_party/stb_ds.h"
 #include "../render/Texture.h"
@@ -67,7 +67,7 @@ void SpriteBatch_Clear(SpriteBatch* sb)
 
 static Texture* GetDefaultTextureData(void)
 {
-	return (Texture*)ResourceManager_GetDefaultResourceData(ResourceManagerList_Texture());
+	return (Texture*)ResourceMan_GetDefaultResourceData(ResourceList_Texture());
 }
 
 RenderCommandSheet* SpriteBatch_Draw(SpriteBatch* sb, Texture* texture, Color color, int32_t depth, ShaderProgram* program, Vector2 position, Rectangle sourceRectangle, 
@@ -187,7 +187,7 @@ RenderCommandString* SpriteBatch_DrawString3(SpriteBatch* sb, const char* font, 
 {
 	ClampDepth(&depth);
 
-	BmFont* bitmapFont = (BmFont*)ResourceManager_GetResourceData(ResourceManagerList_Font(), font);
+	BmFont* bitmapFont = (BmFont*)ResourceMan_GetResourceData(ResourceList_Font(), font);
 	if (bitmapFont == NULL)
 	{
 		Logger_LogError("MISSING FONT FOR DRAW: ");

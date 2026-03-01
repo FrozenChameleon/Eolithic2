@@ -12,6 +12,8 @@
 typedef struct MString MString;
 typedef struct BufferReader BufferReader;
 
+//This MString will be disposed at beginning of next game Tick.
+MString* MString_CreateForJustThisFrame();
 uint64_t MString_GetRefs(void);
 char* MString_Text(const MString* str);
 int32_t MString_Length(const MString* str);
@@ -53,3 +55,4 @@ void MString_Combine6(MString** str, const char* str1, const char* str2, const c
 void MString_Combine7(MString** str, const char* str1, const char* str2, const char* str3, const char* str4, const char* str5, const char* str6, const char* str7);
 void MString_Combine8(MString** str, const char* str1, const char* str2, const char* str3, const char* str4, const char* str5, const char* str6, const char* str7, const char* str8);
 void MString_DebugPrintLeakInfo(void);
+void MString_DisposeJustThisFrameAllocations();

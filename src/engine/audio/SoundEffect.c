@@ -15,7 +15,7 @@
 #include "../globals/Globals.h"
 #include "../core/GameUpdater.h"
 #include "../utils/Logger.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../utils/Cvars.h"
 #include "../gamestate/GameStateManager.h"
 
@@ -274,7 +274,7 @@ void SoundEffect_PlaySound(const char* sound)
 }
 static SoundEffectInstance* SetupNextInstance(const char* sound)
 {
-	SoundEffect* data = (SoundEffect*)ResourceManager_GetResourceData(ResourceManagerList_SoundEffect(), sound);
+	SoundEffect* data = (SoundEffect*)ResourceMan_GetResourceData(ResourceList_SoundEffect(), sound);
 	if (data == NULL)
 	{
 		return NULL;

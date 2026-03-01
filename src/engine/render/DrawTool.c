@@ -9,7 +9,7 @@
 #include "SpriteBatch.h"
 #include "../math/Math.h"
 #include "../math/Point.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../utils/IStrings.h"
 #include "../utils/IStringMap.h"
 #include "../font/BmFont.h"
@@ -18,14 +18,14 @@ static Resource* _mSinglePixel;
 
 static BmFont* GetFont(const char* font)
 {
-	return (BmFont*)ResourceManager_GetResourceData(ResourceManagerList_Font(), font);
+	return (BmFont*)ResourceMan_GetResourceData(ResourceList_Font(), font);
 }
 
 Texture* DrawTool_GetSinglePixel(void)
 {
 	if (_mSinglePixel == NULL)
 	{
-		_mSinglePixel = ResourceManager_GetResource(ResourceManagerList_Texture(), "one_by_one_pixel");
+		_mSinglePixel = ResourceMan_GetResource(ResourceList_Texture(), "one_by_one_pixel");
 		if (_mSinglePixel == NULL)
 		{
 			return NULL;

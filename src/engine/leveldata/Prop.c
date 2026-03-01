@@ -21,6 +21,12 @@
 
 #define VERSION_PROP 7
 
+Prop* Prop_CreateNew()
+{
+	Prop* p = (Prop*)Utils_calloc(1, sizeof(Prop));
+	Prop_Init(p);
+	return p;
+}
 void Prop_Init(Prop* p)
 {
 	Utils_memset(p, 0, sizeof(Prop));
@@ -145,8 +151,7 @@ IStringArray* Prop_GetDirectories(void)
 }
 Prop* Prop_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br)
 {
-	Prop* p = (Prop*)Utils_calloc(1, sizeof(Prop));
-	Prop_Init(p);
+	Prop* p = Prop_CreateNew();
 	Prop_Read(p, br);
 	return p;
 }

@@ -17,6 +17,10 @@
 
 #define VERSION_ANIMTILE 7
 
+AnimTile* AnimTile_CreateNew()
+{
+	return (AnimTile*)Utils_calloc(1, sizeof(AnimTile));
+}
 void AnimTile_Read(AnimTile* at, BufferReader* br)
 {
 	if (!BufferReader_ReadMagicNumber(br))
@@ -58,7 +62,7 @@ void AnimTile_Write(AnimTile* at, DynamicByteBuffer* dbb)
 }
 AnimTile* AnimTile_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br)
 {
-	AnimTile* at = (AnimTile*)Utils_calloc(1, sizeof(AnimTile));
+	AnimTile* at = AnimTile_CreateNew();
 	AnimTile_Read(at, br);
 	return at;
 }

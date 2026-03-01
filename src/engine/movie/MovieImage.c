@@ -10,19 +10,19 @@
 #include "../render/Texture.h"
 #include "../render/Color.h"
 #include "../render/Sheet.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 
 static Sheet* CreateNewSheetForMovieImage(const char* image)
 {
-	ResourceManager* movieTextureMan = ResourceManagerList_MovieTexture();
-	const char* internedKey = ResourceManager_GetKey(movieTextureMan, image);
+	ResourceMan* movieTextureMan = ResourceList_MovieTexture();
+	const char* internedKey = ResourceMan_GetKey(movieTextureMan, image);
 	if (internedKey == NULL)
 	{
 		return NULL;
 	}
 
 	Sheet* temp = (Sheet*)Utils_CallocArena(1, sizeof(Sheet), UTILS_ALLOCATION_ARENA_MOVIE_PLAYER);
-	temp->mTextureResource = ResourceManager_GetResource(movieTextureMan, internedKey);
+	temp->mTextureResource = ResourceMan_GetResource(movieTextureMan, internedKey);
 	Utils_strlcpy(temp->mSheetName, internedKey, EE_FILENAME_MAX);
 	Utils_strlcpy(temp->mUnderlyingTextureName, internedKey, EE_FILENAME_MAX);
 	temp->mRectangle = ((Texture*)Resource_GetData(temp->mTextureResource))->mBounds;
@@ -45,7 +45,7 @@ void MovieImage_Init2(MovieImage* mi, int32_t scale, const char* baseImage, int3
 	mi->mScale = scale;
 
 	{
-		IStringArray* images = IStringArray_Create();
+		IStringArray* images = IStringArray_CreateForJustThisFrame();
 
 		Animation_CreateAnimationStringArray(images, baseImage, frames, Utils_GetAmountOfDigits(frames));
 
@@ -55,7 +55,7 @@ void MovieImage_Init2(MovieImage* mi, int32_t scale, const char* baseImage, int3
 		for (int32_t i = 0; i < frames; i += 1)
 		{
 			const char* currentImage = IStringArray_Get(images, i);
-			Resource* resource = ResourceManager_GetResource(ResourceManagerList_MovieTexture(), currentImage);
+			Resource* resource = ResourceMan_GetResource(ResourceList_MovieTexture(), currentImage);
 			if (resource == NULL)
 			{
 				mi->mSheetsForAnimation[i] = Sheet_GetDefaultSheet();
@@ -65,8 +65,6 @@ void MovieImage_Init2(MovieImage* mi, int32_t scale, const char* baseImage, int3
 				mi->mSheetsForAnimation[i] = CreateNewSheetForMovieImage(currentImage);
 			}
 		}
-
-		IStringArray_Dispose(images);
 	}
 
 	Animation_Init2(&mi->mAnimation, mi->mSheetsForAnimation, mi->mSheetsForAnimationLen, flip);

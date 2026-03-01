@@ -33,6 +33,7 @@ typedef struct AnimTile
 	AnimTileGraphicsState mGraphics;
 } AnimTile;
 
+AnimTile* AnimTile_CreateNew();
 void AnimTile_Read(AnimTile* at, BufferReader* br);
 void AnimTile_Write(AnimTile* at, DynamicByteBuffer* dbb);
 AnimTile* AnimTile_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);

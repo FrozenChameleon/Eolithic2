@@ -85,7 +85,7 @@ const char* Utils_GetCurrentUserLanguageCode(void)
 
 	if (!_mHasCachedValidLanguages)
 	{
-		const std_vector<std_string>& listOfLanguages = OeResourceManagers_StringsTextManager.GetKeyList();
+		const std_vector<std_string>& listOfLanguages = OeResourceMans_StringsTextManager.GetKeyList();
 		for (int32_t i = 0; i < listOfLanguages.size(); i += 1)
 		{
 			_mCachedValidLanguages.push_back(listOfLanguages[i]);

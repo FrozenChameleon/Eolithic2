@@ -10,7 +10,7 @@
 #include "RenderCommands.h"
 #include "../math/Vector2.h"
 #include "../math/Rectangle.h"
-#include "../resources/ResourceManager.h"
+#include "../resources/ResourceMan.h"
 #include "../utils/IStringArray.h"
 
 typedef struct DrawInstance DrawInstance;
@@ -30,6 +30,7 @@ Sheet* Sheet_GetSheet(const char* name);
 void Sheet_BuildSheets(void);
 bool Sheet_HasSheet(const char* name);
 void Sheet_GetListOfSheetNames(IStringArray* addToThis);
+Sheet* Sheet_GetSheet(const char* name);
 Resource* Sheet_GetTextureResource(Sheet* sheet);
 Texture* Sheet_GetTexture(Sheet* sheet);
 

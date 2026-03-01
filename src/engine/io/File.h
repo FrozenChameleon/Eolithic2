@@ -25,7 +25,7 @@ const char* File_GetPrefPath(void);
 
 void File_GetFileName(MString** assignToThis, const char* path);
 void File_GetFileNameWithoutExtension(MString** assignToThis, const char* path);
-IStringArray* File_ReadAllToStrings(BufferReader* br);
+void File_ReadAllToStrings(BufferReader* br, IStringArray* addToThis);
 
 void File_PathCombine2(MString** assignToThis, const char* path1, const char* path2);
 void File_PathCombine3(MString** assignToThis, const char* path1, const char* path2, const char* path3);

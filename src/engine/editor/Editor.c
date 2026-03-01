@@ -12,6 +12,8 @@
 #include "imgui.h"
 #include "EditorGlobals.h"
 #include "EditorDebugToggles.h"
+#include "AnimMan.h"
+#include "PropMan.h"
 
 static Camera _mCamera;
 
@@ -308,6 +310,10 @@ void Editor_Update()
     Camera_Resize(&_mCamera, drawableSize.Width, drawableSize.Height);
 
     EditorDebugToggles_Update();
+
+    //Updates
+    //AnimMan_Update();
+    PropMan_Update();
 }
 void Editor_Draw(SpriteBatch* spriteBatch)
 {

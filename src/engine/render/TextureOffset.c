@@ -16,18 +16,18 @@ TextureOffset* TextureOffset_FromStream(const char* path, const char* filenameWi
 {
 	TextureOffset* textureOffset = (TextureOffset*)Utils_calloc(1, sizeof(TextureOffset));
 
-	IStringArray* lines = File_ReadAllToStrings(br);
+	IStringArray* lines = IStringArray_CreateForJustThisFrame();
+	File_ReadAllToStrings(br, lines);
 	size_t linesLen = IStringArray_Length(lines);
 
 	for (int32_t i = 0; i < linesLen; i += 1)
 	{
 		const char* line = IStringArray_Get(lines, i);
-		IStringArray* spaceSplit = IStringArray_Create();
+		IStringArray* spaceSplit = IStringArray_CreateForJustThisFrame();
 		Utils_SplitString(line, Utils_strlen(line), ' ', spaceSplit);
 		size_t spaceSplitLen = IStringArray_Length(spaceSplit);
 		if (spaceSplitLen != 6)
 		{
-			IStringArray_Dispose(spaceSplit);
 			continue;
 		}
 
@@ -44,10 +44,7 @@ TextureOffset* TextureOffset_FromStream(const char* path, const char* filenameWi
 		Utils_strlcpy(info.mFilenameWithoutExtension, filenameWithoutExtension, EE_FILENAME_MAX);
 
 		arrput(textureOffset->arr_offsets, info);
-		IStringArray_Dispose(spaceSplit);
 	}
-
-	IStringArray_Dispose(lines);
 
 	return textureOffset;
 }

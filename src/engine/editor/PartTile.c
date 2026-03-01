@@ -421,7 +421,7 @@ void PartTile_Operation(Rectangle selection, bool resetTile, bool resetAll, bool
                             currentLayerDt->mRotation = _mRotation;
                             currentLayerDt->mFlipX = _mFlipX;
                             currentLayerDt->mFlipY = _mFlipY;
-							DrawTile_LoadAnimation(currentLayerDt, Resource_GetFilenameWithoutExtension(animTileRes));
+							DrawTile_LoadAnimation(currentLayerDt, Resource_GetName(animTileRes));
 						}
 					}
 				}

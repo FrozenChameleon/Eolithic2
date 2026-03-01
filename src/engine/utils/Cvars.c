@@ -322,12 +322,11 @@ FixedByteBuffer* Cvars_CreateBufferFromUserConfigs(void)
 
 	DynamicByteBuffer* dbb = DynamicByteBuffer_Create();
 	DynamicByteBuffer_SetIsWritingText(dbb, true);
-	IStringArray* prefixes = IStringArray_Create();
+	IStringArray* prefixes = IStringArray_CreateForJustThisFrame();
 	IStringArray_Add(prefixes, CVARS_PREFIX_USER_CONFIG);
 	Cvars_Write(true, dbb, prefixes, NULL);
 	FixedByteBuffer* fbb = DynamicByteBuffer_ConvertToFixedByteBufferAndDisposeDBB(dbb);
 	dbb = NULL;
-	IStringArray_Dispose(prefixes);
 	return fbb;
 }
 void Cvars_CreateSaveDirectories(void)

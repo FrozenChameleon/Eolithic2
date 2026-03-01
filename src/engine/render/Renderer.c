@@ -43,7 +43,7 @@
 #include "../core/Func.h"
 #include "../gamestate/GameStateManager.h"
 #include "../render/DrawTool.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../globals/Globals.h"
 #ifdef EDITOR_MODE
 #include "../editor/Editor.h"
@@ -529,7 +529,7 @@ static BmFont* GetBmFont(const char* font)
 {
 	return NULL;
 
-	//return OeResourceManagers_FontManager.GetResourceData(font);
+	//return OeResourceMans_FontManager.GetResourceData(font);
 }
 Rectangle Renderer_RenderBmFont(bool drawTheText, BmFont* bmf, const char* text, Color color, Vector2 position)
 {
@@ -679,7 +679,7 @@ void Renderer_DrawTiles(RenderCommandTileLayer* draw)
 			}
 			else if (Utils_strnlen(drawTile->mAnimation, EE_FILENAME_MAX) > 0)
 			{
-				AnimTile* animTile = (AnimTile*)ResourceManager_GetResourceData(ResourceManagerList_AnimTile(), drawTile->mAnimation);
+				AnimTile* animTile = (AnimTile*)ResourceMan_GetResourceData(ResourceList_AnimTile(), drawTile->mAnimation);
 				if (animTile == NULL)
 				{
 					Renderer_Draw(DrawTool_GetSinglePixel(), Rectangle_Create((int32_t)position.X, (int32_t)position.Y, TILE_SIZE, TILE_SIZE), Color_Red);

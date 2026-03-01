@@ -182,13 +182,13 @@ void GameStateManager_LoadMap(const char* mapToLoad)
 
 	/*if (!OeCvars::GetAsBool(OeCvars::ENGINE_LOAD_ALL_MOVIES)) //UNUSED, DISABLED FOR C
 	{
-		OeResourceManagers::MovieTextureManager.Dispose();
+		OeResourceMans::MovieTextureManager.Dispose();
 	}*/
 
-	/*if (!OeResourceManagers::LevelDataManager.HasResource(mapToLoad)) //UNUSED
+	/*if (!OeResourceMans::LevelDataManager.HasResource(mapToLoad)) //UNUSED
 	{
 		std::string path = OeFile::Combine(OeLevelData::LEVEL_DATA_DIRECTORY[0], mapToLoad + ".bin");
-		OeResourceManagers.LevelDataManager.CreateResource(path, new OeLevelData());
+		OeResourceMans.LevelDataManager.CreateResource(path, new OeLevelData());
 		Logger.LogError("Unable to load map " + mapToLoad + ", created new level resource in memory for " + path);
 	}*/
 

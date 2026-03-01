@@ -19,9 +19,10 @@ typedef struct MString
 	char* text;
 	int32_t len;
 	int32_t capacity;
+	bool isForJustThisFrame;
 } MString;
 
-static char _mEmptyString[1] = "";
+static char _mDummyString[1] = "";
 static uint64_t _mRefs;
 
 #define STRING_BUFFER_LEN EE_PATH_MAX
@@ -29,6 +30,7 @@ static uint64_t _mRefs;
 
 static char _mStringBuffer[STRING_BUFFER_LEN];
 static char _mNumberBuffer[NUMBER_BUFFER_LEN];
+static MString** arr_just_this_frame;
 
 #ifdef FIND_THE_LEAKS
 typedef struct LeakTest
@@ -69,7 +71,7 @@ static MString* MString_CreateEmpty(int32_t capacity)
 #ifdef FIND_THE_LEAKS
 	if (_mHasLeakTestBegun)
 	{
-		hmput(_mLeakTest, mstring, 0);
+		hmput(_mLeakTest, m_string, 0);
 	}
 #endif
 	m_string->text = (char*)Utils_calloc(1, capacity);
@@ -141,6 +143,14 @@ static void ClearMString(MString* str)
 	str->len = 0;
 }
 
+MString* MString_CreateForJustThisFrame()
+{
+	MString* stringToReturn = NULL;
+	MString_AssignString(&stringToReturn, NULL);
+	stringToReturn->isForJustThisFrame = true;
+	arrput(arr_just_this_frame, stringToReturn);
+	return stringToReturn;
+}
 uint64_t MString_GetRefs(void)
 {
 	return _mRefs;
@@ -149,7 +159,7 @@ char* MString_Text(const MString* str)
 {
 	if (str == NULL)
 	{
-		return _mEmptyString;
+		return _mDummyString;
 	}
 
 	return str->text;
@@ -205,7 +215,7 @@ void MString_AssignString(MString** str, const char* toThis)
 
 	if (toThis == NULL)
 	{
-		toThis = _mEmptyString;
+		toThis = EE_STR_EMPTY;
 	}
 
 	MString* currentString = *str;
@@ -332,7 +342,7 @@ void MString_AddAssignString(MString** str, const char* addThisStr)
 
 	if (addThisStr == NULL)
 	{
-		addThisStr = _mEmptyString;
+		addThisStr = EE_STR_EMPTY;
 	}
 
 	MString* currentString = *str;
@@ -349,7 +359,7 @@ void MString_ToLower(MString** str)
 	MString* currentString = *str;
 	for (int i = 0; i < currentString->len; i += 1)
 	{
-		currentString->text[i] = Utils_tolower(currentString->text[i]);
+		currentString->text[i] = (char)Utils_tolower(currentString->text[i]);
 	}
 }
 void MString_ToUpper(MString** str)
@@ -359,7 +369,7 @@ void MString_ToUpper(MString** str)
 	MString* currentString = *str;
 	for (int i = 0; i < currentString->len; i += 1)
 	{
-		currentString->text[i] = Utils_toupper(currentString->text[i]);
+		currentString->text[i] = (char)Utils_toupper(currentString->text[i]);
 	}
 }
 void MString_Truncate(MString** str, int32_t newLength)
@@ -382,25 +392,37 @@ void MString_Truncate(MString** str, int32_t newLength)
 	}
 	actualStr->len = newLength;
 }
-void MString_Dispose(MString** str)
+static void DisposeHelper(MString** str, bool checkForIsJustThisFrame)
 {
 	if (!CheckDoublePointerSafetyForComparison(str))
 	{
 		return;
 	}
 
+	MString* strToUse = *str;
+	if (checkForIsJustThisFrame && strToUse->isForJustThisFrame)
+	{
+		Logger_LogWarning("Attempted to dispose just-this-frame MString in incorrect way!");
+		return;
+	}
+
 #ifdef FIND_THE_LEAKS
 	if (_mHasLeakTestBegun)
 	{
-		hmdel(_mLeakTest, *str);
+		hmdel(_mLeakTest, strToUse);
 	}
 #endif
 
 	_mRefs -= 1;
 
-	Utils_free((*str)->text);
-	Utils_free((*str));
+	Utils_free(strToUse->text);
+	Utils_free(strToUse);
+	strToUse = NULL;
 	*str = NULL;
+}
+void MString_Dispose(MString** str)
+{
+	DisposeHelper(str, true);
 }
 void MString_Read(MString** str, BufferReader* br)
 {
@@ -410,7 +432,6 @@ void MString_Read(MString** str, BufferReader* br)
 	(*str)->len = newStringLength;
 	BufferReader_ReadJustTheStringData(br, newStringLength, MString_Text(*str), newStrCapacity);
 }
-
 void MString_Combine2(MString** str, const char* str1, const char* str2)
 {
 	MString_AssignString(str, str1);
@@ -451,10 +472,21 @@ void MString_DebugPrintLeakInfo(void)
 #ifdef FIND_THE_LEAKS
 	_mHasLeakTestBegun = true;
 	int64_t len = hmlen(_mLeakTest);
+	Logger_printf("!!!LEAK BEGIN\n");
 	for (int32_t i = 0; i < len; i += 1)
 	{
 		Logger_printf(MString_Text(_mLeakTest[i].key));
 		Logger_printf("\n");
 	}
+	Logger_printf("LEAK END!!!\n");
+	hmfree(_mLeakTest);
 #endif
+}
+void MString_DisposeJustThisFrameAllocations()
+{
+	for (int i = 0; i < arrlen(arr_just_this_frame); i += 1)
+	{
+		DisposeHelper(&arr_just_this_frame[i], false);
+	}
+	arrsetlen(arr_just_this_frame, 0);
 }

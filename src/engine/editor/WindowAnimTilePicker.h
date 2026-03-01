@@ -3,7 +3,7 @@
 #include "../utils/Macros.h"
 #include "../math/Rectangle.h"
 #include "../math/Point.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 
 typedef struct SpriteBatch SpriteBatch;
 

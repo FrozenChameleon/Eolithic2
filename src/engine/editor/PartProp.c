@@ -18,7 +18,7 @@
 #include "../components/Camera.h"
 #include "../leveldata/LevelData.h"
 #include "../utils/Cvars.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../render/DrawTool.h"
 #include "../utils/MString.h"
 #include "../render/Texture.h"
@@ -71,9 +71,9 @@ static void Init()
 
 static void RefreshPropInstanceName()
 {
-    ResourceManager* rmProp = ResourceManagerList_Prop();
-    Resource* prop = ResourceManager_GetResourceByIndex(rmProp, _mCurrentPropData);
-    Utils_strlcpy(_mNextProp.mName, Resource_GetFilenameWithoutExtension(prop), EE_FILENAME_MAX);
+    ResourceMan* rmProp = ResourceList_Prop();
+    Resource* prop = ResourceMan_GetResourceByIndex(rmProp, _mCurrentPropData);
+    Utils_strlcpy(_mNextProp.mName, Resource_GetName(prop), EE_FILENAME_MAX);
 }
 static PropInstance* GetSelectedArrPropList()
 {
@@ -154,8 +154,8 @@ static PropInstance* GetCurrentPropInstance()
 }
 static void NextProp(int direction)
 {
-    ResourceManager* rmProp = ResourceManagerList_Prop();
-    int64_t count = ResourceManager_Length(rmProp);
+    ResourceMan* rmProp = ResourceList_Prop();
+    int64_t count = ResourceMan_Length(rmProp);
     int32_t loc = _mCurrentPropData + direction;
     if (((loc < count) && (direction == 1)) || ((loc >= 0) && (direction == -1)))
     {
@@ -601,8 +601,8 @@ PartFuncData PartProp_GetFuncData()
 }
 void PartProp_CreateWindows()
 {
-    ResourceManager* rmProp = ResourceManagerList_Prop();
-    if (ResourceManager_Length(rmProp) == 0)
+    ResourceMan* rmProp = ResourceList_Prop();
+    if (ResourceMan_Length(rmProp) == 0)
     {
         return;
     }
@@ -616,28 +616,27 @@ void PartProp_CreateWindows()
     }
 
     Prop* hoveredProp = NULL;
-	int32_t propArrayLength = 0;
 
     {
-        const char** filenames = ResourceManager_CreateArrayWithAllResourceFilenames(rmProp, &propArrayLength);
+        IStringArray* sa = IStringArray_CreateForJustThisFrame();
+        ResourceMan_FillArrayWithAllResourceNames(rmProp, sa);
         if (ImGui::BeginListBox("##Props", ImVec2(500, 400)))
         {
-            for (int i = 0; i < propArrayLength; i += 1)
+            for (int i = 0; i < IStringArray_Length(sa); i += 1)
             {
 				bool isSelected = (i == _mCurrentPropData);
-                if (ImGui::Selectable(filenames[i], &isSelected))
+				const char* filename = IStringArray_Get(sa, i);
+                if (ImGui::Selectable(filename, &isSelected))
                 {
                     SetCurrentProp(i);
                 }
                 if (ImGui::IsItemHovered())
                 {
-					hoveredProp = (Prop*)ResourceManager_GetResourceDataByIndex(rmProp, i);
+					hoveredProp = (Prop*)ResourceMan_GetResourceDataByIndex(rmProp, i);
                 }
             }
             ImGui::EndListBox();
         }
-	
-        Utils_free(filenames);
     }
   
     ImGui::NewLine();
@@ -733,7 +732,7 @@ void PartProp_CreateWindows()
     }
     else
     {
-        previewProp = (Prop*)ResourceManager_GetResourceDataByIndex(rmProp, _mCurrentPropData);
+        previewProp = (Prop*)ResourceMan_GetResourceDataByIndex(rmProp, _mCurrentPropData);
     }
     if (previewProp != NULL)
     {

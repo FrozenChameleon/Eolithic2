@@ -6,27 +6,36 @@
 
 #include "IStringArray.h"
 
-#include "../utils/Utils.h"
-#include "../../third_party/stb_ds.h"
 #include "IStrings.h"
+#include "../utils/Utils.h"
 #include "../utils/Logger.h"
-
-static uint64_t _mRefs;
+#include "../../third_party/stb_ds.h"
 
 typedef struct IStringArray
 {
 	struct { int64_t key; const char* value; } *hm_values;
-	IStrings* mStrings;
+	IStrings* strings;
+	bool isJustThisFrame;
 } IStringArray;
 
+static uint64_t _mRefs;
+static IStringArray** arr_just_this_frame;
+
+IStringArray* IStringArray_CreateForJustThisFrame()
+{
+	IStringArray* sa = IStringArray_Create();
+	sa->isJustThisFrame = true;
+	arrput(arr_just_this_frame, sa);
+	return sa;
+}
 IStringArray* IStringArray_Create(void)
 {
 	_mRefs += 1;
 	IStringArray* sa = (IStringArray*)Utils_calloc(1, sizeof(IStringArray));
-	sa->mStrings = IStrings_Create();
+	sa->strings = IStrings_Create();
 	return sa;
 }
-void IStringArray_Dispose(IStringArray* sa)
+static void DisposeHelper(IStringArray* sa, bool checkForIsJustThisFrame)
 {
 	if (sa == NULL)
 	{
@@ -34,10 +43,21 @@ void IStringArray_Dispose(IStringArray* sa)
 		return;
 	}
 
+	if (checkForIsJustThisFrame && sa->isJustThisFrame)
+	{
+		Logger_LogWarning("Attempted to dispose just-this-frame IStringArray in incorrect way!");
+		return;
+	}
+
 	_mRefs -= 1;
 	hmfree(sa->hm_values);
-	IStrings_Dispose(sa->mStrings);
+	IStrings_Dispose(sa->strings);
 	Utils_free(sa);
+}
+
+void IStringArray_Dispose(IStringArray* sa)
+{
+	DisposeHelper(sa, true);
 }
 void IStringArray_Clear(IStringArray* sa)
 {
@@ -46,11 +66,11 @@ void IStringArray_Clear(IStringArray* sa)
 		hmfree(sa->hm_values);
 		sa->hm_values = NULL;
 	}
-	IStrings_Clear(sa->mStrings);
+	IStrings_Clear(sa->strings);
 }
 void IStringArray_Add(IStringArray* sa, const char* str)
 {
-	const char* internedString = IStrings_Get(sa->mStrings, str);
+	const char* internedString = IStrings_Get(sa->strings, str);
 	int64_t len = hmlen(sa->hm_values);
 	hmput(sa->hm_values, len, internedString);
 }
@@ -67,7 +87,7 @@ bool IStringArray_Contains(IStringArray* sa, const char* containsThis)
 	}
 	return false;
 }
-int64_t IStringArray_Length(IStringArray* sa)
+int64_t IStringArray_Length(const IStringArray* sa)
 {
 	if (sa == NULL)
 	{
@@ -88,4 +108,12 @@ const char* IStringArray_Get(IStringArray* sa, int32_t index)
 uint64_t IStringArray_GetRefs(void)
 {
 	return _mRefs;
+}
+void IStringArray_DisposeJustThisFrameAllocations()
+{
+	for (int i = 0; i < arrlen(arr_just_this_frame); i += 1)
+	{
+		DisposeHelper(arr_just_this_frame[i], false);
+	}
+	arrsetlen(arr_just_this_frame, 0);
 }

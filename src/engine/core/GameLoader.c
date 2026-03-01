@@ -26,7 +26,7 @@
 #include "../render/Renderer.h"
 #include "../render/DrawTool.h"
 #include "../service/Service.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 
 #define LOADER_TICK_TIME (1.0 / 60.0)
 
@@ -167,14 +167,14 @@ static bool LoadStart(void)
 	GameHelper_OnLoadingStart();
 	GameHelper_SetupPlatformTypes();
 	Strings_Init();
-	ResourceManagerList_Init();
+	ResourceList_Init();
 	//Tuning_SetCurrentDifficulty(Cvars_GetAsInt(CVARS_ENGINE_DEFAULT_DIFFICULTY)); //UNUSED
 	Logger_LogInformation("Loading started");
 	return true;
 }
 static bool LoadResources(void)
 {
-	ResourceManagerList_LoadAllFromDat();
+	ResourceList_LoadAllFromDat();
 	return true;
 }
 static bool LoadAfterResources(void)

@@ -14,18 +14,18 @@
 #include "../math/Points.h"
 #include "../render/Color.h"
 #include "../render/DrawTool.h"
-#include "../resources/ResourceManager.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceMan.h"
+#include "../resources/ResourceList.h"
 
 static Color SELECTBOX_COLOR = { 0, 0, 255, 76 };
 static Color SELECTBOX_COLOR_OFF = { 0, 255, 0, 153 };
 
 static Prop* GetThePropData(PropInstance* prop)
 {
-	return (Prop*)ResourceManager_GetResourceData(ResourceManagerList_Prop(), prop->mName);
+	return (Prop*)ResourceMan_GetResourceData(ResourceList_Prop(), prop->mName);
 	/*if (prop->INTERNAL_mCachedPropData == NULL)
 	{
-		prop->INTERNAL_mCachedPropData = (Prop*)ResourceManager_GetResourceData(ResourceManagerList_Prop(), prop->mName);
+		prop->INTERNAL_mCachedPropData = (Prop*)ResourceMan_GetResourceData(ResourceList_Prop(), prop->mName);
 	}
 	return prop->INTERNAL_mCachedPropData;*/
 }

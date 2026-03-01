@@ -75,7 +75,8 @@
 #include "../utils/Logger.h"
 #include "../../third_party/stb_ds.h"
 #include "../gamestate/EntitySearch.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
+#include "../resources/ResourceMan.h"
 //#include "../components/MoveGetterSys.h" //UNUSED
 //#include "../utils/Tuning.h" //UNUSED
 
@@ -1391,7 +1392,7 @@ void Do_PlaySound(const char* name)
 {
 	SoundEffect_PlaySound(name);
 }
-void Do_PlaySoundWithForcedVolume(const char* name, float forcedVolume)
+void Do_PlaySound2(const char* name, float forcedVolume)
 {
 	SoundEffect_PlaySoundWithForcedVolume(name, forcedVolume);
 }
@@ -2180,7 +2181,7 @@ Resource* Get_LevelDataResource(void)
 }
 const char* Get_LevelFileName(void)
 {
-	return Resource_GetFilenameWithoutExtension(Get_LevelDataResource());
+	return Resource_GetName(Get_LevelDataResource());
 }
 Rectangle Get_BodyRectangle(Entity entity)
 {
@@ -2830,7 +2831,7 @@ Entity Do_BuildActor5(int32_t gridPositionX, int32_t gridPositionY, float initia
 }
 Entity Do_BuildActor6(int32_t gridPositionX, int32_t gridPositionY, float initialPositionX, float initialPositionY, ThingInstance* instanceData, const char* name, Entity parent)
 {
-	ThingSettings* settings = (ThingSettings*)ResourceManager_GetResourceData(ResourceManagerList_ThingSettings(), name);
+	ThingSettings* settings = (ThingSettings*)ResourceMan_GetResourceData(ResourceList_ThingSettings(), name);
 	if (settings == NULL)
 	{
 		Logger_LogError("Unable to build entity:");

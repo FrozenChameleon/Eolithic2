@@ -50,7 +50,8 @@ TilesetOffset* TilesetOffset_FromStream(const char* path, const char* filenameWi
 		return (TilesetOffset*)Utils_calloc(1, sizeof(TilesetOffset));
 	}
 
-	IStringArray* strings = File_ReadAllToStrings(br);
+	IStringArray* strings = IStringArray_CreateForJustThisFrame();
+	File_ReadAllToStrings(br, strings);
 
 	shput(sh_draw_tile_offset, tilesetName, NULL);
 
@@ -67,7 +68,7 @@ TilesetOffset* TilesetOffset_FromStream(const char* path, const char* filenameWi
 			continue;
 		}
 
-		IStringArray* addToHere = IStringArray_Create();
+		IStringArray* addToHere = IStringArray_CreateForJustThisFrame();
 		Utils_SplitString(nextLine, Utils_strlen(nextLine), ',', addToHere);
 		if (IStringArray_Length(addToHere) != 3)
 		{
@@ -80,10 +81,7 @@ TilesetOffset* TilesetOffset_FromStream(const char* path, const char* filenameWi
 		int32_t y = Utils_ParseInt(IStringArray_Get(addToHere, 2));
 		int64_t sh_index = shgeti(sh_draw_tile_offset, tilesetName);
 		hmput(sh_draw_tile_offset[sh_index].value, index, Point_Create(x, y));
-		IStringArray_Dispose(addToHere);
 	}
-
-	IStringArray_Dispose(strings);
 
 	return (TilesetOffset*)Utils_calloc(1, sizeof(TilesetOffset));
 }

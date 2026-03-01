@@ -9,7 +9,7 @@
 #include "../utils/Macros.h"
 #include "../utils/Utils.h"
 #include "../../third_party/stb_ds.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../globals/Globals.h"
 #include "SpriteBatch.h"
 #include "../render/TextureOffset.h"
@@ -79,17 +79,17 @@ void Sheet_BuildSheets(void)
 
 	Init();
 
-	ResourceManager* textureMan = ResourceManagerList_Texture();
-	for (int32_t i = 0; i < ResourceManager_Length(textureMan); i += 1)
+	ResourceMan* textureMan = ResourceList_Texture();
+	for (int32_t i = 0; i < ResourceMan_Length(textureMan); i += 1)
 	{
-		Resource* resource = ResourceManager_GetResourceByIndex(textureMan, i);
+		Resource* resource = ResourceMan_GetResourceByIndex(textureMan, i);
 	
 		if (resource == NULL)
 		{
 			continue;
 		}
 
-		const char* resourceFilenameWithoutExtension = Resource_GetFilenameWithoutExtension(resource);
+		const char* resourceFilenameWithoutExtension = Resource_GetName(resource);
 		MString* resourcePath = Resource_GetPath(resource);
 		Rectangle bounds = PNGPeakTool_GetBounds(MString_Text(resourcePath));
 		//void* resourceData = Resource_GetData(resource);
@@ -107,10 +107,10 @@ void Sheet_BuildSheets(void)
 	/* //DEBUG ONLY FOR NOW
 	if (!Globals_IsDebugFileMode() || GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS)
 	{
-		ResourceManager* textureOffsetMan = ResourceManagerList_TextureOffset();
-		for (int32_t i = 0; i < ResourceManager_Length(textureOffsetMan); i += 1)
+		ResourceMan* textureOffsetMan = ResourceList_TextureOffset();
+		for (int32_t i = 0; i < ResourceMan_Length(textureOffsetMan); i += 1)
 		{
-			Resource* texOffsetResource = ResourceManager_GetResourceByIndex(textureOffsetMan, i);
+			Resource* texOffsetResource = ResourceMan_GetResourceByIndex(textureOffsetMan, i);
 			if (texOffsetResource->mData == NULL)
 			{
 				continue;
@@ -126,7 +126,7 @@ void Sheet_BuildSheets(void)
 				Utils_strlcpy(sheet->mSheetName, info->mVirtualName, EE_FILENAME_MAX);
 				Utils_strlcpy(sheet->mUnderlyingTextureName, info->mFilenameWithoutExtension, EE_FILENAME_MAX);
 				sheet->mRectangle = info->mRect;
-				sheet->mTextureResource = ResourceManager_GetResource(textureMan, info->mFilenameWithoutExtension);
+				sheet->mTextureResource = ResourceMan_GetResource(textureMan, info->mFilenameWithoutExtension);
 				arrput(arr_sheet_list, sheet);
 				shput(sh_sheet_map, sheet->mSheetName, sheet);
 			}
@@ -157,6 +157,11 @@ void Sheet_GetListOfSheetNames(IStringArray* addToThis)
 }
 Resource* Sheet_GetTextureResource(Sheet* sheet)
 {
+	if (sheet == NULL)
+	{
+		return Sheet_GetTextureResource(Sheet_GetDefaultSheet());
+	}
+
 	return sheet->mTextureResource;
 }
 Texture* Sheet_GetTexture(Sheet* sheet)
@@ -164,15 +169,13 @@ Texture* Sheet_GetTexture(Sheet* sheet)
 	Resource* texResource = Sheet_GetTextureResource(sheet);
 	if (texResource == NULL)
 	{
-		return NULL;
+		return Sheet_GetTexture(Sheet_GetDefaultSheet());
 	}
-	else
-	{
-		return (Texture*)Resource_GetData(texResource);
-	}
+
+	return (Texture*)Resource_GetData(texResource);
 }
 
-RenderCommandSheet* Sheet_Draw(Sheet* sheet, SpriteBatch* spriteBatch, Color color, int32_t depth, bool isCenterX, bool isCenterY, 
+RenderCommandSheet* Sheet_Draw(Sheet * sheet, SpriteBatch * spriteBatch, Color color, int32_t depth, bool isCenterX, bool isCenterY,
 	ShaderProgram* program, Vector2 position)
 {
 	return Sheet_Draw2(sheet, spriteBatch, color, depth, isCenterX, isCenterY, program, position, Vector2_One);

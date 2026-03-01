@@ -11,7 +11,7 @@
 #include "../render/RenderTTFont.h"
 #include "../render/Renderer.h"
 #include "../../third_party/stb_ds.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../font/TTFont.h"
 
 #define FONT_EXTENSION ".fnt"
@@ -38,7 +38,7 @@ bool BmFont_UpdateFontTexture(BmFont* bmf)
 {
 	if (bmf->_mFontTexture == NULL)
 	{
-		Texture* tex = (Texture*)ResourceManager_GetResourceData(ResourceManagerList_FontTexture(), bmf->_mFontName);
+		Texture* tex = (Texture*)ResourceMan_GetResourceData(ResourceList_FontTexture(), bmf->_mFontName);
 		if (tex == NULL)
 		{
 			bmf->_mFontTexture = NULL;
@@ -65,7 +65,7 @@ void BmFont_Init(BmFont* bmf, BufferReader* br, const char* fontName)
 }
 BmFont* BmFont_GetBmFont(BmFont* bmf, const char* font)
 {
-	return (BmFont*)ResourceManager_GetResourceData(ResourceManagerList_Font(), font);
+	return (BmFont*)ResourceMan_GetResourceData(ResourceList_Font(), font);
 }
 const FontMapData* BmFont_GetReplacement(BmFont* bmf)
 {
@@ -75,7 +75,7 @@ const FontMapData* BmFont_GetReplacement(BmFont* bmf)
 #ifndef DISABLE_TT_FONT
 static TTFont* BmFont_GetTTFont(const char* font)
 {
-	return (TTFont*)ResourceManager_GetResourceData(ResourceManagerList_TTFont(), font);
+	return (TTFont*)ResourceMan_GetResourceData(ResourceList_TTFont(), font);
 }
 #endif
 

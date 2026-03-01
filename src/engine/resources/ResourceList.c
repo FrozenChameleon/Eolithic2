@@ -4,7 +4,7 @@
  * See eolithic2.LICENSE for details.
  */
 
-#include "ResourceManagerList.h"
+#include "ResourceList.h"
 
 #include "../utils/Utils.h"
 
@@ -46,9 +46,9 @@
 #define MANAGERS_INDEX_THING_SETTINGS 15
 
 static bool _mHasInit;
-static ResourceManager _mManagers[MANAGERS_LEN];
+static ResourceMan _mManagers[MANAGERS_LEN];
 
-void ResourceManagerList_Init(void)
+void ResourceList_Init(void)
 {
 	if (_mHasInit)
 	{
@@ -58,33 +58,35 @@ void ResourceManagerList_Init(void)
 	MString* tempString = NULL;
 
 	{
-		ResourceManager* animTileMan = ResourceManagerList_AnimTile();
-		ResourceManager_Init(animTileMan);
+		ResourceMan* animTileMan = ResourceList_AnimTile();
+		ResourceMan_Init(animTileMan);
 		Utils_strlcpy(animTileMan->_mResourceType, "AnimTile", EE_FILENAME_MAX);
 		Utils_strlcpy(animTileMan->_mDatFileName, "animtile.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(animTileMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "animtile");
 		Utils_strlcpy(animTileMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
-		animTileMan->_mFromStream = (ResourceManager_FromStreamFunc)AnimTile_FromStream;
-		animTileMan->_mDispose = (ResourceManager_DisposeFunc)AnimTile_Dispose;
-		animTileMan->_mRead = (ResourceManager_ReadFunc)AnimTile_Read;
-		animTileMan->_mWrite = (ResourceManager_WriteFunc)AnimTile_Write;
+		animTileMan->_mFromStream = (ResourceMan_FromStreamFunc)AnimTile_FromStream;
+		animTileMan->_mDispose = (ResourceMan_DisposeFunc)AnimTile_Dispose;
+		animTileMan->_mRead = (ResourceMan_ReadFunc)AnimTile_Read;
+		animTileMan->_mWrite = (ResourceMan_WriteFunc)AnimTile_Write;
+		animTileMan->_mCreateNew = (ResourceMan_CreateNewFunc)AnimTile_CreateNew;
 		animTileMan->_mReadFromDirectory = true;
 		animTileMan->_mIsReadingText = true;
 	}
 
 	{
-		ResourceManager* propMan = ResourceManagerList_Prop();
-		ResourceManager_Init(propMan);
+		ResourceMan* propMan = ResourceList_Prop();
+		ResourceMan_Init(propMan);
 		Utils_strlcpy(propMan->_mResourceType, "Prop", EE_FILENAME_MAX);
 		Utils_strlcpy(propMan->_mDatFileName, "props.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(propMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "props");
 		Utils_strlcpy(propMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
-		propMan->_mFromStream = (ResourceManager_FromStreamFunc)Prop_FromStream;
-		propMan->_mDispose = (ResourceManager_DisposeFunc)Prop_Dispose;
-		propMan->_mRead = (ResourceManager_ReadFunc)Prop_Read;
-		propMan->_mWrite = (ResourceManager_WriteFunc)Prop_Write;
+		propMan->_mFromStream = (ResourceMan_FromStreamFunc)Prop_FromStream;
+		propMan->_mDispose = (ResourceMan_DisposeFunc)Prop_Dispose;
+		propMan->_mRead = (ResourceMan_ReadFunc)Prop_Read;
+		propMan->_mWrite = (ResourceMan_WriteFunc)Prop_Write;
+		propMan->_mCreateNew = (ResourceMan_CreateNewFunc)Prop_CreateNew;
 		propMan->_mReadFromDirectory = true;
 		propMan->_mIsReadingText = true;
 	}
@@ -96,8 +98,8 @@ void ResourceManagerList_Init(void)
 		*/
 
 	{
-		ResourceManager* textureMan = ResourceManagerList_Texture();
-		ResourceManager_Init(textureMan);
+		ResourceMan* textureMan = ResourceList_Texture();
+		ResourceMan_Init(textureMan);
 		Utils_strlcpy(textureMan->_mResourceType, "Texture", EE_FILENAME_MAX);
 		Utils_strlcpy(textureMan->_mDatFileName, "gfx.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(textureMan->_mDefaultResource, "DEBUG_ERROR_777", EE_FILENAME_MAX);
@@ -112,189 +114,189 @@ void ResourceManagerList_Init(void)
 		File_PathCombine3(&tempString, "data", "gfx", "special");
 		Utils_strlcpy(textureMan->_mDirectories[2], MString_Text(tempString), EE_PATH_MAX);
 
-		textureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
-		//textureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
+		textureMan->_mFromStream = (ResourceMan_FromStreamFunc)Texture_FromStream;
+		//textureMan->_mDispose = (ResourceMan_DisposeFunc)Texture_Dispose;
 		textureMan->_mReadFromDirectory = true;
 		textureMan->_mDelayLoading = true;
 	}
 
 	{
-		ResourceManager* fontTextureMan = ResourceManagerList_FontTexture();
-		ResourceManager_Init(fontTextureMan);
+		ResourceMan* fontTextureMan = ResourceList_FontTexture();
+		ResourceMan_Init(fontTextureMan);
 		Utils_strlcpy(fontTextureMan->_mResourceType, "Font Texture", EE_FILENAME_MAX);
 		Utils_strlcpy(fontTextureMan->_mDatFileName, "fontsgfx.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(fontTextureMan->_mFileExtension, ".png", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "fonts");
 		Utils_strlcpy(fontTextureMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
-		fontTextureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
-		//fontTextureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
+		fontTextureMan->_mFromStream = (ResourceMan_FromStreamFunc)Texture_FromStream;
+		//fontTextureMan->_mDispose = (ResourceMan_DisposeFunc)Texture_Dispose;
 		fontTextureMan->_mReadFromDirectory = true;
 	}
 
 	{
-		ResourceManager* movieTextureMan = ResourceManagerList_MovieTexture();
-		ResourceManager_Init(movieTextureMan);
+		ResourceMan* movieTextureMan = ResourceList_MovieTexture();
+		ResourceMan_Init(movieTextureMan);
 		Utils_strlcpy(movieTextureMan->_mResourceType, "Movie Texture", EE_FILENAME_MAX);
 		Utils_strlcpy(movieTextureMan->_mDatFileName, "moviegfx.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(movieTextureMan->_mFileExtension, ".png", EE_FILENAME_MAX);
 		File_PathCombine3(&tempString, "data", "gfx", "movies");
 		Utils_strlcpy(movieTextureMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
-		movieTextureMan->_mFromStream = (ResourceManager_FromStreamFunc)Texture_FromStream;
-		//movieTextureMan->_mDispose = (ResourceManager_DisposeFunc)Texture_Dispose;
+		movieTextureMan->_mFromStream = (ResourceMan_FromStreamFunc)Texture_FromStream;
+		//movieTextureMan->_mDispose = (ResourceMan_DisposeFunc)Texture_Dispose;
 		movieTextureMan->_mReadFromDirectory = true;
 		movieTextureMan->_mDelayLoading = true;
 	}
 
 	{
-		ResourceManager* soundEffectMan = ResourceManagerList_SoundEffect();
-		ResourceManager_Init(soundEffectMan);
+		ResourceMan* soundEffectMan = ResourceList_SoundEffect();
+		ResourceMan_Init(soundEffectMan);
 		Utils_strlcpy(soundEffectMan->_mResourceType, "Sound Effect", EE_FILENAME_MAX);
 		Utils_strlcpy(soundEffectMan->_mDatFileName, "sfx.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(soundEffectMan->_mDefaultResource, "editorSave", EE_FILENAME_MAX);
 		Utils_strlcpy(soundEffectMan->_mFileExtension, ".wav", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "sfx");
 		Utils_strlcpy(soundEffectMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
-		soundEffectMan->_mFromStream = (ResourceManager_FromStreamFunc)SoundEffect_FromStream;
-		soundEffectMan->_mDispose = (ResourceManager_DisposeFunc)SoundEffect_Dispose;
+		soundEffectMan->_mFromStream = (ResourceMan_FromStreamFunc)SoundEffect_FromStream;
+		soundEffectMan->_mDispose = (ResourceMan_DisposeFunc)SoundEffect_Dispose;
 		soundEffectMan->_mReadFromDirectory = true;
 		soundEffectMan->_mDelayLoading = true;
 	}
 
 	{
-		ResourceManager* musicMan = ResourceManagerList_Music();
-		ResourceManager_Init(musicMan);
+		ResourceMan* musicMan = ResourceList_Music();
+		ResourceMan_Init(musicMan);
 		Utils_strlcpy(musicMan->_mResourceType, "Music", EE_FILENAME_MAX);
 		Utils_strlcpy(musicMan->_mDatFileName, "music.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(musicMan->_mDefaultResource, "default", EE_FILENAME_MAX);
 		Utils_strlcpy(musicMan->_mFileExtension, ".wav", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "music");
 		Utils_strlcpy(musicMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
-		musicMan->_mFromStream = (ResourceManager_FromStreamFunc)Music_FromStream;
-		musicMan->_mDispose = (ResourceManager_DisposeFunc)Music_Dispose;
+		musicMan->_mFromStream = (ResourceMan_FromStreamFunc)Music_FromStream;
+		musicMan->_mDispose = (ResourceMan_DisposeFunc)Music_Dispose;
 		musicMan->_mReadFromDirectory = true;
 		musicMan->_mDelayLoading = true;
 	}
 
 	{
-		ResourceManager* levelDataMan = ResourceManagerList_LevelData();
-		ResourceManager_Init(levelDataMan);
+		ResourceMan* levelDataMan = ResourceList_LevelData();
+		ResourceMan_Init(levelDataMan);
 		Utils_strlcpy(levelDataMan->_mResourceType, "Level Data", EE_FILENAME_MAX);
 		Utils_strlcpy(levelDataMan->_mDatFileName, "lvl.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(levelDataMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "lvl");
 		Utils_strlcpy(levelDataMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
-		levelDataMan->_mFromStream = (ResourceManager_FromStreamFunc)LevelData_FromStream;
-		levelDataMan->_mDispose = (ResourceManager_DisposeFunc)LevelData_Dispose;
-		levelDataMan->_mWrite = (ResourceManager_WriteFunc)LevelData_Write;
+		levelDataMan->_mFromStream = (ResourceMan_FromStreamFunc)LevelData_FromStream;
+		levelDataMan->_mDispose = (ResourceMan_DisposeFunc)LevelData_Dispose;
+		levelDataMan->_mWrite = (ResourceMan_WriteFunc)LevelData_Write;
 		levelDataMan->_mReadFromDirectory = true;
 		levelDataMan->_mIsReadingText = true;
 	}
 
 	{
-		ResourceManager* tilesetOffsetMan = ResourceManagerList_TilesetOffset();
-		ResourceManager_Init(tilesetOffsetMan);
+		ResourceMan* tilesetOffsetMan = ResourceList_TilesetOffset();
+		ResourceMan_Init(tilesetOffsetMan);
 		Utils_strlcpy(tilesetOffsetMan->_mResourceType, "Tileset Offset", EE_FILENAME_MAX);
 		Utils_strlcpy(tilesetOffsetMan->_mDatFileName, "offsetstile.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(tilesetOffsetMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine3(&tempString, "data", "gfx", "generated_tilesets");
 		Utils_strlcpy(tilesetOffsetMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
-		tilesetOffsetMan->_mFromStream = (ResourceManager_FromStreamFunc)TilesetOffset_FromStream;
-		tilesetOffsetMan->_mDispose = (ResourceManager_DisposeFunc)TilesetOffset_Dispose;
+		tilesetOffsetMan->_mFromStream = (ResourceMan_FromStreamFunc)TilesetOffset_FromStream;
+		tilesetOffsetMan->_mDispose = (ResourceMan_DisposeFunc)TilesetOffset_Dispose;
 		tilesetOffsetMan->_mReadFromDirectory = true;
 	}
 
 	{
-		ResourceManager* textureOffsetMan = ResourceManagerList_TextureOffset();
-		ResourceManager_Init(textureOffsetMan);
+		ResourceMan* textureOffsetMan = ResourceList_TextureOffset();
+		ResourceMan_Init(textureOffsetMan);
 		Utils_strlcpy(textureOffsetMan->_mResourceType, "Texture Offset", EE_FILENAME_MAX);
 		Utils_strlcpy(textureOffsetMan->_mDatFileName, "offsetstex.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(textureOffsetMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine3(&tempString, "data", "gfx", "generated_game");
 		Utils_strlcpy(textureOffsetMan->_mDirectories[0], MString_Text(tempString), EE_PATH_MAX);
-		textureOffsetMan->_mFromStream = (ResourceManager_FromStreamFunc)TextureOffset_FromStream;
-		textureOffsetMan->_mDispose = (ResourceManager_DisposeFunc)TextureOffset_Dispose;
+		textureOffsetMan->_mFromStream = (ResourceMan_FromStreamFunc)TextureOffset_FromStream;
+		textureOffsetMan->_mDispose = (ResourceMan_DisposeFunc)TextureOffset_Dispose;
 		textureOffsetMan->_mReadFromDirectory = true;
 	}
 
 	{
-		ResourceManager* fontMan = ResourceManagerList_Font();
-		ResourceManager_Init(fontMan);
+		ResourceMan* fontMan = ResourceList_Font();
+		ResourceMan_Init(fontMan);
 		Utils_strlcpy(fontMan->_mResourceType, "Font", EE_FILENAME_MAX);
 		Utils_strlcpy(fontMan->_mDatFileName, "fonts.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(fontMan->_mFileExtension, ".fnt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "fonts");
 		Utils_strlcpy(fontMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
-		fontMan->_mFromStream = (ResourceManager_FromStreamFunc)BmFont_FromStream;
-		fontMan->_mDispose = (ResourceManager_DisposeFunc)BmFont_Dispose;
+		fontMan->_mFromStream = (ResourceMan_FromStreamFunc)BmFont_FromStream;
+		fontMan->_mDispose = (ResourceMan_DisposeFunc)BmFont_Dispose;
 		fontMan->_mReadFromDirectory = true;
 	}
 
 	{
-		ResourceManager* particleMan = ResourceManagerList_Particle();
-		ResourceManager_Init(particleMan);
+		ResourceMan* particleMan = ResourceList_Particle();
+		ResourceMan_Init(particleMan);
 		Utils_strlcpy(particleMan->_mResourceType, "Particle", EE_FILENAME_MAX);
 		Utils_strlcpy(particleMan->_mDatFileName, "particles.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(particleMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "particles");
 		Utils_strlcpy(particleMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
-		particleMan->_mFromStream = (ResourceManager_FromStreamFunc)Particle_FromStream;
-		particleMan->_mDispose = (ResourceManager_DisposeFunc)Particle_Dispose;
-		particleMan->_mRead = (ResourceManager_ReadFunc)Particle_Read;
-		particleMan->_mWrite = (ResourceManager_WriteFunc)Particle_Write;
+		particleMan->_mFromStream = (ResourceMan_FromStreamFunc)Particle_FromStream;
+		particleMan->_mDispose = (ResourceMan_DisposeFunc)Particle_Dispose;
+		particleMan->_mRead = (ResourceMan_ReadFunc)Particle_Read;
+		particleMan->_mWrite = (ResourceMan_WriteFunc)Particle_Write;
 		particleMan->_mReadFromDirectory = true;
 		particleMan->_mIsReadingText = true;
 	}
 
 	{
-		ResourceManager* movieTimingMan = ResourceManagerList_MovieTiming();
-		ResourceManager_Init(movieTimingMan);
+		ResourceMan* movieTimingMan = ResourceList_MovieTiming();
+		ResourceMan_Init(movieTimingMan);
 		Utils_strlcpy(movieTimingMan->_mResourceType, "Movie Timings", EE_FILENAME_MAX);
 		Utils_strlcpy(movieTimingMan->_mDatFileName, "timings.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(movieTimingMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "timings");
 		Utils_strlcpy(movieTimingMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
-		movieTimingMan->_mFromStream = (ResourceManager_FromStreamFunc)MovieTiming_FromStream;
-		movieTimingMan->_mDispose = (ResourceManager_DisposeFunc)MovieTiming_Dispose;
+		movieTimingMan->_mFromStream = (ResourceMan_FromStreamFunc)MovieTiming_FromStream;
+		movieTimingMan->_mDispose = (ResourceMan_DisposeFunc)MovieTiming_Dispose;
 		movieTimingMan->_mReadFromDirectory = true;
 	}
 
 	{
-		ResourceManager* movieMan = ResourceManagerList_Movie();
-		ResourceManager_Init(movieMan);
+		ResourceMan* movieMan = ResourceList_Movie();
+		ResourceMan_Init(movieMan);
 		Utils_strlcpy(movieMan->_mResourceType, "Movies", EE_FILENAME_MAX);
 		Utils_strlcpy(movieMan->_mDatFileName, "movies.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(movieMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "movies");
 		Utils_strlcpy(movieMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
-		movieMan->_mFromStream = (ResourceManager_FromStreamFunc)Movie_FromStream;
-		movieMan->_mDispose = (ResourceManager_DisposeFunc)Movie_Dispose;
+		movieMan->_mFromStream = (ResourceMan_FromStreamFunc)Movie_FromStream;
+		movieMan->_mDispose = (ResourceMan_DisposeFunc)Movie_Dispose;
 		movieMan->_mReadFromDirectory = true;
 	}
 
 	{
-		ResourceManager* ttFontMan = ResourceManagerList_TTFont();
-		ResourceManager_Init(ttFontMan);
+		ResourceMan* ttFontMan = ResourceList_TTFont();
+		ResourceMan_Init(ttFontMan);
 		Utils_strlcpy(ttFontMan->_mResourceType, "TTFont", EE_FILENAME_MAX);
 		Utils_strlcpy(ttFontMan->_mDatFileName, "ttfonts.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(ttFontMan->_mFileExtension, ".ttf", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "ttfonts");
 		Utils_strlcpy(ttFontMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
-		ttFontMan->_mFromStream = (ResourceManager_FromStreamFunc)TTFont_FromStream;
-		ttFontMan->_mDispose = (ResourceManager_DisposeFunc)TTFont_Dispose;
+		ttFontMan->_mFromStream = (ResourceMan_FromStreamFunc)TTFont_FromStream;
+		ttFontMan->_mDispose = (ResourceMan_DisposeFunc)TTFont_Dispose;
 		ttFontMan->_mReadFromDirectory = true;
 	}
 
 	{
-		ResourceManager* thingSettingsMan = ResourceManagerList_ThingSettings();
-		ResourceManager_Init(thingSettingsMan);
+		ResourceMan* thingSettingsMan = ResourceList_ThingSettings();
+		ResourceMan_Init(thingSettingsMan);
 		Utils_strlcpy(thingSettingsMan->_mResourceType, "Thing Settings", EE_FILENAME_MAX);
 		Utils_strlcpy(thingSettingsMan->_mDatFileName, "things.dat", EE_FILENAME_MAX);
 		Utils_strlcpy(thingSettingsMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
 		File_PathCombine2(&tempString, "data", "things");
 		Utils_strlcpy(thingSettingsMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
-		thingSettingsMan->_mFromStream = (ResourceManager_FromStreamFunc)ThingSettings_FromStream;
-		thingSettingsMan->_mDispose = (ResourceManager_DisposeFunc)ThingSettings_Dispose;
-		thingSettingsMan->_mWrite = (ResourceManager_WriteFunc)ThingSettings_Write;
+		thingSettingsMan->_mFromStream = (ResourceMan_FromStreamFunc)ThingSettings_FromStream;
+		thingSettingsMan->_mDispose = (ResourceMan_DisposeFunc)ThingSettings_Dispose;
+		thingSettingsMan->_mWrite = (ResourceMan_WriteFunc)ThingSettings_Write;
 		thingSettingsMan->_mReadFromDirectory = true;
 		thingSettingsMan->_mIsReadingText = true;
 	}
@@ -303,77 +305,77 @@ void ResourceManagerList_Init(void)
 
 	_mHasInit = true;
 }
-void ResourceManagerList_LoadAllFromDat(void)
+void ResourceList_LoadAllFromDat(void)
 {
 	for (int32_t i = 0; i < MANAGERS_LEN; i += 1)
 	{
 		if (_mManagers[i]._mHasInit)
 		{
-			ResourceManager_LoadAllFromDat(&_mManagers[i]);
+			ResourceMan_LoadAllFromDat(&_mManagers[i]);
 		}
 	}
 }
-ResourceManager* ResourceManagerList_AnimTile(void)
+ResourceMan* ResourceList_AnimTile(void)
 {
 	return &_mManagers[MANAGERS_INDEX_ANIM_TILE];
 }
-ResourceManager* ResourceManagerList_Prop(void)
+ResourceMan* ResourceList_Prop(void)
 {
 	return &_mManagers[MANAGERS_INDEX_PROP];
 }
-ResourceManager* ResourceManagerList_Texture(void)
+ResourceMan* ResourceList_Texture(void)
 {
 	return &_mManagers[MANAGERS_INDEX_TEXTURE];
 }
-ResourceManager* ResourceManagerList_FontTexture(void)
+ResourceMan* ResourceList_FontTexture(void)
 {
 	return &_mManagers[MANAGERS_INDEX_FONT_TEXTURE];
 }
-ResourceManager* ResourceManagerList_MovieTexture(void)
+ResourceMan* ResourceList_MovieTexture(void)
 {
 	return &_mManagers[MANAGERS_INDEX_MOVIE_TEXTURE];
 }
-ResourceManager* ResourceManagerList_SoundEffect(void)
+ResourceMan* ResourceList_SoundEffect(void)
 {
 	return &_mManagers[MANAGERS_INDEX_SOUND_EFFECT];
 }
-ResourceManager* ResourceManagerList_Music(void)
+ResourceMan* ResourceList_Music(void)
 {
 	return &_mManagers[MANAGERS_INDEX_MUSIC];
 }
-ResourceManager* ResourceManagerList_LevelData(void)
+ResourceMan* ResourceList_LevelData(void)
 {
 	return &_mManagers[MANAGERS_INDEX_LEVEL_DATA];
 }
-ResourceManager* ResourceManagerList_TilesetOffset(void)
+ResourceMan* ResourceList_TilesetOffset(void)
 {
 	return &_mManagers[MANAGERS_INDEX_TILESET_OFFSET];
 }
-ResourceManager* ResourceManagerList_TextureOffset(void)
+ResourceMan* ResourceList_TextureOffset(void)
 {
 	return &_mManagers[MANAGERS_INDEX_TEXTURE_OFFSET];
 }
-ResourceManager* ResourceManagerList_Font(void)
+ResourceMan* ResourceList_Font(void)
 {
 	return &_mManagers[MANAGERS_INDEX_FONT];
 }
-ResourceManager* ResourceManagerList_Particle(void)
+ResourceMan* ResourceList_Particle(void)
 {
 	return &_mManagers[MANAGERS_INDEX_PARTICLE];
 }
-ResourceManager* ResourceManagerList_MovieTiming(void)
+ResourceMan* ResourceList_MovieTiming(void)
 {
 	return &_mManagers[MANAGERS_INDEX_MOVIE_TIMING];
 }
-ResourceManager* ResourceManagerList_Movie(void)
+ResourceMan* ResourceList_Movie(void)
 {
 	return &_mManagers[MANAGERS_INDEX_MOVIE];
 }
-ResourceManager* ResourceManagerList_TTFont(void)
+ResourceMan* ResourceList_TTFont(void)
 {
 	return &_mManagers[MANAGERS_INDEX_TTFONT];
 }
-ResourceManager* ResourceManagerList_ThingSettings(void)
+ResourceMan* ResourceList_ThingSettings(void)
 {
 	return &_mManagers[MANAGERS_INDEX_THING_SETTINGS];
 }

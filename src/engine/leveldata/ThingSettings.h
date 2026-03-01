@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../resources/ResourceManager.h"
+#include "../resources/ResourceMan.h"
 #include "ImageData.h"
 
 typedef struct MString MString;

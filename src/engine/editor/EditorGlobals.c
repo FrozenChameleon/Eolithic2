@@ -1,6 +1,7 @@
 #include "EditorGlobals.h"
 
 #include "imgui.h"
+#include "../input/Input.h"
 
 static uint64_t _mOperationCounter;
 static bool _mStallOperationCounter;
@@ -29,4 +30,12 @@ void EditorGlobals_StallOperationCounter()
 uint64_t EditorGlobals_GetOperationCounter()
 {
 	return _mOperationCounter;
+}
+bool EditorGlobals_IsKeyCtrlPressedAndKeySTapped()
+{
+	if (Input_IsCtrlPressed() && Input_IsKeyTapped(KEYS_S))
+	{
+		return true;
+	}
+	return false;
 }

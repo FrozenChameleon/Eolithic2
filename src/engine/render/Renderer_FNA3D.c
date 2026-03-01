@@ -28,7 +28,7 @@
 #include "../leveldata/Tile.h"
 #include "../leveldata/AnimTile.h"
 #include "../utils/Logger.h"
-//#include "../resources/ResourceManagers.h"
+//#include "../resources/ResourceMans.h"
 //#include "../render/DrawTool.h"
 #include "../render/Sheet.h"
 #include "../globals/Align.h"

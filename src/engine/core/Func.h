@@ -13,12 +13,8 @@
 #include "../gamestate/ComponentPack.h"
 #include "../utils/Timer.h"
 #include "../render/Color.h"
-//#include "../utils/OeStringPair.h"
-//#include "../utils/TimerDouble.h"
-#include "../resources/ResourceManager.h"
 #include "../gamestate/GameState.h"
 #include "../collision/Body.h"
-//#include "../collision/CollisionEngine.h"
 
 typedef struct Camera Camera;
 typedef struct DrawActor DrawActor;
@@ -41,6 +37,8 @@ typedef struct TimerDouble TimerDouble;
 typedef struct StringPair StringPair;
 typedef struct CollisionEngine CollisionEngine;
 typedef struct EntitySearch EntitySearch;
+typedef struct Resource Resource;
+typedef struct ResourceMan ResourceMan;
 
 //REGION DO
 Entity Do_CreatePlayer(float x, float y, const char* name);
@@ -249,7 +247,7 @@ void Do_PauseAllSounds(int32_t priority);
 void Do_ResumeAllSounds(int32_t priority);
 void Do_StopAllSounds(void);
 void Do_PlaySound(const char* name);
-void Do_PlaySoundWithForcedVolume(const char* name, float forcedVolume);
+void Do_PlaySound2(const char* name, float forcedVolume);
 void Do_StopSound(const char* name);
 void Do_PauseMusic(int32_t priority);
 void Do_ResumeMusic(int32_t priority);

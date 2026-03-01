@@ -281,14 +281,13 @@ void Animation_BuildAnimations(void)
 	sh_new_arena(sh_animation_sheet_map);
 
 	{
-		IStringArray* sheets = IStringArray_Create();
+		IStringArray* sheets = IStringArray_CreateForJustThisFrame();
 		Sheet_GetListOfSheetNames(sheets);
 		for (int32_t i = 0; i < IStringArray_Length(sheets); i += 1)
 		{
 			const char* sheetName = IStringArray_Get(sheets, i);
 			Animation_CheckForAnimation(sheetName);
 		}
-		IStringArray_Dispose(sheets);
 	}
 
 	for (int32_t i = 0; i < arrlen(arr_animation_info); i += 1)

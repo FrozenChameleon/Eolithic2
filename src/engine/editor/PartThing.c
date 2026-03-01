@@ -4,7 +4,7 @@
 #include "../math/Points.h"
 #include "../leveldata/ThingInstance.h"
 #include "imgui.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../../third_party/stb_ds.h"
 #include "../utils/Utils.h"
 #include "EditorPart.h"
@@ -39,10 +39,10 @@ static bool IsDragging()
 }
 static Resource* GetCurrentThingSetting()
 {
-    ResourceManager* rmThings = ResourceManagerList_ThingSettings();
-    if (ResourceManager_Length(rmThings) != 0)
+    ResourceMan* rmThings = ResourceList_ThingSettings();
+    if (ResourceMan_Length(rmThings) != 0)
     {
-        return ResourceManager_GetResourceByIndex(rmThings, _mCurrentThingSetting);
+        return ResourceMan_GetResourceByIndex(rmThings, _mCurrentThingSetting);
     }
     return NULL;
 }
@@ -63,7 +63,7 @@ static bool NodeInMouse(Point point)
 static ThingInstance CreateInstance(Resource* resource)
 {
     ThingInstance instance = { 0 };
-    Utils_strlcpy(instance.mName, Resource_GetFilenameWithoutExtension(resource), EE_FILENAME_MAX);
+    Utils_strlcpy(instance.mName, Resource_GetName(resource), EE_FILENAME_MAX);
     //TODO OeGame.GetHelper().SetupThingInstanceSettings(instance, false);
     return instance;
 }
@@ -147,7 +147,7 @@ static void DrawHelper(SpriteBatch* spriteBatch)
         if (drawDefault)
         {
             DrawTool_DrawRectangle2(spriteBatch, COLOR_RED, 100, Rectangle_Create((int)x, (int)y, TILE_SIZE, TILE_SIZE), 0, true);
-            SpriteBatch_DrawString2(spriteBatch, "editor", Resource_GetFilenameWithoutExtension(resource),
+            SpriteBatch_DrawString2(spriteBatch, "editor", Resource_GetName(resource),
                 COLOR_WHITE, 100, Vector2_Create(x, y), ALIGN_CENTER, ALIGN_CENTER);
         }
     }
@@ -237,8 +237,8 @@ static void MouseWheelChanged(bool up)
     }
     if (up)
     {
-        ResourceManager* rmThings = ResourceManagerList_ThingSettings();
-        int count = ResourceManager_Length(rmThings);
+        ResourceMan* rmThings = ResourceList_ThingSettings();
+        int count = ResourceMan_Length(rmThings);
         _mCurrentThingSetting += 1;
         if (_mCurrentThingSetting >= count - 1)
         {
@@ -274,8 +274,8 @@ static const char* GetStatus()
 }
 static void CreateThingListWindow()
 {
-	ResourceManager* rmThings = ResourceManagerList_ThingSettings();
-    if (ResourceManager_Length(rmThings) == 0)
+	ResourceMan* rmThings = ResourceList_ThingSettings();
+    if (ResourceMan_Length(rmThings) == 0)
     {
         return;
     }
@@ -289,25 +289,27 @@ static void CreateThingListWindow()
     }
 
     ThingSettings* hoveredSettings = NULL;
-    int32_t thingsArrayLength = 0;
-
-    const char** filenames = ResourceManager_CreateArrayWithAllResourceFilenames(rmThings, &thingsArrayLength);
-    if (ImGui::BeginListBox("##Resources", ImVec2(500, 400)))
     {
-        for (int i = 0; i < thingsArrayLength; i += 1)
+        IStringArray* sa = IStringArray_CreateForJustThisFrame();
+        ResourceMan_FillArrayWithAllResourceNames(rmThings, sa);
+        if (ImGui::BeginListBox("##Resources", ImVec2(500, 400)))
         {
-            bool isSelected = (i == _mCurrentThingSetting);
-            if (ImGui::Selectable(filenames[i], &isSelected))
+            for (int i = 0; i < IStringArray_Length(sa); i += 1)
             {
-                SetThingSettings(i);
+                bool isSelected = (i == _mCurrentThingSetting);
+                const char* filename = IStringArray_Get(sa, i);
+                if (ImGui::Selectable(filename, &isSelected))
+                {
+                    SetThingSettings(i);
+                }
+                if (ImGui::IsItemHovered())
+                {
+                    hoveredSettings = (ThingSettings*)ResourceMan_GetResourceDataByIndex(rmThings, i);
+                }
             }
-            if (ImGui::IsItemHovered())
-            {
-                hoveredSettings = (ThingSettings*)ResourceManager_GetResourceDataByIndex(rmThings, i);
-            }
+            ImGui::EndListBox();
         }
-		ImGui::EndListBox();
-	}
+    }
 
     ImGui::NewLine();
 
@@ -340,8 +342,8 @@ static void CreateThingListWindow()
     }
     if (previewThing != NULL)
     {
-		ResourceManager* texMan = ResourceManagerList_Texture();
-        Texture* tex = (Texture*)ResourceManager_GetResourceData(texMan, previewThing->mPreviewSheet);
+		ResourceMan* texMan = ResourceList_Texture();
+        Texture* tex = (Texture*)ResourceMan_GetResourceData(texMan, previewThing->mPreviewSheet);
         ImGui::Image((ImTextureID)(intptr_t)tex->mTextureData, ImVec2(tex->mBounds.Width, tex->mBounds.Height));
     }
 

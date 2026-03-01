@@ -14,7 +14,7 @@
 #include "../../third_party/stb_ds.h"
 #include "../utils/Cvars.h"
 #include "../render/SpriteBatch.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../utils/MString.h"
 #include "../render/TilesetOffset.h"
 #include "../utils/Utils.h"
@@ -409,7 +409,7 @@ void LevelData_DrawTiles2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camer
 }
 Texture* LevelData_GetTilesetTexture(LevelData* ld)
 {
-	void* resourceData = ResourceManager_GetResourceData(ResourceManagerList_Texture(), ld->mTilesetName);
+	void* resourceData = ResourceMan_GetResourceData(ResourceList_Texture(), ld->mTilesetName);
 	if (resourceData == NULL)
 	{
 		return NULL;

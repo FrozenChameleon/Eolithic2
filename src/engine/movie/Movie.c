@@ -8,11 +8,13 @@
 
 #include "../io/File.h"
 #include "../utils/Utils.h"
+#include "../utils/IStringArray.h"
 
 Movie* Movie_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br)
 {
 	Movie* movie = (Movie*)Utils_calloc(1, sizeof(Movie));
-	movie->mMovieData = File_ReadAllToStrings(br);
+	movie->mMovieData = IStringArray_Create();
+	File_ReadAllToStrings(br, movie->mMovieData);
 	return movie;
 }
 void Movie_Dispose(Movie* movie)

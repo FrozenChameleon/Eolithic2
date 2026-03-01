@@ -15,7 +15,7 @@
 #include "../utils/Cvars.h"
 #include "../core/Game.h"
 #include "../core/GameHelper.h"
-#include "../resources/ResourceManagerList.h"
+#include "../resources/ResourceList.h"
 #include "../../third_party/stb_ds.h"
 #include "../render/DrawTool.h"
 #include "ThingSettings.h"
@@ -275,8 +275,8 @@ bool ThingInstance_IsEqualTo(ThingInstance* ti, ThingInstance* instance)
 }
 ThingSettings* ThingInstance_GetThingSettings(ThingInstance* ti)
 {
-	ResourceManager* rmThings = ResourceManagerList_ThingSettings();
-	return (ThingSettings*)ResourceManager_GetResourceData(rmThings, ti->mName);
+	ResourceMan* rmThings = ResourceList_ThingSettings();
+	return (ThingSettings*)ResourceMan_GetResourceData(rmThings, ti->mName);
 }
 void ThingInstance_Draw(ThingInstance* ti, SpriteBatch* spriteBatch, Color color, Point position, bool isSelected)
 {

@@ -16,9 +16,9 @@ bool WindowAnimTilePicker_CreateWindow()
 	bool returnValue = false;
 
 	_mBounds.Width = TILE_SIZE * WindowAnimTilePicker_GetRowAmount();
-	ResourceManager* rmAnim = ResourceManagerList_AnimTile();
+	ResourceMan* rmAnim = ResourceList_AnimTile();
 	
-	_mBounds.Height = (int32_t)(TILE_SIZE * ((ResourceManager_Length(rmAnim) / WindowAnimTilePicker_GetRowAmount()) + 1));
+	_mBounds.Height = (int32_t)(TILE_SIZE * ((ResourceMan_Length(rmAnim) / WindowAnimTilePicker_GetRowAmount()) + 1));
 
 	//ImGui::SetNextWindowPickerWindow();
 	//ImGui::SetNextWindowAlwaysOpen();
@@ -87,11 +87,11 @@ void WindowAnimTilePicker_DrawHud(SpriteBatch* spriteBatch)
 	int counterX = 0;
 	int counterY = 0;
 
-	ResourceManager* rmAnim = ResourceManagerList_AnimTile();
+	ResourceMan* rmAnim = ResourceList_AnimTile();
 
-	for (int i = 0; i < ResourceManager_Length(rmAnim); i += 1)
+	for (int i = 0; i < ResourceMan_Length(rmAnim); i += 1)
 	{
-		AnimTile* at = (AnimTile*)ResourceManager_GetResourceDataByIndex(rmAnim, i);
+		AnimTile* at = (AnimTile*)ResourceMan_GetResourceDataByIndex(rmAnim, i);
 		AnimTile_Draw(at, spriteBatch, COLOR_WHITE, myDepth, 
 			_mBounds.X + counterX * TILE_SIZE, _mBounds.Y + counterY * TILE_SIZE, 0, false, false);
 		counterX += 1;
@@ -110,11 +110,11 @@ void WindowAnimTilePicker_SetAnimTile(const char* animTile)
 {
 	int counterX = 0;
 	int counterY = 0;
-	ResourceManager* rmAnim = ResourceManagerList_AnimTile();
-	for (int i = 0; i < ResourceManager_Length(rmAnim); i += 1)
+	ResourceMan* rmAnim = ResourceList_AnimTile();
+	for (int i = 0; i < ResourceMan_Length(rmAnim); i += 1)
 	{
-		Resource* res = ResourceManager_GetResourceByIndex(rmAnim, i);
-		const char* texName = Resource_GetFilenameWithoutExtension(res);
+		Resource* res = ResourceMan_GetResourceByIndex(rmAnim, i);
+		const char* texName = Resource_GetName(res);
 		if (Utils_StringEqualTo(texName, animTile))
 		{
 			_mPoint.X = counterX;
@@ -132,10 +132,10 @@ void WindowAnimTilePicker_SetAnimTile(const char* animTile)
 Resource* WindowAnimTilePicker_GetAnimTileResource()
 {
 	int num = (_mPoint.Y * WindowAnimTilePicker_GetRowAmount()) + _mPoint.X;
-	ResourceManager* rmAnim = ResourceManagerList_AnimTile();
-	if (num < ResourceManager_Length(rmAnim))
+	ResourceMan* rmAnim = ResourceList_AnimTile();
+	if (num < ResourceMan_Length(rmAnim))
 	{
-		return ResourceManager_GetResourceByIndex(rmAnim, num);
+		return ResourceMan_GetResourceByIndex(rmAnim, num);
 	}
 	return NULL;
 }

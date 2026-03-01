@@ -13,7 +13,7 @@
 #include "../io/BufferReader.h"
 #include "../io/File.h"
 #include "AnimTile.h"
-#include "../resources/ResourceManager.h"
+#include "../resources/ResourceMan.h"
 #include "../render/DrawTool.h"
 #include "../render/Color.h"
 #include "../utils/Utils.h"
@@ -57,7 +57,7 @@ void DrawTile_Draw(DrawTile* drawTile, SpriteBatch* spriteBatch, Texture* textur
 {
 	/*if (drawTile->mAnimation.size() != 0) //UNUSED
 	{
-		OeAnimTile* tile = OeResourceManagers_AnimTileManager.GetResourceData(drawTile->mAnimation);
+		OeAnimTile* tile = OeResourceMans_AnimTileManager.GetResourceData(drawTile->mAnimation);
 
 		if (tile != nullptr)
 		{
