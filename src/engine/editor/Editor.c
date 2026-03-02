@@ -14,6 +14,7 @@
 #include "EditorDebugToggles.h"
 #include "AnimMan.h"
 #include "PropMan.h"
+#include "ParticleMan.h"
 
 static Camera _mCamera;
 
@@ -313,7 +314,8 @@ void Editor_Update()
 
     //Updates
     //AnimMan_Update();
-    PropMan_Update();
+    //PropMan_Update();
+	ParticleMan_Update();
 }
 void Editor_Draw(SpriteBatch* spriteBatch)
 {

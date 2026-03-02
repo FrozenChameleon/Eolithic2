@@ -14,6 +14,7 @@
 #include "../utils/IStrings.h"
 #include "../utils/IStringArray.h"
 #include "../io/DynamicByteBuffer.h"
+#include "../core/Func.h"
 
 typedef struct Resource
 {
@@ -181,33 +182,35 @@ void* ResourceMan_GetResourceData(ResourceMan* rm, const char* name)
 	LoadResourceDataFromResourcePathIfMissing(resource);
 	return resource->data;
 }
-Resource* ResourceMan_CreateResourceIfMissing(ResourceMan* rm, const char* name, const char* path, bool createNewDefaultData)
+Resource* ResourceMan_CreateResource(ResourceMan* rm, const char* name, const char* path, bool createNewDefaultData)
 {
+	Resource* resource;
+	if (ResourceMan_HasResource(rm, name))
 	{
-		Resource* existingResource = JustGetTheResource(rm, name);
-		if (existingResource != NULL)
+		resource = JustGetTheResource(rm, name);
+	}
+	else
+	{
 		{
-			return existingResource;
+			MString* tempString = MString_CreateForJustThisFrame();
+			MString_Combine4(&tempString, "Creating ", rm->_mResourceType, ": ", name);
+			Logger_LogInformation(MString_Text(tempString));
 		}
-	} 
 
-	{
-		MString* tempString = MString_CreateForJustThisFrame();
-		MString_Combine4(&tempString, "Creating ", rm->_mResourceType, ": ", name);
-		Logger_LogInformation(MString_Text(tempString));
+		resource = (Resource*)Utils_calloc(1, sizeof(Resource));
+		resource->manager = rm;
+		MString_AssignString(&resource->path, path);
+		Utils_strlcpy(resource->name, name, EE_FILENAME_MAX);
+		resource->id = rm->_mResourceCounter;
+		rm->_mResourceCounter += 1;
+		shput(rm->sh_resources, resource->name, resource);
 	}
 
-	Resource* resource = (Resource*)Utils_calloc(1, sizeof(Resource));
-	resource->manager = rm;
-	MString_AssignString(&resource->path, path);
-	Utils_strlcpy(resource->name, name, EE_FILENAME_MAX);
-	resource->id = rm->_mResourceCounter;
-	rm->_mResourceCounter += 1;
-	if (createNewDefaultData && (rm->_mCreateNew != NULL))
+	if (createNewDefaultData && (resource->data == NULL) && (rm->_mCreateNew != NULL))
 	{
 		resource->data = rm->_mCreateNew();
 	}
-	shput(rm->sh_resources, resource->name, resource);
+
 	return resource;
 }
 Resource* ResourceMan_LoadAssetFromStreamAndCreateResource(ResourceMan* rm, BufferReader* br, const char* name, const char* path)
@@ -218,7 +221,7 @@ Resource* ResourceMan_LoadAssetFromStreamAndCreateResource(ResourceMan* rm, Buff
 		Logger_LogInformation(MString_Text(tempString));
 	}
 
-	Resource* resource = ResourceMan_CreateResourceIfMissing(rm, name, path, false);
+	Resource* resource = ResourceMan_CreateResource(rm, name, path, false);
 	if (!rm->_mDelayLoading && (rm->_mFromStream != NULL))
 	{
 		resource->data = LoadResourceDataFromBufferReader(resource, br);
@@ -425,4 +428,44 @@ void ResourceMan_FillArrayWithAllResourceNames(ResourceMan* rm, IStringArray* sa
 		Resource* res = ResourceMan_GetResourceByIndex(rm, i);
 		IStringArray_Add(sa, Resource_GetName(res));
 	}
+}
+void ResourceMan_CopyToResourceDataAndThenSaveAsText(ResourceMan* rm, const char* name, const char* path, void* copyThisData)
+{
+	if (path == NULL)
+	{
+		if (Utils_IsStringEmpty(rm->_mDirectories[0]))
+		{
+			Logger_LogWarning("Invalid directory to save resource.");
+			return;
+		}
+
+		MString* tempString = MString_CreateForJustThisFrame();
+		File_PathCombine2(&tempString, rm->_mDirectories[0], name);
+		MString_AddAssignString(&tempString, ".txt");
+		path = MString_Text(tempString);
+	}
+
+	if (Utils_IsStringEmptyOrNotSet(name))
+	{
+		Logger_LogWarning("Invalid filename to save resource.");
+		return;
+	}
+
+	{
+		MString* strDebugInfo = MString_CreateForJustThisFrame();
+		if (ResourceMan_HasResource(rm, name))
+		{
+			MString_Combine2(&strDebugInfo, "Overwriting resource ", path);
+		}
+		else
+		{
+			MString_Combine2(&strDebugInfo, "Saving new resource ", path);
+		}
+		Logger_LogInformation(MString_Text(strDebugInfo));
+	}
+
+	Resource* resource = ResourceMan_CreateResource(rm, name, path, true);
+	rm->_mCopyTo(resource->data, copyThisData);
+	Resource_Save(resource, true);
+	Do_PlaySound2("editorSave", 1.0f);
 }

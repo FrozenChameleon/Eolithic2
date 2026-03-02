@@ -11,6 +11,10 @@
 
 #define VERSION_PARTICLE 7
 
+Particle* Particle_CreateNew()
+{
+	return (Particle*)Utils_calloc(1, sizeof(Particle));
+}
 void Particle_Read(Particle* p, BufferReader* br)
 {
 	if (!BufferReader_ReadMagicNumber(br))
@@ -146,11 +150,15 @@ void Particle_Write(Particle* p, DynamicByteBuffer* dbb)
 }
 Particle* Particle_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br)
 {
-	Particle* p = (Particle*)Utils_calloc(1, sizeof(Particle));
+	Particle* p = Particle_CreateNew();
 	Particle_Read(p, br);
 	return p;
 }
 void Particle_Dispose(Particle* p)
 {
 	Utils_free(p);
+}
+void Particle_CopyTo(Particle* dst, Particle* src)
+{
+	Utils_memcpy(dst, src, sizeof(Particle));
 }

@@ -357,20 +357,14 @@ void MString_ToLower(MString** str)
 	CheckAndReplaceNullString(str);
 
 	MString* currentString = *str;
-	for (int i = 0; i < currentString->len; i += 1)
-	{
-		currentString->text[i] = (char)Utils_tolower(currentString->text[i]);
-	}
+	Utils_StringToLower(currentString->text, currentString->len);
 }
 void MString_ToUpper(MString** str)
 {
 	CheckAndReplaceNullString(str);
 
 	MString* currentString = *str;
-	for (int i = 0; i < currentString->len; i += 1)
-	{
-		currentString->text[i] = (char)Utils_toupper(currentString->text[i]);
-	}
+	Utils_StringToUpper(currentString->text, currentString->len);
 }
 void MString_Truncate(MString** str, int32_t newLength)
 {

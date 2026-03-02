@@ -159,3 +159,8 @@ void Prop_Dispose(Prop* prop)
 {
 	Utils_free(prop);
 }
+
+void Prop_CopyTo(Prop* dst, Prop* src)
+{
+	Utils_memcpy(dst, src, sizeof(Prop));
+}

@@ -70,6 +70,7 @@ void ResourceList_Init(void)
 		animTileMan->_mRead = (ResourceMan_ReadFunc)AnimTile_Read;
 		animTileMan->_mWrite = (ResourceMan_WriteFunc)AnimTile_Write;
 		animTileMan->_mCreateNew = (ResourceMan_CreateNewFunc)AnimTile_CreateNew;
+		animTileMan->_mCopyTo = (ResourceMan_CopyToFunc)AnimTile_CopyTo;
 		animTileMan->_mReadFromDirectory = true;
 		animTileMan->_mIsReadingText = true;
 	}
@@ -87,6 +88,7 @@ void ResourceList_Init(void)
 		propMan->_mRead = (ResourceMan_ReadFunc)Prop_Read;
 		propMan->_mWrite = (ResourceMan_WriteFunc)Prop_Write;
 		propMan->_mCreateNew = (ResourceMan_CreateNewFunc)Prop_CreateNew;
+		propMan->_mCopyTo = (ResourceMan_CopyToFunc)Prop_CopyTo;
 		propMan->_mReadFromDirectory = true;
 		propMan->_mIsReadingText = true;
 	}
@@ -243,6 +245,8 @@ void ResourceList_Init(void)
 		particleMan->_mDispose = (ResourceMan_DisposeFunc)Particle_Dispose;
 		particleMan->_mRead = (ResourceMan_ReadFunc)Particle_Read;
 		particleMan->_mWrite = (ResourceMan_WriteFunc)Particle_Write;
+		particleMan->_mCreateNew = (ResourceMan_CreateNewFunc)Particle_CreateNew;
+		particleMan->_mCopyTo = (ResourceMan_CopyToFunc)Particle_CopyTo;
 		particleMan->_mReadFromDirectory = true;
 		particleMan->_mIsReadingText = true;
 	}

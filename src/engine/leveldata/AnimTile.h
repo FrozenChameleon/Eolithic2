@@ -43,3 +43,4 @@ void AnimTile_UpdateResource(AnimTile* at);
 void AnimTile_Draw(AnimTile* at, SpriteBatch* spriteBatch, Color color, int32_t depth, int32_t x, int32_t y, float rotation, bool flipX, bool flipY);
 Sheet* AnimTile_GetAnimationSheet(AnimTile* at);
 void AnimTile_LoadAnimation(AnimTile* at);
+void AnimTile_CopyTo(AnimTile* dst, AnimTile* src);

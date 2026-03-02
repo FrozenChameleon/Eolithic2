@@ -48,3 +48,4 @@ void Prop_Write(Prop* p, DynamicByteBuffer* dbb);
 IStringArray* Prop_GetDirectories(void);
 Prop* Prop_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);
 void Prop_Dispose(Prop* prop);
+void Prop_CopyTo(Prop* dst, Prop* src);

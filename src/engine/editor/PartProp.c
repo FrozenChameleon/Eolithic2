@@ -100,7 +100,7 @@ static void UpdatePropOffset(PropInstance* propInstance)
     if (IsDragging())
     {
         Vector2_AddAssign(&propPos, _mDragOffset);
-    }
+	}
 
     if (_mIsSnapped)
     {

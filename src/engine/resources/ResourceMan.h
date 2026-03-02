@@ -16,6 +16,7 @@ typedef struct DynamicByteBuffer DynamicByteBuffer;
 typedef struct IStringArray IStringArray;
 
 typedef void* (*ResourceMan_CreateNewFunc)();
+typedef void* (*ResourceMan_CopyToFunc)(void* dst, void* src);
 typedef void* (*ResourceMan_FromStreamFunc)(const char* path, const char* name, BufferReader* br);
 typedef void (*ResourceMan_DisposeFunc)(void* resourceData);
 typedef void (*ResourceMan_WriteFunc)(void* resourceData, DynamicByteBuffer* dbb);
@@ -40,6 +41,7 @@ typedef struct ResourceMan
 	ResourceMan_FromStreamFunc _mFromStream;
 	ResourceMan_DisposeFunc _mDispose;
 	ResourceMan_CreateNewFunc _mCreateNew;
+	ResourceMan_CopyToFunc _mCopyTo;
 	char _mDatFileName[EE_FILENAME_MAX];
 	char _mResourceType[EE_FILENAME_MAX];
 	char _mDefaultResource[EE_FILENAME_MAX];
@@ -57,7 +59,7 @@ Resource* ResourceMan_GetDefaultResource(ResourceMan* rm);
 void* ResourceMan_GetDefaultResourceData(ResourceMan* rm);
 Resource* ResourceMan_GetResource(ResourceMan* rm, const char* name);
 void* ResourceMan_GetResourceData(ResourceMan* rm, const char* name);
-Resource* ResourceMan_CreateResourceIfMissing(ResourceMan* rm, const char* name, const char* path, bool createNewDefaultData);
+Resource* ResourceMan_CreateResource(ResourceMan* rm, const char* name, const char* path, bool createNewDefaultData);
 Resource* ResourceMan_LoadAssetFromStreamAndCreateResource(ResourceMan* rm, BufferReader* br, const char* name, const char* path);
 const char* ResourceMan_GetDatFileName(ResourceMan* rm);
 void ResourceMan_LoadAllFromDat(ResourceMan* rm);
@@ -74,3 +76,5 @@ void ResourceMan_ReadAll(ResourceMan* rm, bool isReadingText);
 void ResourceMan_LoadAllFromDirectories(ResourceMan* rm, bool isReadingText);
 //Pointer that is returned must be freed!
 void ResourceMan_FillArrayWithAllResourceNames(ResourceMan* rm, IStringArray* sa);
+//CopyTo src to dst and then save. Pass NULL path to use directory[0]
+void ResourceMan_CopyToResourceDataAndThenSaveAsText(ResourceMan* rm, const char* name, const char* path, void* copyThisData);

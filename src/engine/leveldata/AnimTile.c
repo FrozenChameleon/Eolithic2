@@ -110,3 +110,7 @@ void AnimTile_LoadAnimation(AnimTile * at)
 		Animation_Init(&at->mGraphics.mAnimation, at->mTextureName, at->mFlipSpeed);
 	}
 }
+void AnimTile_CopyTo(AnimTile* dst, AnimTile* src)
+{
+	Utils_memcpy(dst, src, sizeof(AnimTile));
+}

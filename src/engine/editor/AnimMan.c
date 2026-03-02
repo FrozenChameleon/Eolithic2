@@ -21,33 +21,12 @@ static void ReloadAnimation()
 }
 static void Save()
 {
-	if (!ImGui::IsWindowFocused() || Utils_StringEqualTo(_mTempFileName, EE_STR_NOT_SET))
+	if (!ImGui::IsWindowFocused())
 	{
 		return;
 	}
 
-	ResourceMan* rmAnim = ResourceList_AnimTile();
-
-	MString* path = MString_CreateForJustThisFrame();
-	File_PathCombine2(&path, rmAnim->_mDirectories[0], _mTempFileName);
-	MString_AddAssignString(&path, ".txt");
-
-	MString* strDebugInfo = MString_CreateForJustThisFrame();
-	if (ResourceMan_HasResource(rmAnim, _mTempFileName))
-	{
-		MString_Combine2(&strDebugInfo, "Overwriting anim tile ", MString_Text(path));
-	}
-	else
-	{
-		MString_Combine2(&strDebugInfo, "Saving new anim tile ", MString_Text(path));
-	}
-	Logger_LogInformation(MString_Text(strDebugInfo));
-
-	Resource* resource = ResourceMan_CreateResourceIfMissing(rmAnim, _mTempFileName, MString_Text(path), true);
-	AnimTile* resourceData = (AnimTile*)Resource_PeekData(resource);
-	*resourceData = _mAnimTile;
-	Resource_Save(resource, true);
-	Do_PlaySound2("editorSave", 1.0f);
+	ResourceMan_CopyToResourceDataAndThenSaveAsText(ResourceList_AnimTile(), _mTempFileName, NULL, &_mAnimTile);
 }
 static void CreateWindow()
 {

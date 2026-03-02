@@ -1513,6 +1513,18 @@ bool Utils_IsStringASCII(const char* str, size_t len)
 	}
 	return true;
 }
+bool Utils_IsStringEmpty(const char* str)
+{
+	return Utils_StringEqualTo(str, EE_STR_EMPTY);
+}
+bool Utils_IsStringNotSet(const char* str)
+{
+	return Utils_StringEqualTo(str, EE_STR_NOT_SET);
+}
+bool Utils_IsStringEmptyOrNotSet(const char* str)
+{
+	return Utils_IsStringEmpty(str) || Utils_IsStringNotSet(str);
+}
 int32_t Utils_AlignToTileGridInt(int32_t value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates)
 {
 	double temp = value;
@@ -1570,11 +1582,25 @@ float Utils_fmodf(float x, float y)
 {
 	return SDL_fmodf(x, y);
 }
-int32_t Utils_toupper(int x)
+void Utils_StringToLower(char* str, size_t maxlen)
 {
-	return SDL_toupper(x);
+	for (int i = 0; i < maxlen; i += 1)
+	{
+		if (str[i] == '0')
+		{
+			return;
+		}
+		str[i] = (char)SDL_tolower(str[i]);
+	}
 }
-int32_t Utils_tolower(int x)
+void Utils_StringToUpper(char* str, size_t maxlen)
 {
-	return SDL_toupper(x);
+	for (int i = 0; i < maxlen; i += 1)
+	{
+		if (str[i] == '0')
+		{
+			return;
+		}
+		str[i] = (char)SDL_toupper(str[i]);
+	}
 }

@@ -59,10 +59,6 @@ static int32_t GetValueInt(int32_t min, int32_t max)
 
 	return newValue;
 }
-static void UpdateLastRenderPositionRoutine(ParticleInstance* data)
-{
-	data->mLastRenderPosition = data->mPosition;
-}
 
 static void SetConstantFluctuateTimeLimit(ParticleInstance* data)
 {
@@ -133,7 +129,7 @@ static void AttachThing(ParticleInstance* data, Entity entity, int32_t offsetX, 
 	data->mAttachedThingOffset.Y = offsetY;
 	data->mAttachedThingFollowFlipX = followFlipX;
 	UpdateAttachedPosition(data);
-	UpdateLastRenderPositionRoutine(data);
+	ParticleInstanceSys_UpdateLastRenderPosition(data);
 }
 static void HandleConstant(ParticleInstance* data)
 {
@@ -232,12 +228,6 @@ static void DrawRoutineActual(ParticleInstance* data, SpriteBatch* spriteBatch, 
 	}
 	drawInstance->mExtraPasses = data->mParticle->mExtraPasses;
 }
-static void DrawRoutine(ParticleInstance* data, SpriteBatch* spriteBatch)
-{
-	Vector2 position = Vector2_Add(data->mPosition, data->mOffset);
-	Vector2 lastPosition = Vector2_Add(data->mLastRenderPosition, data->mOffset);
-	DrawRoutineActual(data, spriteBatch, position, lastPosition);
-}
 
 void ParticleInstanceSys_Setup(ParticleInstance* data, const char* name, Particle* particleData, float x, float y)
 {
@@ -300,7 +290,7 @@ void ParticleInstanceSys_Setup(ParticleInstance* data, const char* name, Particl
 		data->mTimerTimeToLive.mLimit = GetValueInt(data->mParticle->mMiscTTLMin, data->mParticle->mMiscTTLMax);
 	}
 
-	UpdateLastRenderPositionRoutine(data);
+	ParticleInstanceSys_UpdateLastRenderPosition(data);
 }
 bool ParticleInstanceSys_UpdateRoutine(ParticleInstance* data)
 {
@@ -341,7 +331,16 @@ bool ParticleInstanceSys_UpdateRoutine(ParticleInstance* data)
 
 	return data->mIsComplete;
 }
-
+void ParticleInstanceSys_UpdateLastRenderPosition(ParticleInstance* data)
+{
+	data->mLastRenderPosition = data->mPosition;
+}
+void ParticleInstanceSys_DrawRoutine(ParticleInstance* data, SpriteBatch* spriteBatch)
+{
+	Vector2 position = Vector2_Add(data->mPosition, data->mOffset);
+	Vector2 lastPosition = Vector2_Add(data->mLastRenderPosition, data->mOffset);
+	DrawRoutineActual(data, spriteBatch, position, lastPosition);
+}
 static void Update(void* givenData)
 {
 	ComponentPack* pack = Get_ComponentPack(C_ParticleInstance);
@@ -361,7 +360,7 @@ static void UpdateLastRenderPosition(void* givenData, GameState* gameState)
 	PackIterator iter = PackIterator_Begin;
 	while (ComponentPack_Next(pack, &iter))
 	{
-		UpdateLastRenderPositionRoutine((ParticleInstance*)iter.mComponent);
+		ParticleInstanceSys_UpdateLastRenderPosition((ParticleInstance*)iter.mComponent);
 	}
 }
 static void Draw(void* givenData, SpriteBatch* spriteBatch)
@@ -383,7 +382,7 @@ static void Draw(void* givenData, SpriteBatch* spriteBatch)
 		{
 			if ((instance->mPosition.X < right) && (instance->mPosition.Y < bottom))
 			{
-				DrawRoutine(instance, spriteBatch);
+				ParticleInstanceSys_DrawRoutine(instance, spriteBatch);
 			}
 		}
 	}

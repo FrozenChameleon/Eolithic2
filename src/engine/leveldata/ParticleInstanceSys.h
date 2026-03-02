@@ -11,4 +11,6 @@
 
 void ParticleInstanceSys_Setup(ParticleInstance* data, const char* name, Particle* particleData, float x, float y);
 bool ParticleInstanceSys_UpdateRoutine(ParticleInstance* data);
+void ParticleInstanceSys_UpdateLastRenderPosition(ParticleInstance* data);
+void ParticleInstanceSys_DrawRoutine(ParticleInstance* data, SpriteBatch* spriteBatch);
 System* ParticleInstanceSys_CreateSystem(void);

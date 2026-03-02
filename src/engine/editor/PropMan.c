@@ -17,33 +17,12 @@ static Prop _mProp;
 
 static void PropDudeSave()
 {
-	if (!ImGui::IsWindowFocused() || Utils_StringEqualTo(_mTempFileName, EE_STR_NOT_SET))
+	if (!ImGui::IsWindowFocused())
 	{
 		return;
 	}
 
-	ResourceMan* rmProp = ResourceList_Prop();
-	MString* path = MString_CreateForJustThisFrame();
-	File_PathCombine2(&path, rmProp->_mDirectories[0], _mTempFileName);
-	MString_AddAssignString(&path, ".txt");
-	{
-		MString* tempString = MString_CreateForJustThisFrame();
-		if (ResourceMan_HasResource(rmProp, _mTempFileName))
-		{
-			MString_AssignString(&tempString, "Overwriting prop ");
-		}
-		else
-		{
-			MString_AssignString(&tempString, "Saving new prop ");
-		}
-		MString_AddAssignMString(&tempString, path);
-		Logger_LogInformation(MString_Text(path));
-	}
-	Resource* resource = ResourceMan_CreateResourceIfMissing(rmProp, _mTempFileName, MString_Text(path), true);
-	Prop* resourceData = (Prop*)Resource_PeekData(resource);
-	*resourceData = _mProp;
-	Resource_Save(resource, true);
-	Do_PlaySound2("editorSave", 1.0f);
+	ResourceMan_CopyToResourceDataAndThenSaveAsText(ResourceList_Prop(), _mTempFileName, NULL, &_mProp);
 }
 static void CreatePropDudeWindow()
 {

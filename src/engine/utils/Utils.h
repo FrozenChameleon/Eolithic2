@@ -145,6 +145,9 @@ int32_t Utils_ConvertFramesToMilliseconds(int32_t val);
 void Utils_StringReplaceStr(MString** assignToThis, const char* str, const char* findThis, const char* replaceWithThis);
 uint8_t Utils_BoolToUInt8(bool value);
 bool Utils_IsStringASCII(const char* str, size_t len);
+bool Utils_IsStringEmpty(const char* str);
+bool Utils_IsStringNotSet(const char* str);
+bool Utils_IsStringEmptyOrNotSet(const char* str);
 int32_t Utils_AlignToTileGridInt(int32_t value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
 Point Utils_AlignToTileGridPoint(Point value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
 int32_t Utils_AlignToTileGridFloat(float value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
@@ -152,5 +155,5 @@ Point Utils_AlignToTileGridVector2(Vector2 value, UtilsRoundingMode roundingMode
 int32_t Utils_AlignToTileGridDouble(double value, UtilsRoundingMode roundingMode, bool returnPixelCoordinates);
 double Utils_fmod(double x, double y);
 float Utils_fmodf(float x, float y);
-int32_t Utils_toupper(int x);
-int32_t Utils_tolower(int x);
+void Utils_StringToLower(char* str, size_t maxlen);
+void Utils_StringToUpper(char* str, size_t maxlen);

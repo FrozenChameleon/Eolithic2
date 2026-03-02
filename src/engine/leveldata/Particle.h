@@ -68,7 +68,9 @@ typedef struct Particle
 	int32_t mPreviewInterval;
 } Particle;
 
+Particle* Particle_CreateNew();
 void Particle_Read(Particle* p, BufferReader* br);
 void Particle_Write(Particle* p, DynamicByteBuffer* dbb);
 Particle* Particle_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);
 void Particle_Dispose(Particle* p);
+void Particle_CopyTo(Particle* dst, Particle* src);
