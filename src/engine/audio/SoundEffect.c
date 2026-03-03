@@ -11,7 +11,6 @@
 #include "SoundEffectInstance.h"
 #include "../utils/Utils.h"
 #include "../../third_party/stb_ds.h"
-#include "VolumeData.h"
 #include "../globals/Globals.h"
 #include "../core/GameUpdater.h"
 #include "../utils/Logger.h"
@@ -33,23 +32,9 @@ static int32_t _mSoundPausePriority = -1;
 static SoundEffectInstance _mInstances[SFX_INSTANCE_LIMIT];
 static bool _mLoopStatus[SFX_INSTANCE_LIMIT];
 static uint64_t _mCurrentFrame;
-static VolumeData _mVolumeData;
 static bool _mIsSfxMuted;
 static SoundEffectPlaybackTimeBuffer* arr_sound_effect_playback_time_buffer;
 static bool _mHasInit;
-
-void SoundEffect_Init(void)
-{
-	if (_mHasInit)
-	{
-		return;
-	}
-
-	VolumeData_Init(&_mVolumeData);
-	VolumeData_Load(&_mVolumeData, false);
-
-	_mHasInit = true;
-}
 
 static float GetVolumeForSoundEffect(const char* sound)
 {
@@ -58,7 +43,7 @@ static float GetVolumeForSoundEffect(const char* sound)
 		return 0;
 	}
 
-	return SoundEffect_GetVolumeHelper(CVARS_USER_VOLUME_SFX, sound, &_mVolumeData);
+	return VolumeTool_GetFinalVolumeHelper(CVARS_USER_VOLUME_SFX, sound, false);
 }
 static uint64_t GetPlaybackTimeBufferForSoundEffect(const char* name)
 {
@@ -359,23 +344,6 @@ void SoundEffect_LoopSound(const char* sound, int32_t loopNumber)
 	SoundEffectInstance_Play(instance);
 
 	RefreshLoopStatus(sound, loopNumber);
-}
-float SoundEffect_GetVolumeHelper(const char* cvar, const char* name, VolumeData* volumeData)
-{
-	if (IsDisabledPermanently() || (name == NULL) || (Utils_StringEqualTo(name, EE_STR_EMPTY)))
-	{
-		return 0;
-	}
-
-	float userVolume = Cvars_GetAsInt(cvar) / 100.0f;
-	float userVolumeMaster = Cvars_GetAsInt(CVARS_USER_VOLUME_MASTER) / 100.0f;
-	float clipVolume = VolumeData_GetVolume(volumeData, name) / 100.0f;
-	float rewindingVolume = 1.0f;
-	if (GameState_IsRewinding(GameStateManager_GetGameState()))
-	{
-		rewindingVolume = 0.6f;
-	}
-	return clipVolume * userVolume * userVolumeMaster * rewindingVolume;
 }
 const char* SoundEffect_GetExtension(void)
 {

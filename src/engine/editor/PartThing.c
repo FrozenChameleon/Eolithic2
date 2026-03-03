@@ -281,7 +281,6 @@ static void CreateThingListWindow()
     }
 
     //ImGui::SetNextWindowAlwaysOpen();
-    ImGui::SetNextWindowSize(ImVec2(500, 500));
 	if (!ImGui::Begin("Thing Mode"))
     {
 		ImGui::End();
@@ -434,7 +433,7 @@ static void AddPair(int number, StringPair* pair, int width, int x, int y)
 static void CreateThingDataWindow()
 {
     //ImGui::SetNextWindowAlwaysOpen();
-	ImGui::SetNextWindowSize(ImVec2(_mWindowSize.X, _mWindowSize.Y));
+	//ImGui::SetNextWindowSize(ImVec2(_mWindowSize.X, _mWindowSize.Y));
 	if (!ImGui::Begin("Thing Data") || (GetSelectedInstance() == NULL))
     {
 		ImGui::End();

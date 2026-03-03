@@ -94,9 +94,9 @@ void* Resource_PeekData(Resource* res)
 {
 	return res->data;
 }
-MString* Resource_GetPath(Resource* res)
+const char* Resource_GetPath(Resource* res)
 {
-	return res->path;
+	return MString_Text(res->path);
 }
 void Resource_Save(Resource* res, bool isWritingText)
 {
@@ -256,8 +256,8 @@ void ResourceMan_LoadAllFromDat(ResourceMan* rm)
 		MString* fileName = MString_CreateForJustThisFrame();
 		MString* name = MString_CreateForJustThisFrame();
 		DatReader_NextFilePath(&nextPath, dr);
-		File_GetFileName(&fileName, MString_Text(nextPath));
-		File_GetFileNameWithoutExtension(&name, MString_Text(nextPath));
+		File_GetFilename(&fileName, MString_Text(nextPath));
+		File_GetFilenameWithoutExtension(&name, MString_Text(nextPath));
 		BufferReader* br = DatReader_NextStream(dr, false);
 		ResourceMan_LoadAssetFromStreamAndCreateResource(rm, br, MString_Text(name), MString_Text(nextPath));
 		BufferReader_Dispose(br);
@@ -405,7 +405,7 @@ static void LoadAllFromDirectoriesHelper(ResourceMan* rm, bool isReadingText, co
 		const char* filePath = IStringArray_Get(filePaths, i);
 		MString* name = NULL;
 		File_PathCombine2(&nextPath, directory, filePath);
-		File_GetFileNameWithoutExtension(&name, MString_Text(nextPath));
+		File_GetFilenameWithoutExtension(&name, MString_Text(nextPath));
 		BufferReader* br = BufferReader_CreateFromPath(MString_Text(nextPath));
 		BufferReader_SetIsReadingText(br, isReadingText);
 		ResourceMan_LoadAssetFromStreamAndCreateResource(rm, br, MString_Text(name), MString_Text(nextPath));

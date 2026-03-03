@@ -20,7 +20,7 @@ enum RecordingVersion
 
 #define GLOBALS_DEFAULT_DEBUG_GAME_LOGIC_SPEED 100
 
-extern Vector2 GLOBALS_DEBUG_QUICK_PLAYER_POSITION;
+
 extern int32_t GLOBALS_DEBUG_SHOW_INFO;
 extern int32_t GLOBALS_DEBUG_GAME_LOGIC_SPEED;
 extern bool GLOBALS_DEBUG_SHOW_INGAME_COLLISION;
@@ -32,6 +32,8 @@ extern bool GLOBALS_DEBUG_JUST_LOADED_MAP_NOTIFY_EDITOR;
 extern bool GLOBALS_DEBUG_IS_META_MAP_EDIT_TILE_MODE_AT_MAP_LOAD;
 extern bool GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS;
 
+void Globals_SetDebugQuickPlayerPosition(Vector2 value);
+Vector2 Globals_GetDebugQuickPlayerPosition();
 bool Globals_IsEditorActive(void);
 void Globals_SetIsEditorActive(bool value);
 bool Globals_IsRenderDisabled(void);

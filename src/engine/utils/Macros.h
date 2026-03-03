@@ -11,6 +11,7 @@
 #include "../../defs/GlobalDefs.h"
 #include "../../defs/DebugDefs.h"
 #include "../../defs/GameDefs.h"
+#include "../../defs/EditorDefs.h"
 
 #define UNUSED(x) (void)(x)
 

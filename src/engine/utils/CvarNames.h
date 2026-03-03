@@ -172,4 +172,6 @@
 #define CVARS_EDITOR_PART_LINE_TOUCH_ALL_JUNCTIONS "edt_line_touch_all_junctions"
 #define CVARS_EDITOR_PART_LINE_FAST_LINE_MODE "edt_line_fast_line_mode"
 #define CVARS_EDITOR_SHOW_SINGLE_SELECTED_SQUARE "edt_show_single_selected_square"
+#define CVARS_EDITOR_WINDOW_FONT_SCALE "edt_window_font_scale"
+
 #endif

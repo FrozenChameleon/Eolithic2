@@ -51,7 +51,7 @@ void File_GetFilenames(IStringArray* addToThis, const char* path, const char* pa
 		if (removeTheExtension)
 		{
 			MString* filenameWithoutExtension = MString_CreateForJustThisFrame();
-			File_GetFileNameWithoutExtension(&filenameWithoutExtension, filename);
+			File_GetFilenameWithoutExtension(&filenameWithoutExtension, filename);
 			IStringArray_Add(addToThis, MString_Text(filenameWithoutExtension));
 		}
 		else
@@ -178,7 +178,7 @@ void File_AppendPathSeparator(MString** str)
 	MString_AddAssignChar(str, PATH_SEPARATOR);
 }
 
-static void File_GetFileNameHelper(MString** assignToThis, const char* path, bool removeTheExtension)
+static void File_GetFilenameHelper(MString** assignToThis, const char* path, bool removeTheExtension)
 {
 	int32_t len = (int32_t)Utils_strlen(path);
 	
@@ -220,13 +220,13 @@ static void File_GetFileNameHelper(MString** assignToThis, const char* path, boo
 
 	returnStrText[counter] = '\0';
 }
-void File_GetFileName(MString** assignToThis, const char* path)
+void File_GetFilename(MString** assignToThis, const char* path)
 {
-	File_GetFileNameHelper(assignToThis, path, false);
+	File_GetFilenameHelper(assignToThis, path, false);
 }
-void File_GetFileNameWithoutExtension(MString** assignToThis, const char* path)
+void File_GetFilenameWithoutExtension(MString** assignToThis, const char* path)
 {
-	File_GetFileNameHelper(assignToThis, path, true);
+	File_GetFilenameHelper(assignToThis, path, true);
 }
 void File_ReadAllToStrings(BufferReader* br, IStringArray* addToThis)
 {

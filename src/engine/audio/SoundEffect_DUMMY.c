@@ -88,10 +88,6 @@ void SoundEffect_PlaySoundWithForcedVolume(const char* sound, float forcedVolume
 void SoundEffect_LoopSound(const char* sound, int32_t loopNumber)
 {
 }
-float SoundEffect_GetVolumeHelper(const char* cvar, const char* name, VolumeData* volumeData)
-{
-	return 0;
-}
 const char* SoundEffect_GetExtension(void)
 {
 	return NULL;

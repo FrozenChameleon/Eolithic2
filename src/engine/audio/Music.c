@@ -10,14 +10,12 @@
 
 #include "../utils/Macros.h"
 #include "../utils/Utils.h"
-#include "VolumeData.h"
 #include "MusicInstance.h"
 #include "../globals/Globals.h"
 #include "../utils/Cvars.h"
 #include "SoundEffect.h"
 #include "../gamestate/GameStateManager.h"
 
-static VolumeData _mVolumeData;
 static MusicInstance _mCurrentMusic;
 static int32_t _mMusicPausePriority;
 static bool _mDoNotAllowUpdatesWhilePaused;
@@ -51,8 +49,6 @@ void Music_Init(void)
 	}
 
 	MusicInstance_Init(&_mCurrentMusic);
-	VolumeData_Init(&_mVolumeData);
-	VolumeData_Load(&_mVolumeData, true);
 
 	_mHasInit = true;
 }
@@ -63,7 +59,7 @@ float Music_GetVolumeForMusic(const char* name)
 		return 0;
 	}
 
-	return SoundEffect_GetVolumeHelper(CVARS_USER_VOLUME_MUSIC, name, &_mVolumeData);
+	return VolumeTool_GetFinalVolumeHelper(CVARS_USER_VOLUME_MUSIC, name, true);
 }
 bool Music_IsPlaying(void)
 {

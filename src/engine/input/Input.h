@@ -132,4 +132,6 @@ bool Input_IsKeyTapped(Key key);
 bool Input_IsKeyReleased(Key key);
 bool Input_IsKeyPressed(Key key);
 int32_t Input_GetKeyTimeHeld(Key key);
+void Input_SetHackForceInvertCtrl(bool value);
+bool Input_GetHackForceInvertCtrl();
 #endif

@@ -40,6 +40,7 @@ typedef struct LevelData
 } LevelData;
 
 LevelData* LevelData_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);
+LevelData* LevelData_CreateNew();
 void LevelData_Init(LevelData* ld);
 void LevelData_Dispose(LevelData* ld);
 void LevelData_Read(LevelData* ld, BufferReader* reader);

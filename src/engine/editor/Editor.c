@@ -15,6 +15,10 @@
 #include "AnimMan.h"
 #include "PropMan.h"
 #include "ParticleMan.h"
+#include "SoundMan.h"
+#include "WindowTogglesWindowMini.h"
+#include "WindowTogglesWindow.h"
+#include "WindowSettings.h"
 
 static Camera _mCamera;
 
@@ -41,30 +45,37 @@ static void MenuWindows()
     {
         if (ImGui::MenuItem("Anim Maanger", "Ctrl+P"))
         {
+            AnimMan_Activate();
         }
         if (ImGui::MenuItem("Input Manager", "Ctrl+I"))
         {
         }
         if (ImGui::MenuItem("Mini Toggles", "Ctrl+M"))
         {
+            WindowTogglesWindowMini_Activate();
         }
         if (ImGui::MenuItem("Particle Manager", "Ctrl+Y"))
         {
+			ParticleMan_Activate();
         }
         if (ImGui::MenuItem("Prop Manager", "Ctrl+U"))
         {
+            PropMan_Activate();
         }
         if (ImGui::MenuItem("Settings", "Ctrl+L"))
         {
+			WindowSettings_Activate();
         }
         if (ImGui::MenuItem("Sound Manager", "Ctrl+K"))
         {
+            SoundMan_Activate();
         }
         if (ImGui::MenuItem("Thing Editor", "Ctrl+N"))
         {
         }
         if (ImGui::MenuItem("Toggles", "Ctrl+T"))
         {
+            WindowTogglesWindowMini_Activate();
         }
         if (ImGui::MenuItem("Tool Manager", "Ctrl+H"))
         {
@@ -312,10 +323,14 @@ void Editor_Update()
 
     EditorDebugToggles_Update();
 
-    //Updates
-    //AnimMan_Update();
-    //PropMan_Update();
+    //UPDATES
+    AnimMan_Update();
+    PropMan_Update();
 	ParticleMan_Update();
+    SoundMan_Update();
+	WindowTogglesWindowMini_Update();
+    WindowTogglesWindow_Update();
+	WindowSettings_Update();
 }
 void Editor_Draw(SpriteBatch* spriteBatch)
 {
@@ -329,12 +344,28 @@ Camera* Editor_GetCamera(void)
 {
 	return &_mCamera;
 }
+void Editor_LoadPreviousLevel()
+{
+    //TODO
+}
+const char* Editor_GetEditorCameraData(int32_t index)
+{
+	MString* temp = MString_CreateForJustThisFrame();
+    MString_AssignString(&temp, CVARS_ENGINE_CAMERA_DATA_NAME);
+	MString_AddAssignInt(&temp, index);
+	return Cvars_GetAsString(MString_Text(temp));
+}
+const char* Editor_GetEditorDataName(int32_t index)
+{
+    MString* temp = MString_CreateForJustThisFrame();
+	MString_AssignString(&temp, CVARS_ENGINE_DATA_NAME);
+    MString_AddAssignInt(&temp, index);
+    return Cvars_GetAsString(MString_Text(temp));
+}
 const char* Editor_GetEditorCollisionName(int32_t index)
 {
-    MString* tempString = NULL;
-    MString_AssignString(&tempString, CVARS_ENGINE_COLLISION_NAME);
-	MString_AddAssignInt(&tempString, index);
-    const char* editorCollisionName = Cvars_GetAsString(MString_Text(tempString));
-	MString_Dispose(&tempString);
-	return editorCollisionName;
+    MString* temp = MString_CreateForJustThisFrame();
+    MString_AssignString(&temp, CVARS_ENGINE_COLLISION_NAME);
+    MString_AddAssignInt(&temp, index);
+    return Cvars_GetAsString(MString_Text(temp));
 }

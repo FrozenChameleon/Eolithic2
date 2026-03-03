@@ -190,6 +190,7 @@ void ResourceList_Init(void)
 		levelDataMan->_mFromStream = (ResourceMan_FromStreamFunc)LevelData_FromStream;
 		levelDataMan->_mDispose = (ResourceMan_DisposeFunc)LevelData_Dispose;
 		levelDataMan->_mWrite = (ResourceMan_WriteFunc)LevelData_Write;
+		levelDataMan->_mCreateNew = (ResourceMan_CreateNewFunc)LevelData_CreateNew;
 		levelDataMan->_mReadFromDirectory = true;
 		levelDataMan->_mIsReadingText = true;
 	}

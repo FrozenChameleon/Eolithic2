@@ -656,4 +656,12 @@ int32_t Input_GetKeyTimeHeld(Key key)
 {
 	return KeyboardState_GetTimeHeld(key);
 }
+void Input_SetHackForceInvertCtrl(bool value)
+{
+	_mHackForceInvertCtrl = value;
+}
+bool Input_GetHackForceInvertCtrl()
+{
+	return _mHackForceInvertCtrl;
+}
 #endif

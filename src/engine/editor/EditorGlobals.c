@@ -2,6 +2,7 @@
 
 #include "imgui.h"
 #include "../input/Input.h"
+#include "../utils/Cvars.h"
 
 static uint64_t _mOperationCounter;
 static bool _mStallOperationCounter;
@@ -35,6 +36,16 @@ bool EditorGlobals_IsKeyCtrlPressedAndKeySTapped()
 {
 	if (Input_IsCtrlPressed() && Input_IsKeyTapped(KEYS_S))
 	{
+		return true;
+	}
+	return false;
+}
+bool EditorGlobals_CvarCheckbox(const char* label, const char* cvar)
+{
+	bool value = Cvars_GetAsBool(cvar);
+	if (ImGui::Checkbox(label, &value))
+	{
+		Cvars_SetAsBool(cvar, value);
 		return true;
 	}
 	return false;

@@ -20,7 +20,7 @@
 #include "../audio/Music.h"
 #include "../utils/Utils.h"
 #include "../utils/Logger.h"
-#include "../audio/VolumeData.h"
+#include "../audio/VolumeTool.h"
 #include "../utils/Timer.h"
 #include "../render/SpriteBatch.h"
 #include "../render/Renderer.h"

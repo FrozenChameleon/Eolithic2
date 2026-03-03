@@ -24,10 +24,11 @@
 typedef struct PreviewParticles
 {
 	ParticleInstance* arr_particles;
-	int _mCounterInterval;
-	bool _mStopped;
+	int mCounterInterval;
+	bool mStopped;
 } PreviewParticles;
 
+static bool _mIsActive;
 static char _mTempFileName[EE_FILENAME_MAX];
 static Particle _mParticleData;
 static PreviewParticles _mPreview;
@@ -39,18 +40,18 @@ static void PreviewParticles_Clear()
 static void PreviewParticles_Init()
 {
 	Utils_memset(&_mPreview, 0, sizeof(PreviewParticles));
-	_mPreview._mStopped = true;
+	_mPreview.mStopped = true;
 }
 static void PreviewParticles_Update()
 {
-	if (_mPreview._mStopped)
+	if (_mPreview.mStopped)
 	{
 		return;
 	}
 
-	_mPreview._mCounterInterval += 1;
+	_mPreview.mCounterInterval += 1;
 
-	if (_mPreview._mCounterInterval >= _mParticleData.mPreviewInterval)
+	if (_mPreview.mCounterInterval >= _mParticleData.mPreviewInterval)
 	{
 		if (!Utils_StringEqualTo(_mParticleData.mTextureName, EE_STR_EMPTY))
 		{
@@ -60,7 +61,7 @@ static void PreviewParticles_Update()
 				ParticleInstanceSys_Setup(&instance, _mTempFileName, &_mParticleData, PREVIEW_WIDTH / 2, PREVIEW_HEIGHT / 2);
 				arrput(_mPreview.arr_particles, instance);
 			}
-			_mPreview._mCounterInterval = 0;
+			_mPreview.mCounterInterval = 0;
 		}
 	}
 
@@ -76,15 +77,15 @@ static void PreviewParticles_Update()
 static void PreviewParticles_Stop()
 {
 	PreviewParticles_Clear();
-	_mPreview._mStopped = true;
+	_mPreview.mStopped = true;
 }
 static void PreviewParticles_StartReset()
 {
 	PreviewParticles_Clear();
 
-	_mPreview._mCounterInterval = _mParticleData.mPreviewInterval;
+	_mPreview.mCounterInterval = _mParticleData.mPreviewInterval;
 
-	_mPreview._mStopped = false;
+	_mPreview.mStopped = false;
 }
 static void PreviewParticles_DrawHud(SpriteBatch* spriteBatch)
 {
@@ -286,8 +287,8 @@ static void SetupMisc()
 
 static void CreateParticleKing()
 {
-	ImGui::SetNextWindowSize(ImVec2(1600, 800));
-	if (!ImGui::Begin(KEY_WINDOW_PARTICLE_KING))
+	//ImGui::SetNextWindowSize(ImVec2(1600, 800));
+	if (!ImGui::Begin(KEY_WINDOW_PARTICLE_KING, &_mIsActive))
 	{
 		ImGui::End();
 		return;
@@ -343,5 +344,14 @@ static void CreateParticleKing()
 
 void ParticleMan_Update()
 {
+	if (!_mIsActive)
+	{
+		return;
+	}
+
 	CreateParticleKing();
+}
+void ParticleMan_Activate()
+{
+	_mIsActive = true;
 }

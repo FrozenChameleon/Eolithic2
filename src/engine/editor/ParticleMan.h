@@ -3,3 +3,4 @@
 #define KEY_WINDOW_PARTICLE_KING "Particle Manager"
 
 void ParticleMan_Update();
+void ParticleMan_Activate();

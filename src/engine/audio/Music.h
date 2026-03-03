@@ -7,7 +7,7 @@
 #pragma once
 
 #include "WaveFileData.h"
-#include "VolumeData.h"
+#include "VolumeTool.h"
 
 #ifdef AUDIO_DUMMY
 typedef struct Music Music;

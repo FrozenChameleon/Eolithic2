@@ -30,6 +30,7 @@
 #include "../io/DynamicByteBuffer.h"
 #include "../render/Renderer.h"
 #include "../gamestate/GameState.h"
+#include "GameHelper.h"
 #ifdef EDITOR_MODE
 #include "../editor/Editor.h"
 #include "imgui.h"
@@ -48,6 +49,7 @@ static bool _mWasNotInFocus;
 static bool _mWasShowingControllerLostConnectionMessage;
 static FPSTool _mFpsToolUpdate;
 static char _mBufferForFPSString[EE_SAFE_BUFFER_LEN_FOR_INT];
+static Vector2 _mDebugPositionForFastResetPlusMove;
 
 static void SetDebugAutoSpeed(bool value)
 {
@@ -603,30 +605,48 @@ void GameUpdater_DebugReloadMap(void)
 		MString_Dispose(&tempString);
 	}
 
-	GLOBALS_DEBUG_QUICK_PLAYER_POSITION = Vector2_Zero;
+	Globals_SetDebugQuickPlayerPosition(Vector2_Zero);
 
 	GameStateManager_SetupReloadMap();
 }
 void GameUpdater_DebugSaveMap(void)
 {
-	//UNUSED
+#if EDITOR_MODE
+	Resource_Save(Get_LevelDataResource(), true);
+	//Editor_Save();
+	Do_PlaySound2("editorSave", 1.0f);
+	Logger_LogInformation("Map Saved");
+#endif
 }
 void GameUpdater_FastReset(void)
 {
-	GLOBALS_DEBUG_QUICK_PLAYER_POSITION = Vector2_Zero;
+	Globals_SetDebugQuickPlayerPosition(Vector2_Zero);
 	GameStateManager_DebugForceReloadMapNow();
 	GameStateManager_SetGameState(GAMESTATEMANAGER_GAME_STATE_NORMAL);
 	Globals_SetIsEditorActive(false);
 	{
 		MString* tempString = NULL;
-		MString_Combine5(&tempString, "Map Reloaded (Fast) [", MString_Text(Resource_GetPath(Get_LevelDataResource())), "][", Get_LevelData()->mLevelName, "]");
+		MString_Combine5(&tempString, "Map Reloaded (Fast) [", Resource_GetPath(Get_LevelDataResource()), "][", Get_LevelData()->mLevelName, "]");
 		Logger_LogInformation(MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 }
 void GameUpdater_FastResetPlusMove(void)
 {
-	//UNUSED
+#ifdef EDITOR_MODE
+	if (Globals_IsEditorActive())
+	{
+		_mDebugPositionForFastResetPlusMove = Input_GetCameraAdjustedMouse(Editor_GetCamera());
+	}
+	Globals_SetDebugQuickPlayerPosition(_mDebugPositionForFastResetPlusMove);
+	GameStateManager_DebugForceReloadMapNow();
+	GameStateManager_SetGameState(GAMESTATEMANAGER_GAME_STATE_NORMAL);
+	Globals_SetIsEditorActive(false);
+	MString* tempString = MString_CreateForJustThisFrame();
+	MString_Combine5(&tempString, "Map Reloaded (Fast+Move) [", Resource_GetPath(Get_LevelDataResource()), "][", Get_LevelData()->mLevelName, "]");
+	Logger_LogInformation(MString_Text(tempString));
+	GameHelper_OnDebugFastResetPlusMove();
+#endif
 }
 void GameUpdater_ToggleEditor(void)
 {

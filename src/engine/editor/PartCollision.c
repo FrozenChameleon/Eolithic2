@@ -19,7 +19,7 @@ static MString* _mTempString;
 void PartCollision_CreateWindows()
 {
 	bool test = false;
-	ImGui::SetNextWindowSize(ImVec2(300, 500));
+	//ImGui::SetNextWindowSize(ImVec2(300, 500));
 	if (!ImGui::Begin("Collision Mode", &test, ImGuiWindowFlags_NoResize))
 	{
 		ImGui::End();

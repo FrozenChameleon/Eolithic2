@@ -12,6 +12,7 @@
 #include "../resources/ResourceList.h"
 #include "../core/Func.h"
 
+static bool _mIsActive;
 static char _mTempFileName[EE_FILENAME_MAX];
 static AnimTile _mAnimTile;
 
@@ -30,8 +31,8 @@ static void Save()
 }
 static void CreateWindow()
 {
-	ImGui::SetNextWindowSize(ImVec2(1000, 720));
-	if (!ImGui::Begin(KEY_WINDOW_ANIM_MAN))
+	//ImGui::SetNextWindowSize(ImVec2(1000, 720));
+	if (!ImGui::Begin(KEY_WINDOW_ANIM_MAN, &_mIsActive))
 	{
 		ImGui::End();
 		return;
@@ -133,5 +134,14 @@ static void CreateWindow()
 }
 void AnimMan_Update()
 {
+	if (!_mIsActive)
+	{
+		return;
+	}
+
 	CreateWindow();
+}
+void AnimMan_Activate()
+{
+	_mIsActive = true;
 }

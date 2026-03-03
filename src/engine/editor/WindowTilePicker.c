@@ -7,7 +7,7 @@
 #include "imgui.h"
 #include "../render/Renderer.h"
 #include "../render/DrawTool.h"
-#include "ImGuiHelper.h"
+#include "EditorGlobals.h"
 
 static int _mState = 1;
 static bool _mIsDragHold;
@@ -34,7 +34,7 @@ bool WindowTilePicker_CreateWindow(Texture* texture)
     _mBounds.Width = (int)(width * scale);
     _mBounds.Height = (int)(height * scale);
 
-	ImGui::SetNextWindowSize(ImVec2((float)_mBounds.Width, (float)_mBounds.Height));
+	//ImGui::SetNextWindowSize(ImVec2((float)_mBounds.Width, (float)_mBounds.Height));
 	ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize;
     if (Cvars_GetAsBool(CVARS_EDITOR_IS_TILE_PICKER_LOCKED))
     {
@@ -88,7 +88,7 @@ bool WindowTilePicker_CreateWindow(Texture* texture)
 
     bool returnValue = WindowTilePicker_FindPoint(width, height, scale);
 
-	ImGuiHelper_CvarCheckbox("Locked?", CVARS_EDITOR_IS_TILE_PICKER_LOCKED);
+	EditorGlobals_CvarCheckbox("Locked?", CVARS_EDITOR_IS_TILE_PICKER_LOCKED);
 
 	ImGui::End();
 

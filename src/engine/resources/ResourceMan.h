@@ -28,7 +28,7 @@ const char* Resource_GetName(Resource* res);
 void* Resource_GetData(Resource* res);
 void Resource_SetData(Resource* res, void* value);
 void* Resource_PeekData(Resource* res);
-MString* Resource_GetPath(Resource* res);
+const char* Resource_GetPath(Resource* res);
 void Resource_Save(Resource* res, bool isWritingText);
 
 typedef struct ResourceMan
@@ -74,7 +74,6 @@ void ResourceMan_WriteAll(ResourceMan* rm, bool isWritingText);
 void ResourceMan_Read(ResourceMan* rm, const char* name, bool isReadingText);
 void ResourceMan_ReadAll(ResourceMan* rm, bool isReadingText);
 void ResourceMan_LoadAllFromDirectories(ResourceMan* rm, bool isReadingText);
-//Pointer that is returned must be freed!
 void ResourceMan_FillArrayWithAllResourceNames(ResourceMan* rm, IStringArray* sa);
-//CopyTo src to dst and then save. Pass NULL path to use directory[0]
+//CopyTo src to dst and then save. Pass NULL path to use directory[0] + name + .txt
 void ResourceMan_CopyToResourceDataAndThenSaveAsText(ResourceMan* rm, const char* name, const char* path, void* copyThisData);

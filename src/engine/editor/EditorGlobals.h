@@ -16,3 +16,4 @@ void EditorGlobals_Update();
 void EditorGlobals_StallOperationCounter();
 uint64_t EditorGlobals_GetOperationCounter();
 bool EditorGlobals_IsKeyCtrlPressedAndKeySTapped();
+bool EditorGlobals_CvarCheckbox(const char* label, const char* cvar);

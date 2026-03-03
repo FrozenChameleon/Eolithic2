@@ -90,8 +90,8 @@ void Sheet_BuildSheets(void)
 		}
 
 		const char* resourceFilenameWithoutExtension = Resource_GetName(resource);
-		MString* resourcePath = Resource_GetPath(resource);
-		Rectangle bounds = PNGPeakTool_GetBounds(MString_Text(resourcePath));
+		const char* resourcePath = Resource_GetPath(resource);
+		Rectangle bounds = PNGPeakTool_GetBounds(resourcePath);
 		//void* resourceData = Resource_GetData(resource);
 	
 		Sheet* sheet = (Sheet*)Utils_calloc(1, sizeof(Sheet));

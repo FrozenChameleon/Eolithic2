@@ -31,9 +31,15 @@ static int32_t LevelData_GetTilePos1D(LevelData* ld, int32_t i, int32_t j)
 
 LevelData* LevelData_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br)
 {
-	LevelData* levelData = (LevelData*)Utils_calloc(1, sizeof(LevelData));
+	LevelData* levelData = LevelData_CreateNew();
 	LevelData_Read(levelData, br);
 	return levelData;
+}
+LevelData* LevelData_CreateNew()
+{
+	LevelData* ld = (LevelData*)Utils_calloc(1, sizeof(LevelData));
+	LevelData_Init(ld);
+	return ld;
 }
 void LevelData_Init(LevelData* ld)
 {
@@ -114,14 +120,63 @@ void LevelData_Read(LevelData* ld, BufferReader* reader)
 	LevelData_LoadSetupOffsets(ld);
 	LevelData_LoadSetupTileData(ld);
 }
+static void CreateSaveTiles(LevelData* ld)
+{
+	ld->_mSaveTileMap = (int32_t*)Utils_calloc(ld->tilemap.boundary.Width * ld->tilemap.boundary.Height, sizeof(int32_t)); //LEAKS, DONT CARE!
+
+	arrsetlen(ld->arr_save_tiles, 0);
+
+	for (int i = 0; i < ld->tilemap.boundary.Width; i += 1) // <-
+	{
+		for (int j = 0; j < ld->tilemap.boundary.Height; j += 1) // <- TODO 20260302 REVERSE THESE ONCE ABLE TO CONFIRM LEVEL DATA INTEGRITY
+		{
+			Tile* currentTile = LevelData_GetTile(ld, i, j);
+
+			int placement = -1;
+
+			for (int k = 0; k < arrlen(ld->arr_save_tiles); k += 1)
+			{
+				if (Tile_EqualTo(ld->arr_save_tiles[k], currentTile))
+				{
+					placement = k;
+					break;
+				}
+			}
+
+			int32_t arrayIndex = Utils_Get1DArrayPosFor2DArray(i, j, ld->tilemap.boundary.Width);
+			if (placement == -1)
+			{
+				ld->_mSaveTileMap[arrayIndex] = arrlen(ld->arr_save_tiles);
+				arrput(ld->arr_save_tiles, currentTile);
+			}
+			else
+			{
+				ld->_mSaveTileMap[arrayIndex] = placement;
+			}
+		}
+	}
+}
 void LevelData_Write(LevelData* ld, DynamicByteBuffer* dbb)
 {
+	CreateSaveTiles(ld);
+
 	DynamicByteBuffer_WriteMagicNumber(dbb);
 	DynamicByteBuffer_WriteVersionNumber(dbb, VERSION_LEVELDATA);
 
 	LevelData_WriteHeader(ld, dbb);
 
 	DynamicByteBuffer_WriteNewline(dbb);
+
+	/*if (IsMetaMap())
+	{
+		_mMetaMap.Write(writer);
+		if (OeGlobals.DebugIsMetaMapEditTileModeAtMapLoad())
+		{
+			_mMetaMap.CopyAllChunkLevelDataFromTileData(mTileData);
+			_mMetaMap.SaveAllChunkLevelData();
+		}
+		return;
+	}*/
 
 	LevelData_WriteData(ld, dbb);
 }

@@ -12,6 +12,7 @@
 #include "../io/File.h"
 #include "../core/Func.h"
 
+static bool _mIsActive;
 static char _mTempFileName[EE_FILENAME_MAX];
 static Prop _mProp;
 
@@ -26,8 +27,8 @@ static void PropDudeSave()
 }
 static void CreatePropDudeWindow()
 {
-	ImGui::SetNextWindowSize(ImVec2(1000, 720));
-	if (!ImGui::Begin(KEY_WINDOW_PROP_DUDE))
+	//ImGui::SetNextWindowSize(ImVec2(1000, 720));
+	if (!ImGui::Begin(KEY_WINDOW_PROP_DUDE, &_mIsActive))
 	{
 		ImGui::End();
 		return;
@@ -124,5 +125,14 @@ static void CreatePropDudeWindow()
 
 void PropMan_Update()
 {
+	if (!_mIsActive)
+	{
+		return;
+	}
+
 	CreatePropDudeWindow();
+}
+void PropMan_Activate()
+{
+	_mIsActive = true;
 }

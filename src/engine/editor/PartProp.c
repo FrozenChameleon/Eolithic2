@@ -608,7 +608,7 @@ void PartProp_CreateWindows()
     }
 
     //ImGui::SetNextWindowAlwaysOpen();
-	ImGui::SetNextWindowSize(ImVec2(500, 600));
+	//ImGui::SetNextWindowSize(ImVec2(500, 600));
     if (!ImGui::Begin(KEY_WINDOW_PROP_SELECTOR))
     {
 		ImGui::End();

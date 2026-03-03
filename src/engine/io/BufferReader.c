@@ -119,9 +119,10 @@ static void TextReader_ReadToNextString(BufferReader* br)
 	{
 		uint8_t nextByte = BinaryReader_ReadU8(br);
 
-		if ((nextByte == ' ') || (nextByte == '\n') || (nextByte == '\r'))
+		bool isWhiteSpace = ((nextByte == ' ') || (nextByte == '\n') || (nextByte == '\r'));
+		if (!isEscaped && isWhiteSpace) //Stuff out non escaped text
 		{
-			if (!isEscaped && hasReachedText)
+			if (hasReachedText)
 			{
 				break;
 			}

@@ -23,8 +23,8 @@ bool File_Exists(const char* path);
 const char* File_GetBasePath(void);
 const char* File_GetPrefPath(void);
 
-void File_GetFileName(MString** assignToThis, const char* path);
-void File_GetFileNameWithoutExtension(MString** assignToThis, const char* path);
+void File_GetFilename(MString** assignToThis, const char* path);
+void File_GetFilenameWithoutExtension(MString** assignToThis, const char* path);
 void File_ReadAllToStrings(BufferReader* br, IStringArray* addToThis);
 
 void File_PathCombine2(MString** assignToThis, const char* path1, const char* path2);

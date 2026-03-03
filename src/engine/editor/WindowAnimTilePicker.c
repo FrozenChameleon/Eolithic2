@@ -3,7 +3,7 @@
 #include "../render/Renderer.h"
 #include "../render/SpriteBatch.h"
 #include "imgui.h"
-#include "ImGuiHelper.h"
+#include "EditorGlobals.h"
 #include "../utils/Cvars.h"
 #include "../leveldata/AnimTile.h"
 #include "../render/DrawTool.h"
@@ -23,7 +23,7 @@ bool WindowAnimTilePicker_CreateWindow()
 	//ImGui::SetNextWindowPickerWindow();
 	//ImGui::SetNextWindowAlwaysOpen();
 	//ImGui::SetNextWindowNoMove(OeCvars.GetAsBool(OeCvars.EDITOR_IS_ANIM_TILE_PICKER_LOCKED));
-	ImGui::SetNextWindowSize(ImVec2((float)_mBounds.Width, (float)_mBounds.Height));
+	//ImGui::SetNextWindowSize(ImVec2((float)_mBounds.Width, (float)_mBounds.Height));
 	bool whatever = false;
 	ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize;
 	if (!ImGui::Begin("Anim Tile Picker", &whatever, flags))
@@ -71,7 +71,7 @@ bool WindowAnimTilePicker_CreateWindow()
 		//_mIsDragging = false;
 	}
 
-	ImGuiHelper_CvarCheckbox("Locked?", CVARS_EDITOR_IS_ANIM_TILE_PICKER_LOCKED);
+	EditorGlobals_CvarCheckbox("Locked?", CVARS_EDITOR_IS_ANIM_TILE_PICKER_LOCKED);
 
 	ImGui::End();
 	return returnValue;

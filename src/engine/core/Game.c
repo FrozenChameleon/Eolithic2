@@ -146,7 +146,7 @@ int32_t Game_SecondInit(void)
 	GameHelper_Initialize();
 	MenuFunc_Init();
 	Music_Init();
-	SoundEffect_Init();
+	VolumeTool_Load();
 
 	_mInitStatus = INIT_STATUS_SECOND;
 

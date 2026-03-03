@@ -30,6 +30,8 @@ static const char* _mMessageStr = "INFORMATION : ";
 static const char* _mWarningStr = "WARNING : ";
 static const char* _mErrorStr = "ERROR : ";
 
+static const Vector2 _mInitialPosition = { 0, 32 };
+
 #define TOTAL_TIME 150
 #define FADE_OUT_TIME 30
 #define HARD_LIMIT_ON_NOTIFICATIONS 10
@@ -84,7 +86,7 @@ static void LogHelper(int32_t type, const char* message, bool isSilent)
 	if (!isSilent && Globals_IsGameLoaded() && (arrlen(arr_notifications) < HARD_LIMIT_ON_NOTIFICATIONS))
 	{
 		LoggerNotification notification = { 0 };
-		notification.mPosition = Vector2_Zero;
+		notification.mPosition = _mInitialPosition;
 		notification.mTimer.mLimit = TOTAL_TIME;
 		notification.mFadeTimer.mLimit = FADE_OUT_TIME;
 		Utils_strlcpy(notification.mText, message, EE_FILENAME_MAX);
@@ -151,14 +153,13 @@ void Logger_Update(void)
 		return;
 	}
 
-	Vector2 initialPosition = Vector2_Zero;
 	/*if (OeGlobals.DEBUG_IS_EDITOR_MODE) //UNUSED
 	{
 		initialPosition = new Vector2(0, 24);
 	}*/
 	for (int32_t i = 0; i < arrlen(arr_notifications); i += 1)
 	{
-		if (UpdateNotification(&arr_notifications[i], initialPosition, i))
+		if (UpdateNotification(&arr_notifications[i], _mInitialPosition, i))
 		{
 			arrdel(arr_notifications, i);
 			i -= 1;
