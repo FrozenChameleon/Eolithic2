@@ -9,6 +9,7 @@
 #include "../core/Func.h"
 #include "../render/ShaderProgram.h"
 #include "../components/DrawActor.h"
+#include "../utils/Utils.h"
 
 static ShaderProgram* _mShaderProgram;
 
@@ -18,7 +19,6 @@ void HitFlashKitSys_InitRoutine(Entity owner, HitFlashKit* data)
 	{
 		_mShaderProgram = ShaderProgram_GetShaderWhiteHitFlash();
 	}
-	data->mState = -1;
 }
 void HitFlashKitSys_UpdateRoutine(Entity owner, HitFlashKit* data)
 {
@@ -39,7 +39,7 @@ void HitFlashKitSys_UpdateRoutine(Entity owner, HitFlashKit* data)
 		return;
 	}
 
-	if (data->mState == -1)
+	if (Utils_IsStringEmpty(data->mState))
 	{
 		drawActor->mShaderProgram = _mShaderProgram;
 	}
@@ -50,7 +50,7 @@ void HitFlashKitSys_UpdateRoutine(Entity owner, HitFlashKit* data)
 	if (Timer_Update(&data->mHitFlashTimer))
 	{
 		data->mShowHitFlash = false;
-		if (data->mState == -1)
+		if (Utils_IsStringEmpty(data->mState))
 		{
 			drawActor->mShaderProgram = NULL;
 		}

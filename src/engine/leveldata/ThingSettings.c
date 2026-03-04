@@ -12,6 +12,7 @@
 #include "../../third_party/stb_ds.h"
 #include "../io/BufferReader.h"
 #include "../io/DynamicByteBuffer.h"
+#include "../utils/IStringArray.h"
 
 #define VERSION_THINGSETTINGS 7
 
@@ -50,7 +51,7 @@ void ThingSettings_Read(ThingSettings* ts, BufferReader* br)
 	int32_t stateCount = BufferReader_ReadI32(br);
 	for (int32_t i = 0; i < stateCount; i += 1)
 	{
-		MString* key1 = NULL;
+		MString* key1 = MString_CreateForJustThisFrame();
 		BufferReader_ReadMString(&key1, br);
 
 		ThingGraphicsEntry* entry = NULL;
@@ -59,7 +60,7 @@ void ThingSettings_Read(ThingSettings* ts, BufferReader* br)
 		int32_t phaseCount = BufferReader_ReadI32(br);
 		for (int32_t j = 0; j < phaseCount; j += 1)
 		{
-			MString* key2 = NULL;
+			MString* key2 = MString_CreateForJustThisFrame();
 			BufferReader_ReadMString(&key2, br);
 
 			ImageData* arr_images = NULL;
@@ -74,13 +75,9 @@ void ThingSettings_Read(ThingSettings* ts, BufferReader* br)
 			}
 
 			shput(entry, MString_Text(key2), arr_images);
-
-			MString_Dispose(&key2);
 		}
 
 		shput(ts->sh_graphics_data, MString_Text(key1), entry);
-
-		MString_Dispose(&key1);
 	}
 }
 
@@ -132,8 +129,189 @@ ThingSettings* ThingSettings_FromStream(const char* path, const char* filenameWi
 	ThingSettings_Read(ts, br);
 	return ts;
 }
-
 void ThingSettings_Dispose(ThingSettings* ts)
 {
 	Utils_free(ts);
+}
+int64_t ThingSettings_GetStateIndex(ThingSettings* ts, const char* state)
+{
+	return shgeti(ts->sh_graphics_data, state);
+}
+int64_t ThingSettings_GetPhaseIndex(ThingSettings* ts, const char* state, const char* phase)
+{
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	if (stateIndex < 0)
+	{
+		return -1;
+	}
+
+	ThingGraphicsEntry* sh_entry = ts->sh_graphics_data[stateIndex].value;
+	return shgeti(sh_entry, phase);
+}
+void ThingSettings_AddState(ThingSettings* ts, const char* state)
+{
+	if (ThingSettings_HasState(ts, state))
+	{
+		return;
+	}
+
+	shput(ts->sh_graphics_data, state, NULL);
+}
+void ThingSettings_AddPhase(ThingSettings* ts, const char* state, const char* phase)
+{
+	if (ThingSettings_HasStateAndPhase(ts, state, phase))
+	{
+		return;
+	}
+
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	shput(ts->sh_graphics_data[stateIndex].value, phase, NULL);
+}
+bool ThingSettings_HasState(ThingSettings* ts, const char* state)
+{
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	if (stateIndex < 0)
+	{
+		return false;
+	}
+	return true;
+}
+void ThingSettings_RemoveState(ThingSettings* ts, const char* state)
+{
+	shdel(ts->sh_graphics_data, state);
+}
+bool ThingSettings_HasStateAndPhase(ThingSettings* ts, const char* state, const char* phase)
+{
+	int64_t phaseIndex = ThingSettings_GetPhaseIndex(ts, state, phase);
+	if (phaseIndex < 0)
+	{
+		return false;
+	}
+	return true;
+}
+void ThingSettings_RemovePhase(ThingSettings* ts, const char* state, const char* phase)
+{
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	if (stateIndex < 0)
+	{
+		return;
+	}
+
+	shdel(ts->sh_graphics_data[stateIndex].value, phase);
+}
+void ThingSettings_GetStates(ThingSettings* ts, IStringArray* addToThis)
+{
+	for (int i = 0; i < shlen(ts->sh_graphics_data); i += 1)
+	{
+		IStringArray_Add(addToThis, ts->sh_graphics_data[i].key);
+	}
+}
+void ThingSettings_GetPhases(ThingSettings* ts, IStringArray* addToThis, const char* state)
+{
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	if (stateIndex < 0)
+	{
+		return;
+	}
+
+	for (int i = 0; i < shlen(ts->sh_graphics_data[stateIndex].value); i += 1)
+	{
+		IStringArray_Add(addToThis, ts->sh_graphics_data[stateIndex].value[i].key);
+	}
+}
+void ThingSettings_GetImages(ThingSettings* ts, IStringArray* addToThis, const char* state, const char* phase)
+{
+	int32_t len = 0;
+	ImageData* imageDatas = ThingSettings_GetImageDatas(ts, state, phase, &len);
+	for (int i = 0; i < len; i += 1)
+	{
+		IStringArray_Add(addToThis, imageDatas[i].mImage);
+	}
+}
+int64_t ThingSettings_GetStateLength(ThingSettings* ts)
+{
+	return shlen(ts->sh_graphics_data);
+}
+int64_t ThingSettings_GetPhaseLength(ThingSettings* ts, const char* state)
+{
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	if (stateIndex < 0)
+	{
+		return 0;
+	}
+
+	return shlen(ts->sh_graphics_data[stateIndex].value);
+}
+int64_t ThingSettings_GetImagesLength(ThingSettings* ts, const char* state, const char* phase)
+{
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	if (stateIndex < 0)
+	{
+		return 0;
+	}
+
+	int64_t phaseIndex = ThingSettings_GetPhaseIndex(ts, state, phase);
+	if (phaseIndex < 0)
+	{
+		return 0;
+	}
+
+	return arrlen(ts->sh_graphics_data[stateIndex].value[phaseIndex].value);
+}
+ImageData* ThingSettings_GetImageDatas(ThingSettings* ts, const char* state, const char* phase, int32_t* out_image_datas_len)
+{
+	*out_image_datas_len = 0;
+
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	if (stateIndex < 0)
+	{
+		return NULL;
+	}
+
+	int64_t phaseIndex = ThingSettings_GetPhaseIndex(ts, state, phase);
+	if (phaseIndex < 0)
+	{
+		return NULL;
+	}
+
+	ImageData* imageDatas = ts->sh_graphics_data[stateIndex].value[phaseIndex].value;
+	*out_image_datas_len = (int32_t)arrlen(imageDatas);
+	return imageDatas;
+}
+
+void ThingSettings_AddImageData(ThingSettings* ts, const char* state, const char* phase, ImageData data)
+{
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	if (stateIndex < 0)
+	{
+		return;
+	}
+
+	int64_t phaseIndex = ThingSettings_GetPhaseIndex(ts, state, phase);
+	if (phaseIndex < 0)
+	{
+		return;
+	}
+
+	arrput(ts->sh_graphics_data[stateIndex].value[phaseIndex].value, data);
+}
+
+void ThingSettings_RemoveImageData(ThingSettings* ts, const char* state, const char* phase, int32_t imageIndex)
+{
+	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
+	if (stateIndex < 0)
+	{
+		return;
+	}
+
+	int64_t phaseIndex = ThingSettings_GetPhaseIndex(ts, state, phase);
+	if (phaseIndex < 0)
+	{
+		return;
+	}
+
+	if (imageIndex < ThingSettings_GetImagesLength(ts, state, phase))
+	{
+		arrdel(ts->sh_graphics_data[stateIndex].value[phaseIndex].value, imageIndex);
+	}
 }

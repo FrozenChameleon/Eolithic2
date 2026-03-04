@@ -4,42 +4,24 @@
  * See eolithic2.LICENSE for details.
  */
 
+ //DEPRECATED DO NOT USE!!!
+
 #pragma once
 
-#include "stdint.h"
-
-typedef enum DrawState
-{
-	OeState_DEFAULT = 0,
-	OeState_HEAD = 1,
-	OeState_SHOOT = 2,
-	OeState_NEW = 3,
-	OeState_TAGS = 4,
-	OeState_WHEELS = 5,
-	OeState_WHEELFX = 6,
-	OeState_MUZZLE = 7,
-	OeState_STEP1 = 8,
-	OeState_STEP2 = 9,
-	OeState_STEP3 = 10,
-	OeState_STEP4 = 11,
-	OeState_STEP5 = 12,
-	OeState_STEP6 = 13,
-	OeState_STEP7 = 14,
-	OeState_STEP8 = 15,
-	OeState_STEP9 = 16,
-} DrawState;
-
-typedef struct DrawStateMap
-{
-	char* key;
-	int32_t value;
-} DrawStateMap;
-
-DrawStateMap* OeState_GetShDrawStateMap(void);
-
-/*
-const std::vector<std::string>& OeState_GetDrawStateArray();
-std::unordered_map<std::string, int32_t>& OeState_GetDrawStateMap();
-const std::string& OeState_GetDefaultState();
-void OeState_Init();
-*/
+#define OeState_DEFAULT "DEFAULT"
+#define OeState_HEAD "HEAD"
+#define OeState_SHOOT "SHOOT"
+#define OeState_NEW "NEW"
+#define OeState_TAGS "TAGS"
+#define OeState_WHEELS "WHEELS"
+#define OeState_WHEELFX "WHEELFX"
+#define OeState_MUZZLE "MUZZLE"
+#define OeState_STEP1 "STEP1"
+#define OeState_STEP2 "STEP2"
+#define OeState_STEP3 "STEP3"
+#define OeState_STEP4 "STEP4"
+#define OeState_STEP5 "STEP5"
+#define OeState_STEP6 "STEP6"
+#define OeState_STEP7 "STEP7"
+#define OeState_STEP8 "STEP8"
+#define OeState_STEP9 "STEP9"

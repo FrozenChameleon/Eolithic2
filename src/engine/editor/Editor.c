@@ -19,6 +19,7 @@
 #include "WindowTogglesWindowMini.h"
 #include "WindowTogglesWindow.h"
 #include "WindowSettings.h"
+#include "ThingEditor.h"
 
 static Camera _mCamera;
 
@@ -331,6 +332,7 @@ void Editor_Update()
 	WindowTogglesWindowMini_Update();
     WindowTogglesWindow_Update();
 	WindowSettings_Update();
+    ThingEditor_Update();
 }
 void Editor_Draw(SpriteBatch* spriteBatch)
 {

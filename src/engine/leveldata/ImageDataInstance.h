@@ -20,8 +20,7 @@ typedef struct ImageDataInstance
 	bool mIsOriginSet;
 } ImageDataInstance;
 
-void ImageDataInstance_Init(ImageDataInstance* idi);
-void ImageDataInstance_Init2(ImageDataInstance* idi, ImageData* data);
+void ImageDataInstance_Init(ImageDataInstance* idi, ImageData* data);
 
 RenderCommandSheet* ImageDataInstance_DrawInterpolated(ImageDataInstance* render, SpriteBatch* spriteBatch, Color color, ShaderProgram* program, Vector2 position, Vector2 lastPosition,
 	Vector2 scale, float rotation, bool flipX,

@@ -10,8 +10,8 @@
 
 typedef struct DrawRenderInfo
 {
-	int32_t mState;
-	int32_t mPhase;
+	char mState[EE_FILENAME_MAX];
+	char mPhase[EE_FILENAME_MAX];
 	ImageDataInstance mRender;
 } DrawRenderInfo;
 

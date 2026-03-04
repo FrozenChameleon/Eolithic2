@@ -10,7 +10,7 @@
 
 typedef struct HitFlashKit
 {
-	int32_t mState;
+	char mState[EE_FILENAME_MAX];
 	bool mIsDisabled;
 	bool mShowHitFlash;
 	Timer mHitFlashTimer;

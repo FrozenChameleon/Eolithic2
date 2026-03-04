@@ -33,6 +33,6 @@ typedef struct ImageData
 void ImageData_Init(ImageData* id);
 
 void ImageData_Read(ImageData* id, BufferReader* br);
-void ImageData_Write(ImageData* id, DynamicByteBuffer* dbb);
-const char* ImageData_ToString(ImageData* id);
-bool ImageData_IsOriginSet(ImageData* id);
+void ImageData_Write(const ImageData* id, DynamicByteBuffer* dbb);
+const char* ImageData_ToString(const ImageData* id);
+bool ImageData_IsOriginSet(const ImageData* id);

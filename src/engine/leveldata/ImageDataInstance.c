@@ -8,11 +8,7 @@
 #include "../render/BlendState.h"
 #include "../utils/Utils.h"
 
-void ImageDataInstance_Init(ImageDataInstance* idi)
-{
-	Utils_memset(idi, 0, sizeof(ImageDataInstance));
-}
-void ImageDataInstance_Init2(ImageDataInstance* idi, ImageData* data)
+void ImageDataInstance_Init(ImageDataInstance* idi, ImageData* data)
 {
 	Utils_memset(idi, 0, sizeof(ImageDataInstance));
 

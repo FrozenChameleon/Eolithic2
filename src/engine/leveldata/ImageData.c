@@ -37,7 +37,7 @@ void ImageData_Read(ImageData* id, BufferReader* br)
 	id->mInitialRotation = BufferReader_ReadFloat(br);
 	id->mScaler = BufferReader_ReadI32(br);
 }
-void ImageData_Write(ImageData* id, DynamicByteBuffer* dbb)
+void ImageData_Write(const ImageData* id, DynamicByteBuffer* dbb)
 {
 	DynamicByteBuffer_WriteString(dbb, id->mImage, EE_FILENAME_MAX);
 	DynamicByteBuffer_WriteBoolean(dbb, id->mIsAdditive);
@@ -54,11 +54,11 @@ void ImageData_Write(ImageData* id, DynamicByteBuffer* dbb)
 	DynamicByteBuffer_WriteFloat(dbb, id->mInitialRotation);
 	DynamicByteBuffer_WriteI32(dbb, id->mScaler);
 }
-const char* ImageData_ToString(ImageData* id)
+const char* ImageData_ToString(const ImageData* id)
 {
 	return id->mImage;
 }
-bool ImageData_IsOriginSet(ImageData* id)
+bool ImageData_IsOriginSet(const ImageData* id)
 {
 	if (Vector2_EqualTo(id->mOrigin, Vectors_NegativeOne))
 	{

@@ -12,8 +12,8 @@ typedef struct ShaderProgram ShaderProgram;
 
 typedef struct DrawStateInfo
 {
-	int32_t mState;
-	int32_t mCurrentPhase;
+	char mState[EE_FILENAME_MAX];
+	char mCurrentPhase[EE_FILENAME_MAX];
 	int32_t mDepth;
 	float mRotation;
 	Vector2 mNudge;

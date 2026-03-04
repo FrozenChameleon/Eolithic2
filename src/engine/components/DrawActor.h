@@ -14,8 +14,8 @@ typedef struct ShaderProgram ShaderProgram;
 typedef struct DrawActor
 {
 	int32_t mExtraPasses;
-	int32_t mDefaultDrawState;
-	int32_t mDefaultDrawPhase;
+	char mDefaultDrawState[EE_FILENAME_MAX];
+	char mDefaultDrawPhase[EE_FILENAME_MAX];
 	int32_t mUniversalDepthOverride;
 	float mRotation;
 	float mOnScreenCheckMul;

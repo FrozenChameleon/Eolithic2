@@ -854,11 +854,11 @@ void Do_ResetDepthOverride(Entity entity)
 {
 	Do_SetDepthOverride(entity, -1);
 }
-void Do_SetDepthOverride2(Entity entity, int32_t state, int32_t value)
+void Do_SetDepthOverride2(Entity entity, const char* state, int32_t value)
 {
 	DrawActorSys_SetDepthOverride(entity, state, value);
 }
-void Do_ResetDepthOverride2(Entity entity, int32_t state)
+void Do_ResetDepthOverride2(Entity entity, const char* state)
 {
 	Do_SetDepthOverride2(entity, state, -1);
 }
@@ -879,7 +879,7 @@ void Do_DrawFullscreenRectangle(SpriteBatch* spriteBatch, Color color)
 	Rectangle internalBounds = Utils_GetInternalBounds();
 	DrawTool_DrawRectangle2(spriteBatch, color, 100, Rectangle_Create(0, 0, internalBounds.X, internalBounds.Y), 0, false);
 }
-void Do_SetAnimationTimeLimit(Entity entity, int32_t state, int32_t phase, int32_t time)
+void Do_SetAnimationTimeLimit(Entity entity, const char* state, const char* phase, int32_t time)
 {
 	Get_Animation(entity, state, phase)->mFlipTimer.mLimit = time;
 }
@@ -887,7 +887,7 @@ void Do_SetShader(Entity entity, ShaderProgram* program)
 {
 	Get_DrawActor(entity)->mShaderProgram = program;
 }
-void Do_SetShader2(Entity entity, int32_t state, ShaderProgram* program)
+void Do_SetShader2(Entity entity, const char* state, ShaderProgram* program)
 {
 	DrawActorSys_SetShaderProgram(entity, state, program);
 }
@@ -969,7 +969,7 @@ void Do_SetStunFrames(Entity entity, int32_t value)
 	StunFrames* component = (StunFrames*)Get_Component(C_StunFrames, entity);
 	component->mTag = value;
 }
-void Do_SetStateRotation(Entity entity, int32_t state, float rotation)
+void Do_SetStateRotation(Entity entity, const char* state, float rotation)
 {
 	DrawActorSys_SetStateRotation(entity, state, rotation);
 }
@@ -1082,7 +1082,7 @@ void Do_LoopSound(const char* sound, int32_t number)
 {
 	SoundEffect_LoopSound(sound, number);
 }
-void Do_SynchronizeAnimation(Entity entity, int32_t state, int32_t phase)
+void Do_SynchronizeAnimation(Entity entity, const char* state, const char* phase)
 {
 	Animation* anim = Get_Animation(entity, state, phase);
 	Do_SynchronizeAnimation2(anim);
@@ -1105,7 +1105,7 @@ void Do_Vibrate2(Entity entity, int32_t priority, int32_t frames, float leftMoto
 {
 	Do_Vibrate(Get_PlayerNumber(entity), priority, frames, leftMotor, rightMotor);
 }
-void Do_RandomShake(Entity entity, int32_t state, int32_t amount)
+void Do_RandomShake(Entity entity, const char* state, int32_t amount)
 {
 	int32_t amountX = Get_RandomBinaryDirection(Globals_GetSharedRandom()) * amount;
 	int32_t amountY = Get_RandomBinaryDirection(Globals_GetSharedRandom()) * amount;
@@ -1119,7 +1119,7 @@ void Do_RandomShake2(Entity entity, int32_t amount)
 	universalNudge->X = (float)nudgeX;
 	universalNudge->Y = (float)nudgeY;
 }
-void Do_Shake(Entity entity, int32_t state, int32_t amountX, int32_t amountY)
+void Do_Shake(Entity entity, const char* state, int32_t amountX, int32_t amountY)
 {
 	DrawActorSys_SetNudge(entity, state, (float)amountX, (float)amountY);
 }
@@ -1127,7 +1127,7 @@ void Do_ClearShake(Entity entity)
 {
 	Get_DrawActor(entity)->mUniversalNudge = Vector2_Zero;
 }
-void Do_ClearShake2(Entity entity, int32_t state)
+void Do_ClearShake2(Entity entity, const char* state)
 {
 	Do_Shake(entity, state, 0, 0);
 }
@@ -1606,25 +1606,25 @@ bool Do_MoveSomewhereToVector(Vector2* moveThis, Vector2 target, float speed)
 		return true;
 	}
 }
-void Do_SetImage(Entity entity, int32_t state, int32_t phase)
+void Do_SetImage(Entity entity, const char* state, const char* phase)
 {
 	if (!Is_ImagePhaseTheSame(entity, state, phase))
 	{
 		Do_SetImageForced(entity, state, phase);
 	}
 }
-void Do_SetImage2(Entity entity, int32_t state, int32_t phase, bool carry)
+void Do_SetImage2(Entity entity, const char* state, const char* phase, bool carry)
 {
 	if (!Is_ImagePhaseTheSame(entity, state, phase))
 	{
 		Do_SetImageForced2(entity, state, phase, carry);
 	}
 }
-void Do_SetImageForced(Entity entity, int32_t state, int32_t phase)
+void Do_SetImageForced(Entity entity, const char* state, const char* phase)
 {
 	Do_SetImageForced2(entity, state, phase, false);
 }
-void Do_SetImageForced2(Entity entity, int32_t state, int32_t phase, bool carry)
+void Do_SetImageForced2(Entity entity, const char* state, const char* phase, bool carry)
 {
 	DrawActorSys_SetImageState2(entity, Get_DrawActor(entity), state, phase, carry);
 }
@@ -2105,7 +2105,7 @@ Point Get_GridPosition(Entity entity)
 		return component->mGridPosition;
 	}
 }
-int32_t Get_CurrentImagePhase(Entity entity, int32_t state)
+const char* Get_CurrentImagePhase(Entity entity, const char* state)
 {
 	return DrawActorSys_GetCurrentPhase(entity, state);
 }
@@ -2290,11 +2290,11 @@ double Get_ClampedValueAsDouble(double value, double limit)
 	double returnValue = abs * signum;
 	return returnValue;
 }
-Animation* Get_Animation(Entity entity, int32_t state, int32_t phase)
+Animation* Get_Animation(Entity entity, const char* state, const char* phase)
 {
 	return DrawActorSys_GetAnimation(entity, state, phase);
 }
-Animation* Get_CurrentAnimation(Entity entity, int32_t state)
+Animation* Get_CurrentAnimation(Entity entity, const char* state)
 {
 	return DrawActorSys_GetCurrentAnimation(entity, state);
 }
@@ -3375,21 +3375,21 @@ bool Is_NearPlayerY(Entity entity, int32_t buffer)
 	}
 	return false;
 }
-bool Is_OnDrawPhase(Entity entity, int32_t state, int32_t phaseToCheck)
+bool Is_OnDrawPhase(Entity entity, const char* state, const char* phaseToCheck)
 {
-	if (Get_CurrentImagePhase(entity, state) == phaseToCheck)
+	if (Utils_StringEqualTo(Get_CurrentImagePhase(entity, state), phaseToCheck))
 	{
 		return true;
 	}
 	return false;
 }
-bool Is_AnimationComplete(Entity entity, int32_t state, int32_t phase)
+bool Is_AnimationComplete(Entity entity, const char* state, const char* phase)
 {
 	return Get_Animation(entity, state, phase)->mIsAnimationComplete;
 }
-bool Is_ImagePhaseTheSame(Entity entity, int32_t state, int32_t phase)
+bool Is_ImagePhaseTheSame(Entity entity, const char* state, const char* phase)
 {
-	if (Get_CurrentImagePhase(entity, state) == phase)
+	if (Utils_StringEqualTo(Get_CurrentImagePhase(entity, state), phase))
 	{
 		return true;
 	}
