@@ -56,7 +56,7 @@ void Achievement_UnlockAchievement(bool doNotCertify, Achievement* achievement, 
 		MString_AddAssignString(&tempString, " - ");
 		MString_AddAssignString(&tempString, achievement->mName);
 		MString_AddAssignString(&tempString, " has been unlocked!");
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 

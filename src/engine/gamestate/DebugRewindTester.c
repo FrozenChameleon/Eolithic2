@@ -90,7 +90,7 @@ void DebugRewindTester_Update(void)
 			_mData.mEndLevelFrameCount = Get_LevelFrameCount();
 			if (_mData.mBeginLevelFrameCount != _mData.mEndLevelFrameCount)
 			{
-				Logger_LogInformation("Rewind failure!");
+				Logger_Log(LOGGER_INFORMATION, "Rewind failure!");
 			}
 			_mData.mIsRewinding = false;
 			_mData.mState = STATE_WAITING;

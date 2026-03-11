@@ -27,5 +27,8 @@
 #define TILE_SIZE GLOBAL_DEF_TILE_SIZE
 #define HALF_TILE_SIZE GLOBAL_DEF_HALF_TILE_SIZE
 
+typedef void (*EE_ACTION0)();
+typedef void (*EE_ACTION1)(void* userData);
+
 typedef int32_t Entity;
 typedef int32_t ResourceID;

@@ -23,7 +23,7 @@ LevelPatch* LevelPatch_Create(Tile* src)
 {
 	if (src == NULL)
     {
-        Logger_LogInformation("Given invalid data for level patch creation");
+        Logger_Log(LOGGER_INFORMATION, "Given invalid data for level patch creation");
         return NULL;
     }
 
@@ -39,7 +39,7 @@ LevelPatchStatus LevelPatch_Finish(LevelPatch* lp)
 {
 	if ((lp == NULL) || (lp->src == NULL) || lp->isReady)
 	{
-		Logger_LogInformation("Given invalid data for level patch finishing");
+		Logger_Log(LOGGER_INFORMATION, "Given invalid data for level patch finishing");
 		return LEVEL_PATCH_STATUS_INVALID;
 	}
 
@@ -57,7 +57,7 @@ void LevelPatch_Undo(LevelPatch* lp)
 {
     if (!lp->isReady)
     {
-        Logger_LogInformation("Patch not ready for undo!");
+        Logger_Log(LOGGER_INFORMATION, "Patch not ready for undo!");
 		return;
     }
 
@@ -67,7 +67,7 @@ void LevelPatch_Redo(LevelPatch* lp)
 {
     if (!lp->isReady)
     {
-        Logger_LogInformation("Patch not ready for redo!");
+        Logger_Log(LOGGER_INFORMATION, "Patch not ready for redo!");
         return;
     }
 

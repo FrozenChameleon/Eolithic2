@@ -13,7 +13,7 @@
 
 int32_t Exception_Run(const char* message, bool exitTheGameNow)
 {
-	Logger_LogError(message);
+	Logger_Log(LOGGER_ERROR, message);
 	assert(0);
 	if (exitTheGameNow)
 	{

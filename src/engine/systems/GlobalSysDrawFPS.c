@@ -39,7 +39,7 @@ static void Update(void* givenData)
 	_mPrintCounter += 1;
 	if (_mPrintCounter > 60)
 	{
-		//Logger_LogInformation(GameUpdater_GetFpsString());
+		//Logger_Log(LOGGER_INFORMATION, GameUpdater_GetFpsString());
 		_mPrintCounter = 0;
 	}
 

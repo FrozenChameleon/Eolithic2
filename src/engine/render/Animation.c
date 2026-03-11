@@ -93,7 +93,7 @@ void Animation_Init(Animation* data, const char* spriteSheet, int32_t flipTimer)
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "Unable to setup animation:", spriteSheet);
-		Logger_LogError(MString_Text(tempString));
+		Logger_Log(LOGGER_ERROR, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 }
@@ -301,7 +301,7 @@ void Animation_BuildAnimations(void)
 		{
 			MString* tempString = NULL;
 			MString_Combine2(&tempString, "Animation is incorrectly setup: ", info->mSheetName);
-			Logger_LogWarning(MString_Text(tempString));
+			Logger_Log(LOGGER_WARNING, MString_Text(tempString));
 			MString_Dispose(&tempString);
 		}
 	}

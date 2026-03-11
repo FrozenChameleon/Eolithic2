@@ -22,6 +22,8 @@
 #include "../utils/Logger.h"
 #include "../render/BlendState.h"
 
+#define PHASE_NOTHING EE_STR_EMPTY
+
 static Animation EmptyAnimation;
 static ImageDataInstance EmptyRender;
 
@@ -48,7 +50,7 @@ void DrawActorSys_Setup(Entity owner, DrawActor* data, ThingGraphicsData* sh_gra
 
 		DrawStateInfo* stateInfo = (DrawStateInfo*)ComponentPack_Set2(stateInfos, owner, true);
 		Utils_strlcpy(stateInfo->mState, stateString, EE_FILENAME_MAX);
-		Utils_strlcpy(stateInfo->mCurrentPhase, EE_STR_EMPTY, EE_FILENAME_MAX);
+		Utils_strlcpy(stateInfo->mCurrentPhase, PHASE_NOTHING, EE_FILENAME_MAX);
 		stateInfo->mDepth = -1;
 
 		ThingGraphicsEntry* sh_thing_graphics_entries = sh_graphics_data[i].value;
@@ -166,7 +168,7 @@ DrawStateInfo* DrawActorSys_GetStateInfo(Entity owner, const char* state)
 	{
 		MString* tempString = NULL;
 		MString_Combine4(&tempString, "State Not Available: ", state, " on ", Get_Name(owner));
-		Logger_LogError(MString_Text(tempString));
+		Logger_Log(LOGGER_ERROR, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -198,7 +200,7 @@ void DrawActorSys_SetImageState(Entity owner, DrawActor* data, const char* state
 void DrawActorSys_SetImageState2(Entity owner, DrawActor* data, const char* state, const char* newPhase, bool carryAnimationState)
 {
 	const char* oldPhase = DrawActorSys_GetCurrentPhase(owner, state);
-	if ((Utils_StringEqualTo(oldPhase, EE_STR_EMPTY)) && (Utils_StringEqualTo(newPhase, EE_STR_EMPTY)))
+	if ((Utils_StringEqualTo(oldPhase, PHASE_NOTHING)) && (Utils_StringEqualTo(newPhase, PHASE_NOTHING)))
 	{
 		return;
 	}
@@ -280,6 +282,10 @@ const char* DrawActorSys_GetCurrentPhase(Entity owner, const char* state)
 {
 	return DrawActorSys_GetStateInfo(owner, state)->mCurrentPhase;
 }
+Vector2 DrawActorSys_GetNudge(Entity owner, const char* state)
+{
+	return DrawActorSys_GetStateInfo(owner, state)->mNudge;
+}
 void DrawActorSys_SetNudge(Entity owner, const char* state, float x, float y)
 {
 	DrawActorSys_GetStateInfo(owner, state)->mNudge = Vector2_Create(x, y);
@@ -337,7 +343,7 @@ Animation* DrawActorSys_GetAnimation(Entity owner, const char* state, const char
 	{
 		MString* tempString = MString_CreateForJustThisFrame();
 		MString_Combine5(&tempString, "Unable to get Animation: ", state, ",", phase, "!");
-		Logger_LogError(MString_Text(tempString));
+		Logger_Log(LOGGER_ERROR, MString_Text(tempString));
 	}
 
 	return &EmptyAnimation;
@@ -360,7 +366,7 @@ ImageDataInstance* DrawActorSys_GetCurrentImageDataRender(Entity owner, const ch
 	{
 		MString* tempString = MString_CreateForJustThisFrame();
 		MString_Combine5(&tempString, "Unable to get Image Data Render: ", state,",", phase, "!");
-		Logger_LogError(MString_Text(tempString));
+		Logger_Log(LOGGER_ERROR, MString_Text(tempString));
 	}
 
 	return &EmptyRender;
@@ -439,7 +445,7 @@ void DrawActorSys_UpdateRenders(Entity owner, DrawActor* data,
 
 		DrawStateInfo* stateInfo = (DrawStateInfo*)ComponentPack_GetComponentAtIndex(drawStateInfos, i);
 		const char* phase = stateInfo->mCurrentPhase;
-		if (Utils_StringEqualTo(phase, EE_STR_EMPTY))
+		if (Utils_StringEqualTo(phase, PHASE_NOTHING))
 		{
 			continue;
 		}
@@ -462,7 +468,7 @@ void DrawActorSys_UpdateRenders(Entity owner, DrawActor* data,
 					Animation_Update(&render->mAnimation);
 					if (render->mData->mAnimationBlanks && render->mAnimation.mIsAnimationComplete)
 					{
-						DrawActorSys_SetImageState(owner, data, state, EE_STR_EMPTY);
+						DrawActorSys_SetImageState(owner, data, state, PHASE_NOTHING);
 					}
 				}
 			}
@@ -491,7 +497,7 @@ void DrawActorSys_DrawInterpolated(Entity owner, DrawActor* data, SpriteBatch* s
 			const char* state = stateInfo->mState;
 			const char* phase = stateInfo->mCurrentPhase;
 
-			if (Utils_StringEqualTo(phase, EE_STR_EMPTY))
+			if (Utils_StringEqualTo(phase, PHASE_NOTHING))
 			{
 				continue;
 			}

@@ -62,8 +62,8 @@ static void UpdateRoutine(Entity owner, SpecialMcFinalBossEffect* data)
 		{
 			for (int32_t i = 0; i < BLOOD_SPRAY_DENSITY; i += 1)
 			{
-				ParticleInstance* instance = Do_AddParticle4("FINALBLOODSPLOSION", 
-					data->mPosition.X + data->mBloodOffset.X, data->mPosition.Y + data->mBloodOffset.Y);
+				ParticleInstance* instance = Do_AddParticleAbsolute("FINALBLOODSPLOSION", 
+					Vector2_Create(data->mPosition.X + data->mBloodOffset.X, data->mPosition.Y + data->mBloodOffset.Y));
 				instance->mInfluencedDepth = 100;
 				if (data->mForcedDirection == 1)
 				{

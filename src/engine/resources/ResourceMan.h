@@ -63,8 +63,8 @@ Resource* ResourceMan_CreateResource(ResourceMan* rm, const char* name, const ch
 Resource* ResourceMan_LoadAssetFromStreamAndCreateResource(ResourceMan* rm, BufferReader* br, const char* name, const char* path);
 const char* ResourceMan_GetDatFileName(ResourceMan* rm);
 void ResourceMan_LoadAllFromDat(ResourceMan* rm);
-void ResourceMan_Dispose(ResourceMan* rm, const char* name);
-void ResourceMan_DisposeAll(ResourceMan* rm);
+void ResourceMan_Reload(ResourceMan* rm, const char* name);
+void ResourceMan_ReloadAll(ResourceMan* rm);
 int64_t ResourceMan_Length(ResourceMan* rm);
 Resource* ResourceMan_GetResourceByIndex(ResourceMan* rm, int32_t index);
 void* ResourceMan_GetResourceDataByIndex(ResourceMan* rm, int32_t index);

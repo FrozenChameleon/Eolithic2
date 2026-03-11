@@ -50,7 +50,7 @@ static void CreateWindow()
 
 	if (ImGui::Button("Setup New", ImVec2(100, 25)))
 	{
-		Logger_LogInformation("New anim tile setup");
+		Logger_Log(LOGGER_INFORMATION, "New anim tile setup");
 		Utils_memset(&_mAnimTile, 0, sizeof(AnimTile));
 		Utils_strlcpy(_mTempFileName, EE_STR_NOT_SET, EE_FILENAME_MAX);
 	}

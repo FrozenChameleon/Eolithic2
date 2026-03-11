@@ -83,7 +83,7 @@ static bool CheckDoublePointerSafetyForComparison(MString** str)
 {
 	if (str == NULL)
 	{
-		Logger_LogWarning("MString double pointer is not safe...");
+		Logger_Log(LOGGER_WARNING, "MString double pointer is not safe...");
 		return false;
 	}
 
@@ -98,7 +98,7 @@ static void CheckAndReplaceNullString(MString** str)
 {
 	if (str == NULL)
 	{
-		Logger_LogWarning("Handed NULL MString Double Pointer...");
+		Logger_Log(LOGGER_WARNING, "Handed NULL MString Double Pointer...");
 		return;
 	}
 
@@ -113,7 +113,7 @@ static void GrowMStringIfNeeded(MString* str, size_t newCapacity)
 {
 	if (str == NULL)
 	{
-		Logger_LogWarning("Cannot grow NULL MString!");
+		Logger_Log(LOGGER_WARNING, "Cannot grow NULL MString!");
 		return;
 	}
 
@@ -135,7 +135,7 @@ static void ClearMString(MString* str)
 {
 	if (str == NULL)
 	{
-		Logger_LogWarning("Cannot clear NULL MString!");
+		Logger_Log(LOGGER_WARNING, "Cannot clear NULL MString!");
 		return;
 	}
 
@@ -247,7 +247,7 @@ void MString_AssignSubString(MString** str, const char* fromThis, int32_t startI
 
 	if ((length + 1) > STRING_BUFFER_LEN)
 	{
-		Logger_LogWarning("SubString is too large for MString!");
+		Logger_Log(LOGGER_WARNING, "SubString is too large for MString!");
 		return;
 	}
 
@@ -396,7 +396,7 @@ static void DisposeHelper(MString** str, bool checkForIsJustThisFrame)
 	MString* strToUse = *str;
 	if (checkForIsJustThisFrame && strToUse->isForJustThisFrame)
 	{
-		Logger_LogWarning("Attempted to dispose just-this-frame MString in incorrect way!");
+		Logger_Log(LOGGER_WARNING, "Attempted to dispose just-this-frame MString in incorrect way!");
 		return;
 	}
 

@@ -19,6 +19,7 @@
 #include "../render/TilesetOffset.h"
 #include "../utils/Utils.h"
 #include "../../third_party/stb_ds.h"
+#include "../utils/Logger.h"
 
 #define VERSION_LEVELDATA 12
 
@@ -80,7 +81,7 @@ void LevelData_Read(LevelData* ld, BufferReader* reader)
 	{
 		//if (mStringData.Length < STRING_DATA_LENGTH) //if debug then correct custom data if wrong size...
 		//{
-		//	OeLogger_LogInformation("Correcting custom data amount...");
+		//	OeLogger_Log(LOGGER_INFORMATION, "Correcting custom data amount...");
 
 		//	string[] newCustom = new string[CUSTOM_DATA_AMOUNT];
 		//	for (int32_t i = 0; i < newCustom.Length; i += 1)
@@ -146,7 +147,7 @@ static void CreateSaveTiles(LevelData* ld)
 			int32_t arrayIndex = Utils_Get1DArrayPosFor2DArray(i, j, ld->tilemap.boundary.Width);
 			if (placement == -1)
 			{
-				ld->_mSaveTileMap[arrayIndex] = arrlen(ld->arr_save_tiles);
+				ld->_mSaveTileMap[arrayIndex] = (int32_t)arrlen(ld->arr_save_tiles);
 				arrput(ld->arr_save_tiles, currentTile);
 			}
 			else
@@ -305,7 +306,7 @@ void LevelData_LoadSetupOffsets(LevelData* ld)
 	{
 		return;
 	}
-	
+
 	for (int32_t i = 0; i < arrlen(ld->arr_save_tiles); i += 1)
 	{
 		Tile* t = ld->arr_save_tiles[i];
@@ -520,9 +521,9 @@ void LevelData_DrawCollision(LevelData* ld, SpriteBatch* spriteBatch, Camera* ca
 	Rectangle rect = Rectangle_Empty;
 	int lastType = -1;
 	Tile** tileData = ld->tilemap.tiles;
-	for (int j = y1; j < y2; j++)
+	for (int j = y1; j < y2; j += 1)
 	{
-		for (int i = x1; i < x2; i++)
+		for (int i = x1; i < x2; i += 1)
 		{
 			Tile* tile = tileData[LevelData_GetTilePos1D(ld, i, j)];
 			int type = tile->mCollisionType;
@@ -585,4 +586,185 @@ void LevelData_DrawThings(LevelData* ld, SpriteBatch* spriteBatch, Camera* camer
 			}
 		}
 	}
+}
+static void LevelData_OffsetStuff(LevelData* ld, bool isColumn, int target, int direction)
+{
+	for (int i = 0; i < arrlen(ld->arr_camera_data); i += 1)
+	{
+		LevelCameraData* data = &ld->arr_camera_data[i];
+		LevelData_OffsetPoint(ld, &data->mVolumeTrigger.mPointOne, TILE_SIZE, isColumn, target, direction);
+		LevelData_OffsetPoint(ld, &data->mVolumeTrigger.mPointTwo, TILE_SIZE, isColumn, target, direction);
+		LevelData_OffsetPoint(ld, &data->mVolumeBounds.mPointOne, TILE_SIZE, isColumn, target, direction);
+		LevelData_OffsetPoint(ld, &data->mVolumeBounds.mPointTwo, TILE_SIZE, isColumn, target, direction);
+	}
+
+	for (int i = 0; i < arrlen(ld->arr_lines); i += 1)
+	{
+		Line* line = &ld->arr_lines[i];
+		LevelData_OffsetPoint(ld, &line->mBegin, 1, isColumn, target, direction);
+		LevelData_OffsetPoint(ld, &line->mEnd, 1, isColumn, target, direction);
+	}
+}
+void LevelData_DeleteColumn(LevelData* ld, int loc)
+{
+	if (ld->_mIsMetaMap)
+	{
+		return;
+	}
+
+	if (ld->tilemap.boundary.Width <= 1)
+	{
+		return;
+	}
+
+	Rectangle newBoundary = Rectangle_Create(0, 0, ld->tilemap.boundary.Width - 1, ld->tilemap.boundary.Height);
+	Tilemap newData;
+	Tilemap_Init(&newData, newBoundary);
+
+	for (int i = 0; i < newData.boundary.Width; i += 1)
+	{
+		for (int j = 0; j < newData.boundary.Height; j += 1)
+		{
+			if (i < loc)
+			{
+				Tilemap_SetTile(&newData, i, j, LevelData_GetTile(ld, i, j));
+			}
+			else if (i >= loc)
+			{
+				Tilemap_SetTile(&newData, i, j, LevelData_GetTile(ld, i + 1, j));
+			}
+		}
+	}
+
+	ld->tilemap = newData;
+
+	LevelData_OffsetStuff(ld, true, loc, -1);
+
+	Logger_Log(LOGGER_INFORMATION, "Deleted column at " + loc);
+}
+void LevelData_DeleteRow(LevelData* ld, int loc)
+{
+	if (ld->_mIsMetaMap)
+	{
+		return;
+	}
+
+	if (ld->tilemap.boundary.Height <= 1)
+	{
+		return;
+	}
+
+	Rectangle newBoundary = Rectangle_Create(0, 0, ld->tilemap.boundary.Width, ld->tilemap.boundary.Height - 1);
+	Tilemap newData;
+	Tilemap_Init(&newData, newBoundary);
+
+	for (int i = 0; i < newData.boundary.Width; i += 1)
+	{
+		for (int j = 0; j < newData.boundary.Height; j += 1)
+		{
+			if (j < loc)
+			{
+				Tilemap_SetTile(&newData, i, j, LevelData_GetTile(ld, i, j));
+			}
+			else if (j >= loc)
+			{
+				Tilemap_SetTile(&newData, i, j, LevelData_GetTile(ld, i, j + 1));
+			}
+		}
+	}
+
+	ld->tilemap = newData;
+
+	LevelData_OffsetStuff(ld, false, loc, -1);
+
+	Logger_Log(LOGGER_INFORMATION, "Deleted row at " + loc);
+}
+void LevelData_OffsetPoint(LevelData* ld, Point* point, int tileSizeMul, bool isColumn, int target, int direction)
+{
+	if (isColumn)
+	{
+		if (point->X >= target * tileSizeMul)
+		{
+			point->X += direction * tileSizeMul;
+		}
+	}
+	else
+	{
+		if (point->Y >= target * tileSizeMul)
+		{
+			point->Y += direction * tileSizeMul;
+		}
+	}
+}
+void LevelData_AddColumn(LevelData* ld, int loc)
+{
+	if (ld->_mIsMetaMap)
+	{
+		return;
+	}
+
+	Rectangle newBoundary = Rectangle_Create(0, 0, ld->tilemap.boundary.Width + 1, ld->tilemap.boundary.Height);
+	Tilemap newData;
+	Tilemap_Init(&newData, newBoundary);
+
+	for (int i = 0; i < newData.boundary.Width; i += 1)
+	{
+		for (int j = 0; j < newData.boundary.Height; j += 1)
+		{
+			if (i < loc)
+			{
+				Tilemap_SetTile(&newData, i, j, LevelData_GetTile(ld, i, j));
+			}
+			else if (i > loc)
+			{
+				Tilemap_SetTile(&newData, i, j, LevelData_GetTile(ld, i - 1, j));
+			}
+			else
+			{
+				Tilemap_SetTile(&newData, i, j, Tile_Create());
+			}
+		}
+	}
+
+	ld->tilemap = newData;
+
+	LevelData_OffsetStuff(ld, true, loc, 1);
+
+	Logger_Log(LOGGER_INFORMATION, "Added column at " + loc);
+}
+void LevelData_AddRow(LevelData* ld, int loc)
+{
+	if (ld->_mIsMetaMap)
+	{
+		return;
+	}
+
+	Rectangle newBoundary = Rectangle_Create(0, 0, ld->tilemap.boundary.Width, ld->tilemap.boundary.Height + 1);
+	Tilemap newData;
+	Tilemap_Init(&newData, newBoundary);
+
+	for (int i = 0; i < newData.boundary.Width; i += 1)
+	{
+		for (int j = 0; j < newData.boundary.Height; j += 1)
+		{
+			if (j < loc)
+			{
+				Tilemap_SetTile(&newData, i, j, LevelData_GetTile(ld, i, j));
+			}
+			else if (j > loc)
+			{
+				Tilemap_SetTile(&newData, i, j, LevelData_GetTile(ld, i, j - 1));
+			}
+			else
+			{
+				Tilemap_SetTile(&newData, i, j, Tile_Create());
+			}
+		}
+	}
+
+	ld->tilemap = newData;
+
+	LevelData_OffsetStuff(ld, false, loc, 1);
+
+	Logger_Log(LOGGER_INFORMATION, "Added row at " + loc);
 }

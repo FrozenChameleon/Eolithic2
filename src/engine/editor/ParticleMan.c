@@ -226,7 +226,7 @@ static void SetupMisc()
 
 	if (ImGui::Button("Setup New", ImVec2(100, 25)))
 	{
-		Logger_LogInformation("New particle setup");
+		Logger_Log(LOGGER_INFORMATION, "New particle setup");
 		Utils_memset(&_mParticleData, 0, sizeof(Particle));
 		Utils_strlcpy(_mTempFileName, EE_STR_NOT_SET, EE_FILENAME_MAX);
 	}

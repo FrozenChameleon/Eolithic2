@@ -50,7 +50,7 @@ bool InputCheck_CheckTypeAxis(InputCheck* data)
 
 	if (threshold == 0)
 	{
-		Logger_LogWarning("No threshold set for stick/trigger");
+		Logger_Log(LOGGER_WARNING, "No threshold set for stick/trigger");
 		threshold = 50;
 	}
 

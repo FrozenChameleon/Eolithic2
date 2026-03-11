@@ -41,7 +41,7 @@ void File_GetFilenames(IStringArray* addToThis, const char* path, const char* pa
 
 	if (files == NULL)
 	{
-		Logger_LogWarning(SDL_GetError());
+		Logger_Log(LOGGER_WARNING, SDL_GetError());
 		return;
 	}
 
@@ -74,7 +74,7 @@ void File_GetFilePaths(IStringArray* addToThis, const char* path, const char* on
 
 	if (files == NULL)
 	{
-		Logger_LogWarning(SDL_GetError());
+		Logger_Log(LOGGER_WARNING, SDL_GetError());
 		return;
 	}
 

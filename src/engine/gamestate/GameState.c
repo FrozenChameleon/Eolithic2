@@ -74,8 +74,8 @@ ParticleInstance* GameState_GetParticleInstance(GameState* gs, const char* name,
 	Particle* particleData = (Particle*)ResourceMan_GetResourceData(ResourceList_Particle(), name);
 	if (particleData == NULL)
 	{
-		Logger_LogInformation("Particle missing:");
-		Logger_LogInformation(name);
+		Logger_Log(LOGGER_INFORMATION, "Particle missing:");
+		Logger_Log(LOGGER_INFORMATION, name);
 		return ParticleInstance_Dummy();
 	}
 
@@ -365,7 +365,7 @@ void GameState_CreateDebugSaveState(GameState* gs)
 {
 	gs->_mHasSavedDebugSaveState = true;
 	GameStateData_CopyTo(&gs->_mData, &gs->_mDebugSaveState);
-	Logger_LogInformation("Debug Quicksave");
+	Logger_Log(LOGGER_INFORMATION, "Debug Quicksave");
 }
 void GameState_UseDebugSaveState(GameState* gs)
 {
@@ -374,6 +374,6 @@ void GameState_UseDebugSaveState(GameState* gs)
 		return;
 	}
 	GameStateData_CopyTo(&gs->_mDebugSaveState, &gs->_mData);
-	Logger_LogInformation("Debug Quickload");
+	Logger_Log(LOGGER_INFORMATION, "Debug Quickload");
 }
 #endif

@@ -183,7 +183,7 @@ void Tile_CopyTo(Tile* toThis, Tile* fromThis, bool respectCopyCvars)
 {
 	if ((toThis == NULL) || (fromThis == NULL))
 	{
-		Logger_LogWarning("Tile_CopyTo was handed NULL tiles!");
+		Logger_Log(LOGGER_WARNING, "Tile_CopyTo was handed NULL tiles!");
 		return;
 	}
 
@@ -304,4 +304,44 @@ void Tile_DrawThings(Tile* t, SpriteBatch* spriteBatch, Camera* camera, int grid
 			ThingInstance_Draw2(&t->arr_instances[k], spriteBatch, COLOR_WHITE, OVERRIDE_DEPTH, Point_Create(gridX * TILE_SIZE, gridY * TILE_SIZE), false);
 		}
 	}
+}
+void Tile_DeleteCollision(Tile* t)
+{
+	t->mCollisionType = 0;
+}
+void Tile_DeleteDrawTiles(Tile* t)
+{
+	for (int i = 0; i < TILE_DRAW_LAYER_LENGTH; i += 1)
+	{
+		Tile_DeleteDrawTilesByLayer(t, i);
+	}
+}
+void Tile_DeleteDrawTilesByLayer(Tile* t, int layer)
+{
+	DrawTile_Init(&t->mDrawTiles[layer]);
+}
+void Tile_DeleteThings(Tile* t)
+{
+	arrsetlen(t->arr_instances, 0);
+}
+void Tile_DeleteProps(Tile* t)
+{
+	arrsetlen(t->arr_props, 0);
+}
+void Tile_DrawCollision(Tile* t, SpriteBatch* spriteBatch, Camera* camera, int gridX, int gridY, bool overrideDepth)
+{
+	if (t->mCollisionType == 0)
+	{
+		return;
+	}
+
+	int depth = 100;
+	if (overrideDepth)
+	{
+		depth = OVERRIDE_DEPTH;
+	}
+
+	Rectangle rect = Tile_GetCollisionRectangle(t, gridX, gridY);
+	Color color = Utils_GetCollisionColor(t->mCollisionType);
+	DrawTool_DrawRectangle2(spriteBatch, color, depth, rect, 0, false);
 }

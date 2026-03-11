@@ -414,7 +414,7 @@ bool BufferReader_ReadMagicNumber(BufferReader* br)
 	int16_t magicNumber = BufferReader_ReadI16(br);
 	if (magicNumber != EE_MAGIC_NUMBER)
 	{
-		Logger_LogError("Magic number not found!");
+		Logger_Log(LOGGER_ERROR, "Magic number not found!");
 		return false;
 	}
 	return true;
@@ -507,6 +507,7 @@ BufferReader* BufferReader_CreateFromPath(const char* path)
 {
 	return BufferReader_Create(File_ReadAll(path));
 }
+//This WILL dispose the FBB inside. Use Dispose2 to tell it not to.
 void BufferReader_Dispose(BufferReader* br)
 {
 	BufferReader_Dispose2(br, false);

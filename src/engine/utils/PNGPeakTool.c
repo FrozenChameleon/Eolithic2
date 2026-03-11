@@ -21,7 +21,7 @@ Rectangle PNGPeakTool_GetBounds(const char* path)
 
     if (!Utils_StringEqualTo(chunkType, "IHDR"))
     {
-		Logger_LogWarning("Not valid PNG file.");
+		Logger_Log(LOGGER_WARNING, "Not valid PNG file.");
 		BufferReader_Dispose(br);
 		return bounds;
     }

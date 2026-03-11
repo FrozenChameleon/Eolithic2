@@ -77,6 +77,9 @@
 #include "../gamestate/EntitySearch.h"
 #include "../resources/ResourceList.h"
 #include "../resources/ResourceMan.h"
+#include "../components/ShakeFOverTime.h"
+#include "../globals/OeState.h"
+#include "../globals/OePhase.h"
 //#include "../components/MoveGetterSys.h" //UNUSED
 //#include "../utils/Tuning.h" //UNUSED
 
@@ -539,7 +542,7 @@ bool Do_Bounce(Entity entity, float dampener, float jumpSpeed, float velocityInc
 	{
 		jumpSpeed *= dampener;
 	}
-	Do_MoveAbsolute(entity, 0, -jumpSpeed + data->mVelocity);
+	Do_Move(entity, Vector2_Create(0, -jumpSpeed + data->mVelocity));
 	data->mVelocity += velocityIncrease;
 	data->mWasUsed = true;
 	return returnValue;
@@ -745,7 +748,7 @@ bool Do_FloatyMoveSomewhere2(Entity entity, float destX, float destY, float spee
 	}
 	data->mCurrentSpeed = Math_MinFloat(data->mCurrentSpeed, speedLimit);
 	data->mCurrentSpeed = Math_MaxFloat(data->mCurrentSpeed, speedAccel);
-	if (Do_MoveSomewhere(entity, destX, destY, data->mCurrentSpeed))
+	if (Do_MoveSomewhere(entity, Vector2_Create(destX, destY), data->mCurrentSpeed))
 	{
 		if (!doNotResetMovementAtEnd)
 		{
@@ -776,7 +779,7 @@ bool Do_FloatyMoveSomewhere3(float* currentSpeed, Vector2* moveThis, Vector2 des
 	}
 	*currentSpeed = Math_Min(*currentSpeed, speedLimit);
 	*currentSpeed = Math_Max(*currentSpeed, speedAccel);
-	if (Do_MoveSomewhereVector2(moveThis, destination, *currentSpeed))
+	if (Do_MoveSomewhere(moveThis, destination, *currentSpeed))
 	{
 		if (!doNotResetMovementAtEnd)
 		{
@@ -793,7 +796,7 @@ void Do_FloatyMove(Entity entity, float directionX, float directionY, float spee
 	data->mWasUsed = true;
 	data->mCurrentSpeed += speedAccel;
 	data->mCurrentSpeed = Math_MinFloat(data->mCurrentSpeed, speedLimit);
-	Do_Move(entity, directionX, directionY, data->mCurrentSpeed);
+	Do_MoveBySpeed(entity, Vector2_Create(directionX, directionY), data->mCurrentSpeed);
 }
 void Do_InitRandom(Entity entity)
 {
@@ -1056,7 +1059,7 @@ void Do_MoveCircle3(Entity entity, float degree, float degreeOffset, float radiu
 bool Do_MoveCircleAroundPosition(Entity entity, float degree, float degreeOffset, float radius, Vector2 position, float speed)
 {
 	Vector2 dest = Get_MoveCircleAroundPositionDestination(degree, degreeOffset, radius, position);
-	return Do_MoveSomewhereVector2(entity, dest, speed);
+	return Do_MoveSomewhere(entity, dest, speed);
 }
 Vector2 Get_MoveCircleAroundPositionDestination(float degree, float degreeOffset, float radius, Vector2 position)
 {
@@ -1133,45 +1136,33 @@ void Do_ClearShake2(Entity entity, const char* state)
 }
 ParticleInstance* Do_AddParticle(Entity entity, const char* name)
 {
-	return Do_AddParticle3(name, Get_Position(entity), 0, 0);
+	return Do_AddParticleAbsolute(name, Get_Position(entity));
 }
-ParticleInstance* Do_AddParticle2(const char* name, Vector2 absolutePos)
+ParticleInstance* Do_AddParticle2(Entity entity, const char* name, Vector2 offset)
 {
-	return Do_AddParticle5(name, absolutePos.X, absolutePos.Y, 0, 0);
+	return Do_AddParticleAbsolute(name, Vector2_Add(Get_Position(entity), offset));
 }
-ParticleInstance* Do_AddParticle3(const char* name, Vector2 absolutePos, int32_t rangeX, int32_t rangeY)
+ParticleInstance* Do_AddParticleAbsolute(const char* name, Vector2 absolutePos)
 {
-	return Do_AddParticle5(name, absolutePos.X, absolutePos.Y, rangeX, rangeY);
+	return Do_AddParticleAbsolute2(name, absolutePos, 0, 0);
 }
-ParticleInstance* Do_AddParticle4(const char* name, float absoluteX, float absoluteY)
-{
-	return Do_AddParticle5(name, absoluteX, absoluteY, 0, 0);
-}
-ParticleInstance* Do_AddParticle5(const char* name, float absoluteX, float absoluteY, int32_t rangeX, int32_t rangeY)
+ParticleInstance* Do_AddParticleAbsolute2(const char* name, Vector2 absolutePos, int32_t rangeX, int32_t rangeY)
 {
 	Point rangePoint = { rangeX, rangeY };
 	Point randomWrappedPointInRange = Get_RandomPointInBounds(rangePoint, true, Get_SharedRandom());
-	absoluteX += randomWrappedPointInRange.X;
-	absoluteY += randomWrappedPointInRange.Y;
-	return GameState_GetParticleInstance(Get_ActiveGameState(), name, absoluteX, absoluteY);
+	absolutePos.X += randomWrappedPointInRange.X;
+	absolutePos.Y += randomWrappedPointInRange.Y;
+	return GameState_GetParticleInstance(Get_ActiveGameState(), name, absolutePos.X, absolutePos.Y);
 }
-void Do_AddParticles(const char* name, Vector2 absolutePos, int32_t amount)
+void Do_AddParticlesAbsolute(const char* name, Vector2 absolutePos, int32_t amount)
 {
-	Do_AddParticles4(name, absolutePos.X, absolutePos.Y, amount, 0, 0);
+	Do_AddParticlesAbsolute2(name, absolutePos, amount, 0, 0);
 }
-void Do_AddParticles2(const char* name, float absoluteX, float absoluteY, int32_t amount)
-{
-	Do_AddParticles4(name, absoluteX, absoluteY, amount, 0, 0);
-}
-void Do_AddParticles3(const char* name, Vector2 absolutePos, int32_t amount, int32_t rangeX, int32_t rangeY)
-{
-	Do_AddParticles4(name, absolutePos.X, absolutePos.Y, amount, rangeX, rangeY);
-}
-void Do_AddParticles4(const char* name, float absoluteX, float absoluteY, int32_t amount, int32_t rangeX, int32_t rangeY)
+void Do_AddParticlesAbsolute2(const char* name, Vector2 absolutePos, int32_t amount, int32_t rangeX, int32_t rangeY)
 {
 	for (int32_t i = 0; i < amount; i += 1)
 	{
-		Do_AddParticle5(name, absoluteX, absoluteY, rangeX, rangeY);
+		Do_AddParticleAbsolute2(name, absolutePos, rangeX, rangeY);
 	}
 }
 Point Get_RandomPointInBounds(Point bounds, bool wrapped, Random32* random)
@@ -1361,7 +1352,7 @@ bool Do_MoveToPlayer2(Entity entity, float speed, bool nullifyX, bool nullifyY)
 		playerY = Get_Y(entity);
 	}
 
-	return Do_MoveSomewhere(entity, playerX, playerY, speed);
+	return Do_MoveSomewhere(entity, Vector2_Create(playerX, playerY), speed);
 }
 void Do_MoveToClosestPlayer(Entity entity, float speed)
 {
@@ -1452,7 +1443,7 @@ void Do_DestroyChildrenByName2(Entity entity, const char* name, const char* part
 		Entity target = search->entities[i];
 		if (!Utils_StringEqualTo(particle, EE_STR_EMPTY))
 		{
-			Do_AddParticle2(particle, Get_Position(target));
+			Do_AddParticleAbsolute(particle, Get_Position(target));
 		}
 		Do_SetComplete(target);
 	}
@@ -1469,7 +1460,7 @@ void Do_DestroyEntitiesWithName2(const char* name, const char* particle)
 		Entity target = search->entities[i];
 		if (!Utils_StringEqualTo(particle, EE_STR_EMPTY))
 		{
-			Do_AddParticle2(particle, Get_Position(target));
+			Do_AddParticleAbsolute(particle, Get_Position(target));
 		}
 		Do_SetComplete(target);
 	}
@@ -1557,32 +1548,24 @@ void Do_SetHitFlashByModuloOverHalf2(Entity entity, int32_t value, int32_t sourc
 		Do_SetShader(entity, NULL);
 	}
 }
-bool Do_MoveSomewherePoint(Entity entity, Point target, float speed)
+bool Do_MoveSomewhere(Entity entity, Vector2 target, float speed)
 {
-	return Do_MoveSomewhere(entity, (float)target.X, (float)target.Y, speed);
-}
-bool Do_MoveSomewhereVector2(Entity entity, Vector2 target, float speed)
-{
-	return Do_MoveSomewhere(entity, target.X, target.Y, speed);
-}
-bool Do_MoveSomewhere(Entity entity, float targetX, float targetY, float speed)
-{
-	double distance = Get_Distance2(entity, targetX, targetY);
+	double distance = Get_Distance2(entity, target.X, target.Y);
 	bool isVeryClose = (Math_fabs(distance - speed) < .0001f);
 	if ((speed < distance) && !isVeryClose)
 	{
-		double angle = Get_AngleToSomewhere(entity, targetX, targetY);
+		double angle = Get_AngleToSomewhere(entity, target.X, target.Y);
 		double movementX = Get_VectorFromRadianAngleX(angle) * speed;
 		double movementY = Get_VectorFromRadianAngleY(angle) * speed;
-		Do_MoveAbsolute(entity, (float)(movementX), (float)(movementY));
+		Do_Move(entity, Vector2_Create((float)(movementX), (float)(movementY)));
 		return false;
 	}
 	else
 	{
 		Vector2 currentPos = Get_Position(entity);
-		float movementX = targetX - currentPos.X;
-		float movementY = targetY - currentPos.Y;
-		Do_MoveAbsolute(entity, movementX, movementY);
+		float movementX = target.X - currentPos.X;
+		float movementY = target.Y - currentPos.Y;
+		Do_Move(entity, Vector2_Create(movementX, movementY));
 		return true;
 	}
 }
@@ -1643,36 +1626,20 @@ void Do_SetColor(Entity entity, Color color)
 {
 	Get_DrawActor(entity)->mTintColor = color;
 }
-void Do_MovePoint(Entity entity, Point move, float speed)
+void Do_MoveBySpeed(Entity entity, Vector2 move, float speed)
 {
-	Do_Move(entity, (float)move.X, (float)move.Y, speed);
+	Do_Move(entity, Vector2_Create(move.X * speed, move.Y * speed));
 }
-void Do_MoveVector2(Entity entity, Vector2 move, float speed)
-{
-	Do_Move(entity, move.X, move.Y, speed);
-}
-void Do_Move(Entity entity, float x, float y, float speed)
-{
-	Do_MoveAbsolute(entity, x * speed, y * speed);
-}
-void Do_MovePointAbsolute(Entity entity, Point move)
-{
-	Do_MoveAbsolute(entity, (float)move.X, (float)move.Y);
-}
-void Do_MoveVector2Absolute(Entity entity, Vector2 move)
-{
-	Do_MoveAbsolute(entity, move.X, move.Y);
-}
-void Do_MoveAbsolute(Entity entity, float x, float y)
+void Do_Move(Entity entity, Vector2 move)
 {
 	FakePosition* position = (FakePosition*)Get_Component(C_FakePosition, entity);
-	position->mFakePosition.X += x;
-	position->mFakePosition.Y += y;
+	position->mFakePosition.X += move.X;
+	position->mFakePosition.Y += move.Y;
 	bool wasSuccessful;
 	Body* body = (Body*)TryGet_Component(C_Body, entity, &wasSuccessful);
 	if (wasSuccessful)
 	{
-		Body_Move(body, x, y);
+		Body_Move(body, move.X, move.Y);
 	}
 }
 void Do_MoveAtAngle(Entity entity, double angle, float speed)
@@ -1683,9 +1650,120 @@ void Do_MoveAtAngle(Entity entity, double angle, float speed)
 	double tempY = vecY * speed;
 	float moveX = (float)tempX;
 	float moveY = (float)tempY;
-	Do_MoveAbsolute(entity, moveX, moveY);
+	Do_Move(entity, Vector2_Create(moveX, moveY));
+}
+void Do_SetImagePhaseToNothing(Entity entity, const char* state)
+{
+	Do_SetImage(entity, state, COMDRAWACTORSYS_NOTHING);
+}
+float INTERNAL_Do_ShakeFHelperHelper(float currentShake, float min, float max, bool isLockedToInteger, bool isRandomDirection)
+{
+	if ((min < 0) || (max < 0))
+	{
+		Logger_Log(LOGGER_ERROR, "Random Shake F given value cannot be negative!");
+		if (min < 0)
+		{
+			min = 0;
+		}
+		if (max < 0)
+		{
+			max = 0;
+		}
+	}
+
+	if ((min == 0) && (max == 0))
+	{
+		return 0;
+	}
+
+	float newShake;
+	if (min >= max)
+	{
+		newShake = min;
+	}
+	else
+	{
+		float diff = max - min;
+		float randMul = Random32_NextFloat(Get_SharedRandom());
+		newShake = min + (diff * randMul);
+	}
+
+	if (isLockedToInteger)
+	{
+		newShake = (int)newShake;
+	}
+
+	int currentDirection = Math_SignumFloat(currentShake);
+	if ((currentDirection == 0) || isRandomDirection)
+	{
+		newShake *= Get_RandomBinaryDirection(Get_SharedRandom());
+	}
+	else
+	{
+		newShake *= -currentDirection;
+	}
+
+	return newShake;
+}
+Vector2 INTERNAL_Do_ShakeFHelper(Vector2 currentShake, float minX, float maxX, float minY, float maxY, bool isLockedToInteger, bool isRandomDirection)
+{
+	float tempX = INTERNAL_Do_ShakeFHelperHelper(currentShake.X, minX, maxX, isLockedToInteger, isRandomDirection);
+	float tempY = INTERNAL_Do_ShakeFHelperHelper(currentShake.Y, minY, maxY, isLockedToInteger, isRandomDirection);
+	return Vector2_Create(tempX, tempY);
+}
+void INTERNAL_Do_ShakeStateF(Entity entity, const char* state, float minX, float maxX, float minY, float maxY, bool isLockedToInteger, bool isRandomDirection)
+{
+	Vector2 currentShake = DrawActorSys_GetNudge(entity, state);
+	Vector2 newShake = INTERNAL_Do_ShakeFHelper(currentShake, minX, maxX, minY, maxY, isLockedToInteger, isRandomDirection);
+	DrawActorSys_SetNudge(entity, state, newShake.X, newShake.Y);
+}
+void Do_ShakeStateF(Entity entity, const char* state, float minX, float maxX, float minY, float maxY, bool isLockedToInteger, bool isRandomDirection, int framesToShake)
+{
+	ShakeFOverTime_Create(SHAKEFOVERTIME_TYPE_ENTITY_SINGLE_STATE, entity,
+		state, minX, maxX, minY, maxY, isLockedToInteger, isRandomDirection, framesToShake);
+}
+void INTERNAL_Do_ShakeF(Entity entity, float minX, float maxX, float minY, float maxY, bool isLockedToInteger, bool isRandomDirection)
+{
+	Vector2 currentShake = Get_DrawActor(entity)->mUniversalNudge;
+	Vector2 newShake = INTERNAL_Do_ShakeFHelper(currentShake, minX, maxX, minY, maxY, isLockedToInteger, isRandomDirection);
+	Get_DrawActor(entity)->mUniversalNudge = newShake;
+}
+void Do_ShakeF(Entity entity, float minX, float maxX, float minY, float maxY, bool isLockedToInteger, bool isRandomDirection, int framesToShake)
+{
+	ShakeFOverTime_Create(SHAKEFOVERTIME_TYPE_ENTITY_UNIVERSAL, entity,
+		OeState_DEFAULT, minX, maxX, minY, maxY, isLockedToInteger, isRandomDirection, framesToShake);
+}
+void INTERNAL_Do_ShakeCameraF(float minX, float maxX, float minY, float maxY, bool isLockedToInteger, bool isRandomDirection)
+{
+	if (Cvars_GetAsBool(CVARS_USER_IS_SCREENSHAKE_DISABLED))
+	{
+		return;
+	}
+
+	Camera* camera = Get_Camera();
+	Vector2 currentShake = camera->mCurrentShake;
+	Vector2 newShake = INTERNAL_Do_ShakeFHelper(currentShake, minX, maxX, minY, maxY, isLockedToInteger, isRandomDirection);
+	camera->mNewShake = newShake;
+}
+void Do_ShakeCameraF(float minX, float maxX, float minY, float maxY, bool isLockedToInteger, bool isRandomDirection, int framesToShake)
+{
+	ShakeFOverTime_Create(SHAKEFOVERTIME_TYPE_CAMERA, ENTITY_NOTHING,
+		OeState_DEFAULT, minX, maxX, minY, maxY, isLockedToInteger, isRandomDirection, framesToShake);
+}
+void Do_InitStringSetting(ComponentType ctype, const char* key, const char* value)
+{
+	//TOOD 2026
 }
 
+//REGION GET
+Rectangle Get_GameInternalResolutionBounds()
+{
+	return Utils_GetInternalBounds();
+}
+Rectangle Get_GameInternalRenderResolutionBounds()
+{
+	return Utils_GetInternalRenderBounds();
+}
 //GETS
 Random32* Get_SharedRandom(void)
 {
@@ -2253,10 +2331,6 @@ int32_t Get_ValueLockedToTileSize(float value)
 	int32_t tiles = (int32_t)(value / TILE_SIZE);
 	return tiles * TILE_SIZE;
 }
-int32_t Get_TuningAsInt(Entity entity, const char* dataName)
-{
-	return 0;
-}
 int32_t Get_ClampedValueAsInt(int32_t value, int32_t limit)
 {
 	int32_t signum = Math_SignumInt(value);
@@ -2349,7 +2423,7 @@ Vector2 Get_PlayerPosition(void)
 	Entity player = Get_Player();
 	if (player == ENTITY_NOTHING)
 	{
-		Logger_LogError("Player not present.");
+		Logger_Log(LOGGER_ERROR, "Player not present.");
 		return Vector2_Zero;
 	}
 
@@ -2493,8 +2567,8 @@ bool Get_StringSettingAsBooleanByChar(Entity entity, const char* setting)
 	const char* temp = Get_StringSettingAsString(entity, setting);
 	if (Utils_StringEqualTo(temp, EE_STR_EMPTY))
 	{
-		Logger_LogError("Missing char bool setting: ");
-		Logger_LogError(setting);
+		Logger_Log(LOGGER_ERROR, "Missing char bool setting: ");
+		Logger_Log(LOGGER_ERROR, setting);
 		return false;
 	}
 	return Utils_ParseBooleanFromChar(temp);
@@ -2508,8 +2582,8 @@ bool Get_StringSettingAsBoolean(Entity entity, const char* setting)
 	const char* temp = Get_StringSettingAsString(entity, setting);
 	if (Utils_StringEqualTo(temp, EE_STR_EMPTY))
 	{
-		Logger_LogError("Missing bool setting: ");
-		Logger_LogError(setting);
+		Logger_Log(LOGGER_ERROR, "Missing bool setting: ");
+		Logger_Log(LOGGER_ERROR, setting);
 		return false;
 	}
 	if (Utils_StringEqualTo(temp, "T") || Utils_StringEqualTo(temp, "TRUE"))
@@ -2537,6 +2611,11 @@ void Get_VectorFromRadianAngle(double radianAngle, Vector2* vec)
 void Get_VectorFromDegreeAngle(float degreeAngle, Vector2* vec)
 {
 	Get_VectorFromRadianAngle(Math_ToRadians(degreeAngle), vec);
+}
+Vector2 Get_VectorDirectionToPlayer(Entity entity)
+{
+	double angle = Get_AngleToPlayer(entity);
+	return Vector2_Create((float)Get_VectorFromRadianAngleX(angle), (float)Get_VectorFromRadianAngleY(angle));
 }
 double Get_VectorDirectionToPlayerX(Entity entity)
 {
@@ -2834,8 +2913,8 @@ Entity Do_BuildActor6(int32_t gridPositionX, int32_t gridPositionY, float initia
 	ThingSettings* settings = (ThingSettings*)ResourceMan_GetResourceData(ResourceList_ThingSettings(), name);
 	if (settings == NULL)
 	{
-		Logger_LogError("Unable to build entity:");
-		Logger_LogError(name);
+		Logger_Log(LOGGER_ERROR, "Unable to build entity:");
+		Logger_Log(LOGGER_ERROR, name);
 		return ENTITY_NOTHING;
 	}
 
@@ -2926,6 +3005,20 @@ void Do_SaveGame(void)
 void Do_SaveUserConfig(void)
 {
 	Cvars_SaveUserConfig();
+}
+Rectangle Get_CameraHingeGateBounds()
+{
+	return Camera_GetHingeGateBounds(Get_Camera());
+}
+float Get_TuningAsFloat(Entity owner, const char* tuning)
+{
+	//TODO 2026
+	return 0;
+}
+int32_t Get_TuningAsInt(Entity owner, const char* tuning)
+{
+	//TODO 2026
+	return 0;
 }
 
 //IS REGION
@@ -3035,7 +3128,7 @@ bool Is_PlayerPresent(bool logWarning)
 	{
 		if (logWarning)
 		{
-			Logger_LogWarning("Player not present.");
+			Logger_Log(LOGGER_WARNING, "Player not present.");
 		}
 		return false;
 	}
@@ -3415,6 +3508,26 @@ bool Is_DrawDisabled(Entity entity)
 {
 	return Is_ComponentPresent(C_TagIsDrawDisabled, entity);
 }
+bool Is_DuplicatePresentAtInitialPosition(ComponentType ctype, Entity entity)
+{
+	ComponentPack* pack = Get_ComponentPack(ctype);
+	PackIterator iter = PackIterator_Begin;
+	Vector2 myInitialPositon = Get_InitialPosition(entity);
+	while (ComponentPack_Next(pack, &iter))
+	{
+		if (iter.mEntity == entity)
+		{
+			continue;
+		}
+
+		Vector2 theirInitialPosition = Get_InitialPosition(iter.mEntity);
+		if (Vector2_EqualTo(myInitialPositon, theirInitialPosition))
+		{
+			return true;
+		}
+	}
+	return false;
+}
 void* Get_Component(ComponentType ctype, Entity entity)
 {
 	return GameStateManager_Set(ctype, entity);
@@ -3528,7 +3641,7 @@ void Do_DestroyChildrenWithComponent2(ComponentType ctype, Entity entity, const 
 		Entity target = search->entities[i];
 		if (!Utils_StringEqualTo(particle, EE_STR_EMPTY))
 		{
-			Do_AddParticle2(particle, Get_Position(target));
+			Do_AddParticleAbsolute(particle, Get_Position(target));
 		}
 		Do_SetComplete(target);
 	}
@@ -3572,7 +3685,7 @@ void Do_DestroyEntitiesWithComponent2(ComponentType ctype, const char* particle)
 		Entity target = search->entities[i];
 		if (!Utils_StringEqualTo(particle, EE_STR_EMPTY))
 		{
-			Do_AddParticle2(particle, Get_Position(target));
+			Do_AddParticleAbsolute(particle, Get_Position(target));
 		}
 		Do_SetComplete(target);
 	}

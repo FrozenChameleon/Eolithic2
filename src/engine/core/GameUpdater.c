@@ -31,6 +31,7 @@
 #include "../render/Renderer.h"
 #include "../gamestate/GameState.h"
 #include "GameHelper.h"
+#include "../resources/ResourceList.h"
 #ifdef EDITOR_MODE
 #include "../editor/Editor.h"
 #include "imgui.h"
@@ -89,7 +90,7 @@ static void DebugLogGameSpeed(void)
 	MString* tempString = NULL;
 	MString_AssignString(&tempString, "Game Speed: ");
 	MString_AddAssignDouble(&tempString, Globals_GetDebugGameSpeedAsMul());
-	Logger_LogInformation(MString_Text(tempString));
+	Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 	MString_Dispose(&tempString);
 }
 static void DebugLogBoolHelper(const char* info, bool value)
@@ -97,7 +98,7 @@ static void DebugLogBoolHelper(const char* info, bool value)
 	MString* tempString = NULL;
 	MString_AssignString(&tempString, info);
 	MString_AddAssignBool(&tempString, value);
-	Logger_LogInformation(MString_Text(tempString));
+	Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 	MString_Dispose(&tempString);
 }
 static void Cheats(void)
@@ -122,12 +123,12 @@ static void Cheats(void)
 		if (Input_IsKeyTapped(KEYS_NUMPAD3))
 		{
 			//UNUSED
-			Logger_LogInformation("Reloaded Audio");
+			Logger_Log(LOGGER_INFORMATION, "Reloaded Audio");
 		}
 		if (Input_IsKeyTapped(KEYS_NUMPAD4))
 		{
 			GameUpdater_DebugReloadGraphics();
-			Logger_LogInformation("Reloaded All Assets And Animations");
+			Logger_Log(LOGGER_INFORMATION, "Reloaded All Assets And Animations");
 		}
 	}
 	else if (Input_IsShiftPressed())
@@ -329,7 +330,7 @@ static bool HandleDebugPauseAndStep(void)
 	{
 		Tick();
 		Renderer_SetupRenderState();
-		Logger_LogInformation("Step");
+		Logger_Log(LOGGER_INFORMATION, "Step");
 		return true;
 	}
 
@@ -344,7 +345,7 @@ static bool HandleDebugPauseAndStep(void)
 		//Utils_ToggleNextUserLanguage(true); //UNUSED
 		Tick();
 		Renderer_SetupRenderState();
-		Logger_LogInformation("Step");
+		Logger_Log(LOGGER_INFORMATION, "Step");
 		return true;
 	}
 
@@ -596,12 +597,14 @@ void GameUpdater_Update(double deltaTime)
 }
 void GameUpdater_DebugReloadMap(void)
 {
+	ResourceMan_Reload(ResourceList_LevelData(), Get_LevelFileName());
+
 	//Get_LevelDataResource()->Reload(); //UNUSED FOR NOW
 	
 	{
 		MString* tempString = NULL;
 		MString_Combine5(&tempString, "Map Reloaded (Full) [", Resource_GetName(Get_LevelDataResource()), "][", Get_LevelFileName(), "]");
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -615,7 +618,7 @@ void GameUpdater_DebugSaveMap(void)
 	Resource_Save(Get_LevelDataResource(), true);
 	//Editor_Save();
 	Do_PlaySound2("editorSave", 1.0f);
-	Logger_LogInformation("Map Saved");
+	Logger_Log(LOGGER_INFORMATION, "Map Saved");
 #endif
 }
 void GameUpdater_FastReset(void)
@@ -627,7 +630,7 @@ void GameUpdater_FastReset(void)
 	{
 		MString* tempString = NULL;
 		MString_Combine5(&tempString, "Map Reloaded (Fast) [", Resource_GetPath(Get_LevelDataResource()), "][", Get_LevelData()->mLevelName, "]");
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 }
@@ -644,14 +647,15 @@ void GameUpdater_FastResetPlusMove(void)
 	Globals_SetIsEditorActive(false);
 	MString* tempString = MString_CreateForJustThisFrame();
 	MString_Combine5(&tempString, "Map Reloaded (Fast+Move) [", Resource_GetPath(Get_LevelDataResource()), "][", Get_LevelData()->mLevelName, "]");
-	Logger_LogInformation(MString_Text(tempString));
+	Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 	GameHelper_OnDebugFastResetPlusMove();
 #endif
 }
 void GameUpdater_ToggleEditor(void)
 {
 	Globals_SetIsEditorActive(!Globals_IsEditorActive());
-	Logger_LogInformation("Editor Toggle");
+	Renderer_ApplyChanges();
+	Logger_Log(LOGGER_INFORMATION, "Editor Toggle");
 }
 void GameUpdater_ToggleDebugAutoSpeed(void)
 {
@@ -673,7 +677,7 @@ void GameUpdater_CycleDebugShowInfo(void)
 		MString* tempString = NULL;
 		MString_AssignString(&tempString, "Debug Info: ");
 		MString_AddAssignBool(&tempString, GLOBALS_DEBUG_SHOW_INFO);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 }

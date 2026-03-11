@@ -112,7 +112,7 @@ static bool ReadDataCvars2(const char* pathWithoutExtension, const char* debugNa
 		{
 			MString* tempString = NULL;
 			MString_Combine3(&tempString, debugName, " data dir cvars loaded from ", MString_Text(path));
-			Logger_LogInformation(MString_Text(tempString));
+			Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 			MString_Dispose(&tempString);
 		}
 		successfullyReadTheFile = true;
@@ -122,7 +122,7 @@ static bool ReadDataCvars2(const char* pathWithoutExtension, const char* debugNa
 		{
 			MString* tempString = NULL;
 			MString_Combine3(&tempString, debugName, " data dir cvars missing at ", MString_Text(path));
-			Logger_LogInformation(MString_Text(tempString));
+			Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 			MString_Dispose(&tempString);
 		}
 		if (isBinary)
@@ -311,7 +311,7 @@ void Cvars_SaveUserConfig2(bool showSavingAnimation)
 	if (showSavingAnimation)
 	{
 		Utils_JustSaved();
-		Logger_LogInformation("User config file saved");
+		Logger_Log(LOGGER_INFORMATION, "User config file saved");
 	}
 }
 FixedByteBuffer* Cvars_CreateBufferFromUserConfigs(void)
@@ -359,7 +359,7 @@ void Cvars_LoadInitialCvars(void)
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "Version: ", Cvars_GetAsString(CVARS_ENGINE_VERSION));
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -380,7 +380,7 @@ void Cvars_LoadInitialCvars(void)
 		if (!Cvars_LoadSaveCvarsFromBlob())
 		{
 			Cvars_SaveUserConfig2(false);
-			Logger_LogInformation("Need to test frame rate because this is the first game launch");
+			Logger_Log(LOGGER_INFORMATION, "Need to test frame rate because this is the first game launch");
 			Globals_SetAsNeedToTestFrameRate();
 		}
 #ifdef EDITOR_MODE

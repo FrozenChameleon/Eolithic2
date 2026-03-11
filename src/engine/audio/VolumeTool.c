@@ -60,7 +60,7 @@ static void PrintLoadFailure(const char* strVolumeType)
 {
 	MString* temp = MString_CreateForJustThisFrame();
 	MString_Combine2(&temp, "Failed to load volume data for ", strVolumeType);
-	Logger_LogWarning(MString_Text(temp));
+	Logger_Log(LOGGER_WARNING, MString_Text(temp));
 }
 
 int32_t VolumeTool_GetVolume(const char* name, bool isMusic)
@@ -120,7 +120,7 @@ static void LoadHelper(bool isMusic)
 
 	MString* tempString = MString_CreateForJustThisFrame();
 	MString_Combine2(&tempString, "Loaded volume data for ", strVolumeType);
-	Logger_LogWarning(MString_Text(tempString));
+	Logger_Log(LOGGER_WARNING, MString_Text(tempString));
 }
 void VolumeTool_Load()
 {

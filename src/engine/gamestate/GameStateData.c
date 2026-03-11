@@ -53,7 +53,7 @@ void GameStateData_FillListWithEntitiesInPlay(GameStateData* gsd, EntitySearch* 
 	ComponentPack* pack = GameStateData_GetComponentPack(gsd, C_TagIsInPlay);
 	if (list->cap < pack->_mLength)
 	{
-		Logger_LogWarning("Not enough room to fill list with entities in play.");
+		Logger_Log(LOGGER_WARNING, "Not enough room to fill list with entities in play.");
 		return;
 	}
 

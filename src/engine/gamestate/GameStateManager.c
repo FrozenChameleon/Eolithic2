@@ -162,19 +162,19 @@ void GameStateManager_LoadMap(const char* mapToLoad)
 {
 	if(mapToLoad == NULL)
 	{
-		Logger_LogWarning("Attempted to load NULL map!");
+		Logger_Log(LOGGER_WARNING, "Attempted to load NULL map!");
 		return;
 	}
 	else if (Utils_StringEqualTo(mapToLoad, EE_STR_NOT_SET))
 	{
-		Logger_LogWarning("Attempted to load EMPTY STRING map!");
+		Logger_Log(LOGGER_WARNING, "Attempted to load EMPTY STRING map!");
 		return;
 	}
 
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "Attempting to load map: ", mapToLoad);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -218,7 +218,7 @@ void GameStateManager_LoadMap(const char* mapToLoad)
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "Map loaded: ", mapToLoad);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 

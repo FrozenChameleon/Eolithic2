@@ -835,15 +835,15 @@ void Renderer_Commit(SpriteBatch* render, Matrix translation, double deltaTime)
 }
 void Renderer_LogInfo(const char* msg)
 {
-	Logger_LogInformation(msg);
+	Logger_Log(LOGGER_INFORMATION, msg);
 }
 void Renderer_LogWarning(const char* msg)
 {
-	Logger_LogWarning(msg);
+	Logger_Log(LOGGER_WARNING, msg);
 }
 void Renderer_LogError(const char* msg)
 {
-	Logger_LogError(msg);
+	Logger_Log(LOGGER_ERROR, msg);
 }
 SpriteEffects Renderer_GetEffects(bool flipX, bool flipY)
 {

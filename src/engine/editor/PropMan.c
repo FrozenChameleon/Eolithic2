@@ -47,7 +47,7 @@ static void CreatePropDudeWindow()
 
 	if (ImGui::Button("Setup New", ImVec2(100, 25)))
 	{
-		Logger_LogInformation("New prop setup");
+		Logger_Log(LOGGER_INFORMATION, "New prop setup");
 		Utils_strlcpy(_mTempFileName, EE_STR_NOT_SET, EE_FILENAME_MAX);
 		Prop_Init(&_mProp);
 	}

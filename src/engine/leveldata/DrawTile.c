@@ -13,10 +13,10 @@
 #include "../io/BufferReader.h"
 #include "../io/File.h"
 #include "AnimTile.h"
-#include "../resources/ResourceMan.h"
 #include "../render/DrawTool.h"
 #include "../render/Color.h"
 #include "../utils/Utils.h"
+#include "../resources/ResourceList.h"
 
 void DrawTile_Init(DrawTile* drawTile)
 {
@@ -55,26 +55,25 @@ void DrawTile_LoadAnimation(DrawTile* drawTile, const char* animation)
 }
 void DrawTile_Draw(DrawTile* drawTile, SpriteBatch* spriteBatch, Texture* texture, Color color, int32_t depth, int32_t x, int32_t y)
 {
-	/*if (drawTile->mAnimation.size() != 0) //UNUSED
+	if ((drawTile->mPoint.X != -1) || (drawTile->mPoint.Y != -1))
 	{
-		OeAnimTile* tile = OeResourceMans_AnimTileManager.GetResourceData(drawTile->mAnimation);
+		Point point = DrawTile_GetCorrectPoint(drawTile);
 
-		if (tile != nullptr)
+		SpriteBatch_Draw(spriteBatch, texture, color, depth, nullptr, Vector2(x, y), Rectangle(point.X, point.Y, TILE_SIZE, TILE_SIZE),
+			Vector2_One, drawTile->mRotation, drawTile->mFlipX, drawTile->mFlipY, Vector2(TILE_SIZE / 2));
+	}
+	else if (!Utils_IsStringEmpty(drawTile->mAnimation)) //UNUSED
+	{
+		AnimTile* at = (AnimTile*)ResourceMan_GetResourceData(ResourceList_AnimTile(), drawTile->mAnimation);
+		if (at != NULL)
 		{
-			tile->Draw(spriteBatch, color, depth, x, y, drawTile->mRotation, drawTile->mFlipX, drawTile->mFlipY);
+			AnimTile_Draw(at, spriteBatch, color, depth, x, y, drawTile->mRotation, drawTile->mFlipX, drawTile->mFlipY);
 		}
 		else
 		{
-			OeDrawTool_DrawRectangle(spriteBatch, OeColors_RED, 100, Rectangle(x, y, TILE_SIZE, TILE_SIZE), 0, false);
+			DrawTool_DrawRectangle2(spriteBatch, COLOR_RED, 100, Rectangle_Create(x, y, TILE_SIZE, TILE_SIZE), 0, false);
 		}
 	}
-	else if (drawTile->mPoint.X != -1 || drawTile->mPoint.Y != -1)
-	{
-		Point point = GetCorrectPoint(drawTile);
-
-		spriteBatch->Draw(texture, color, depth, nullptr, Vector2(x, y), Rectangle(point.X, point.Y, TILE_SIZE, TILE_SIZE),
-			Vector2_One, drawTile->mRotation, drawTile->mFlipX, drawTile->mFlipY, Vector2(TILE_SIZE / 2));
-	}*/
 }
 Point DrawTile_GetCorrectPoint(DrawTile* drawTile)
 {

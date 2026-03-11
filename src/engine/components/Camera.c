@@ -460,3 +460,12 @@ void Camera_ShakeCamera(Camera* camera, int32_t minX, int32_t maxX, int32_t minY
 {
 	Camera_ShakeCameraMul(camera, 1, minX, maxX, minY, maxY);
 }
+Rectangle Camera_GetHingeGateBounds(Camera* camera)
+{
+	Rectangle bounds;
+	bounds.X = camera->mHingeGateLeft;
+	bounds.Y = camera->mHingeGateTop;
+	bounds.Width = camera->mHingeGateRight - camera->mHingeGateLeft;
+	bounds.Height = camera->mHingeGateBottom - camera->mHingeGateTop;
+	return bounds;
+}

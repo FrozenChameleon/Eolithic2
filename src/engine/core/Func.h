@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "../globals/ObjectTypes.h"
 #include "../utils/Macros.h"
 #include "../math/Vector2.h"
 #include "../math/Point.h"
@@ -199,14 +200,11 @@ void Do_Shake(Entity entity, const char* state, int32_t amountX, int32_t amountY
 void Do_ClearShake(Entity entity);
 void Do_ClearShake2(Entity entity, const char* state);
 ParticleInstance* Do_AddParticle(Entity entity, const char* name);
-ParticleInstance* Do_AddParticle2(const char* name, Vector2 absolutePos);
-ParticleInstance* Do_AddParticle3(const char* name, Vector2 absolutePos, int32_t rangeX, int32_t rangeY);
-ParticleInstance* Do_AddParticle4(const char* name, float absoluteX, float absoluteY);
-ParticleInstance* Do_AddParticle5(const char* name, float absoluteX, float absoluteY, int32_t rangeX, int32_t rangeY);
-void Do_AddParticles(const char* name, Vector2 absolutePos, int32_t amount);
-void Do_AddParticles2(const char* name, float absoluteX, float absoluteY, int32_t amount);
-void Do_AddParticles3(const char* name, Vector2 absolutePos, int32_t amount, int32_t rangeX, int32_t rangeY);
-void Do_AddParticles4(const char* name, float absoluteX, float absoluteY, int32_t amount, int32_t rangeX, int32_t rangeY);
+ParticleInstance* Do_AddParticle2(Entity entity, const char* name, Vector2 offset);
+ParticleInstance* Do_AddParticleAbsolute(const char* name, Vector2 absolutePos);
+ParticleInstance* Do_AddParticleAbsolute2(const char* name, Vector2 absolutePos, int32_t rangeX, int32_t rangeY);
+void Do_AddParticlesAbsolute(const char* name, Vector2 absolutePos, int32_t amount);
+void Do_AddParticlesAbsolute2(const char* name, Vector2 absolutePos, int32_t amount, int32_t rangeX, int32_t rangeY);
 Point Get_RandomPointInBounds(Point bounds, bool wrapped, Random32* random);
 void Do_DestroyParticlesByName(const char* name);
 void Do_ImprintTile(Vector2 position, int32_t type);
@@ -227,7 +225,6 @@ void Do_SetFlipYBool(Entity entity, bool value);
 void Do_SetFlipYFloat(Entity entity, float value);
 void Do_SetFlipYDouble(Entity entity, double value);
 void Do_SetFlipYInt(Entity entity, int32_t value);
-
 void Do_AddCameraShake(int32_t timerLimit, int32_t minX, int32_t maxX, int32_t minY, int32_t maxY);
 void Do_ShakeCamera(int32_t minX, int32_t maxX, int32_t minY, int32_t maxY);
 void Do_AddCameraShakeWhileOnScreen(Entity entity, int32_t timerLimit, int32_t minX, int32_t maxX, int32_t minY, int32_t maxY, float mul);
@@ -275,9 +272,7 @@ void Do_SetHitFlashByModulo(Entity entity, int32_t value, int32_t target);
 void Do_SetHitFlashByModulo2(Entity entity, int32_t value, int32_t target, int32_t source);
 void Do_SetHitFlashByModuloOverHalf(Entity entity, int32_t value);
 void Do_SetHitFlashByModuloOverHalf2(Entity entity, int32_t value, int32_t source);
-bool Do_MoveSomewherePoint(Entity entity, Point target, float speed);
-bool Do_MoveSomewhereVector2(Entity entity, Vector2 target, float speed);
-bool Do_MoveSomewhere(Entity entity, float targetX, float targetY, float speed);
+bool Do_MoveSomewhere(Entity entity, Vector2 target, float speed);
 bool Do_MoveSomewhereToVector(Vector2* moveThis, Vector2 target, float speed);
 void Do_SetImage(Entity entity, const char* state, const char* phase);
 void Do_SetImage2(Entity entity, const char* state, const char* phase, bool carry);
@@ -285,16 +280,32 @@ void Do_SetImageForced(Entity entity, const char* state, const char* phase);
 void Do_SetImageForced2(Entity entity, const char* state, const char* phase, bool carry);
 void Do_RestrictOnSides(Entity entity);
 void Do_SetColor(Entity entity, Color color);
-void Do_MovePoint(Entity entity, Point move, float speed);
-void Do_MoveVector2(Entity entity, Vector2 move, float speed);
-void Do_Move(Entity entity, float x, float y, float speed);
-void Do_MovePointAbsolute(Entity entity, Point move);
-void Do_MoveVector2Absolute(Entity entity, Vector2 move);
-void Do_MoveAbsolute(Entity entity, float x, float y);
+void Do_MoveBySpeed(Entity entity, Vector2 move, float speed);
+void Do_Move(Entity entity, Vector2 move);
 void Do_MoveAtAngle(Entity entity, double angle, float speed);
+void Do_SetImagePhaseToNothing(Entity entity, const char* state);
+float INTERNAL_Do_ShakeFHelperHelper(float currentShake, float min, float max,
+	bool isLockedToInteger, bool isRandomDirection);
+Vector2 INTERNAL_Do_ShakeFHelper(Vector2 currentShake, float minX, float maxX, float minY, float maxY,
+	bool isLockedToInteger, bool isRandomDirection);
+void INTERNAL_Do_ShakeStateF(Entity entity, const char* state, float minX, float maxX, float minY, float maxY,
+	bool isLockedToInteger, bool isRandomDirection);
+void Do_ShakeStateF(Entity entity, const char* state, float minX, float maxX, float minY, float maxY,
+	bool isLockedToInteger, bool isRandomDirection, int framesToShake);
+void INTERNAL_Do_ShakeF(Entity entity, float minX, float maxX, float minY, float maxY,
+	bool isLockedToInteger, bool isRandomDirection);
+void Do_ShakeF(Entity entity, float minX, float maxX, float minY, float maxY,
+	bool isLockedToInteger, bool isRandomDirection, int framesToShake);
+void INTERNAL_Do_ShakeCameraF(float minX, float maxX, float minY, float maxY,
+	bool isLockedToInteger, bool isRandomDirection);
+void Do_ShakeCameraF(float minX, float maxX, float minY, float maxY,
+	bool isLockedToInteger, bool isRandomDirection, int framesToShake);
+void Do_InitStringSetting(ComponentType ctype, const char* key, const char* value);
 //ENDREGION
 
 //REGION GET
+Rectangle Get_GameInternalResolutionBounds();
+Rectangle Get_GameInternalRenderResolutionBounds();
 Random32* Get_SharedRandom(void);
 void Do_SetDebugForcedMove(Entity entity);
 int32_t Get_DebugForcedMove(Entity entity);
@@ -372,7 +383,6 @@ float Get_InitialX(Entity entity);
 float Get_InitialY(Entity entity);
 int32_t Get_FacingDirection(Entity entity);
 int32_t Get_ValueLockedToTileSize(float value);
-int32_t Get_TuningAsInt(Entity entity, const char* dataName);
 int32_t Get_ClampedValueAsInt(int32_t value, int32_t limit);
 float Get_ClampedValueAsFloat(float value, float limit);
 double Get_ClampedValueAsDouble(double value, double limit);
@@ -415,6 +425,7 @@ double Get_VectorFromRadianAngleX(double radianAngle);
 double Get_VectorFromRadianAngleY(double radianAngle);
 void Get_VectorFromRadianAngle(double radianAngle, Vector2* vec);
 void Get_VectorFromDegreeAngle(float degreeAngle, Vector2* vec);
+Vector2 Get_VectorDirectionToPlayer(Entity entity);
 double Get_VectorDirectionToPlayerX(Entity entity);
 double Get_VectorDirectionToPlayerY(Entity entity);
 double Get_VectorToAngleLegacyDoNotUse(float x, float y);
@@ -471,6 +482,9 @@ void Do_SendBroadcast4(int32_t type, int32_t packet1, int32_t packet2, int32_t p
 int32_t Get_CameraHingeBottom(void);
 void Do_SaveGame(void);
 void Do_SaveUserConfig(void);
+Rectangle Get_CameraHingeGateBounds();
+float Get_TuningAsFloat(Entity owner, const char* tuning);
+int32_t Get_TuningAsInt(Entity owner, const char* tuning);
 //ENDREGION
 
 //REGION IS
@@ -551,6 +565,7 @@ bool Is_LevelFrameCountModulo(int32_t value, int32_t target);
 bool Is_UpdateDisabled(Entity entity);
 bool Is_TaggedAsEnemy(Entity entity);
 bool Is_DrawDisabled(Entity entity);
+bool Is_DuplicatePresentAtInitialPosition(ComponentType ctype, Entity entity);
 //ENDREGION
 
 //TEMPLATE STUFF

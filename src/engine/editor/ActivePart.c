@@ -39,16 +39,16 @@ static PartFuncData _mEditorParts[8];
 	 switch (part)
 	 {
 	 case EDITORPART_COLLISION:
-		 Logger_LogInformation("Mode: Collision");
+		 Logger_Log(LOGGER_INFORMATION, "Mode: Collision");
 		 break;
 	case EDITORPART_TILE_PICKER:
-		 Logger_LogInformation("Mode: Tile");
+		 Logger_Log(LOGGER_INFORMATION, "Mode: Tile");
 		 break;
 	 case EDITORPART_THING: 
-		 Logger_LogInformation("Mode: Thing");
+		 Logger_Log(LOGGER_INFORMATION, "Mode: Thing");
 		 break;
 	 case EDITORPART_PROP:
-		 Logger_LogInformation("Mode: Prop");
+		 Logger_Log(LOGGER_INFORMATION, "Mode: Prop");
 		 break;/*
 	 case PART_LINE:
 		 OeLogger.LogInformation("Mode: Line");

@@ -31,8 +31,8 @@ typedef struct Camera
 	bool mChangedCameraHingeY;
 	bool mIsUpdateDisabled;
 	Point mHingeDirection;
-	Point mNewShake;
-	Point mCurrentShake;
+	Vector2 mNewShake;
+	Vector2 mCurrentShake;
 	Vector2 mLastDifference;
 	Vector2 mCurrentPosition;
 	Vector2 mLastRenderedPosition; //DO NOT USE FOR LOGIC
@@ -117,3 +117,4 @@ void Camera_SetHingeGateTop(Camera* camera, int32_t value);
 void Camera_SetHingeGateBottom(Camera* camera, int32_t value);
 void Camera_ShakeCameraMul(Camera* camera, float mul, int32_t minX, int32_t maxX, int32_t minY, int32_t maxY);
 void Camera_ShakeCamera(Camera* camera, int32_t minX, int32_t maxX, int32_t minY, int32_t maxY);
+Rectangle Camera_GetHingeGateBounds(Camera* camera);

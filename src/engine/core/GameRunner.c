@@ -33,7 +33,7 @@ static const char ARGS_FILE_SEPARATOR = ' ';
 
 	if (Globals_IsDebugFileMode())
 	{
-		Logger_LogInformation("Game is in debug file mode");
+		Logger_Log(LOGGER_INFORMATION, "Game is in debug file mode");
 	}
 }*/
 /*static void FillArgListFromArgFile(std_string path, std_vector<std_string>& argList)
@@ -43,7 +43,7 @@ static const char ARGS_FILE_SEPARATOR = ' ';
 		return;
 	}
 
-	OeLogger_LogInformation("Loading arg file: " + path);
+	OeLogger_Log(LOGGER_INFORMATION, "Loading arg file: " + path);
 	std_string temp;
 
 	//WILLNOTDO 06262023 2023
@@ -97,7 +97,7 @@ static void HandleCvarsFromArgList(int argc, char* args[])
 			{
 				MString* tempString = NULL;
 				MString_Combine3(&tempString, argument, " ", MString_Text(cvarValue));
-				Logger_LogInformation(MString_Text(tempString));
+				Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 				MString_Dispose(&tempString);
 			}
 
@@ -214,7 +214,7 @@ static void HandleSpecialArgsFromArgList(int argc, char* args[])
 		}
 		if (showArg)
 		{
-			Logger_LogInformation(argument);
+			Logger_Log(LOGGER_INFORMATION, argument);
 		}
 	}
 }
@@ -290,7 +290,7 @@ int GameRunner_Run(int argc, char* args[])
 
 	GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS = Cvars_GetAsBool(CVARS_ENGINE_FORCE_LOAD_DATS); //UNUSED FOR NOW
 
-	Logger_SetLevel(Cvars_GetAsInt(CVARS_ENGINE_LOGGER_LEVEL));
+	Logger_SetLevel((LoggerLevel)Cvars_GetAsInt(CVARS_ENGINE_LOGGER_LEVEL));
 
 	Service_Init();
 

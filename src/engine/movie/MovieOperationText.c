@@ -167,7 +167,7 @@ void MovieOperationText_Init(MovieOperationText* text, bool isMappedText, const 
 				}
 				if (!wasFound)
 				{
-					Logger_LogInformation("Unable to find index for movie play sound!");
+					Logger_Log(LOGGER_INFORMATION, "Unable to find index for movie play sound!");
 				}
 				MString_Dispose(&sound);
 			}
@@ -192,7 +192,7 @@ void MovieOperationText_Init(MovieOperationText* text, bool isMappedText, const 
 				}
 				if (!wasFound)
 				{
-					Logger_LogInformation("Unable to find index for movie text pause!");
+					Logger_Log(LOGGER_INFORMATION, "Unable to find index for movie text pause!");
 				}
 				MString_Dispose(&number);
 			}

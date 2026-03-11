@@ -40,6 +40,7 @@ typedef struct Body
 	int32_t mPhysicsOriginalHeight;
 	int32_t mPhysicsWidth;
 	int32_t mPhysicsHeight;
+	int32_t mIgnoreThisFlag;
 	float mMaxDeceleration;
 	bool mUseOnlyFixedGravity;
 	bool mIgnoreFixedGravityY;

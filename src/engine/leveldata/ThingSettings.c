@@ -26,7 +26,12 @@ void ThingSettings_Init(ThingSettings* ts)
 
 	sh_new_arena(ts->sh_graphics_data);
 }
-
+ThingSettings* ThingSettings_CreateNew()
+{
+	ThingSettings* ts = (ThingSettings*)Utils_calloc(1, sizeof(ThingSettings));
+	ThingSettings_Init(ts);
+	return ts;
+}
 void ThingSettings_Read(ThingSettings* ts, BufferReader* br)
 {
 	if (!BufferReader_ReadMagicNumber(br))
@@ -80,7 +85,6 @@ void ThingSettings_Read(ThingSettings* ts, BufferReader* br)
 		shput(ts->sh_graphics_data, MString_Text(key1), entry);
 	}
 }
-
 void ThingSettings_Write(ThingSettings* ts, DynamicByteBuffer* dbb)
 {
 	DynamicByteBuffer_WriteMagicNumber(dbb);
@@ -121,10 +125,9 @@ void ThingSettings_Write(ThingSettings* ts, DynamicByteBuffer* dbb)
 		}
 	}
 }
-
 ThingSettings* ThingSettings_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br)
 {
-	ThingSettings* ts = (ThingSettings*)Utils_calloc(1, sizeof(ThingSettings));
+	ThingSettings* ts = ThingSettings_CreateNew();
 	ThingSettings_Init(ts);
 	ThingSettings_Read(ts, br);
 	return ts;
@@ -278,7 +281,6 @@ ImageData* ThingSettings_GetImageDatas(ThingSettings* ts, const char* state, con
 	*out_image_datas_len = (int32_t)arrlen(imageDatas);
 	return imageDatas;
 }
-
 void ThingSettings_AddImageData(ThingSettings* ts, const char* state, const char* phase, ImageData data)
 {
 	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
@@ -295,7 +297,6 @@ void ThingSettings_AddImageData(ThingSettings* ts, const char* state, const char
 
 	arrput(ts->sh_graphics_data[stateIndex].value[phaseIndex].value, data);
 }
-
 void ThingSettings_RemoveImageData(ThingSettings* ts, const char* state, const char* phase, int32_t imageIndex)
 {
 	int64_t stateIndex = ThingSettings_GetStateIndex(ts, state);
@@ -314,4 +315,13 @@ void ThingSettings_RemoveImageData(ThingSettings* ts, const char* state, const c
 	{
 		arrdel(ts->sh_graphics_data[stateIndex].value[phaseIndex].value, imageIndex);
 	}
+}
+void ThingSettings_CopyTo(ThingSettings* dst, ThingSettings* src)
+{
+	DynamicByteBuffer* dbb = DynamicByteBuffer_Create();
+	ThingSettings_Write(src, dbb);
+	ThingSettings_Init(dst);
+	BufferReader* br = BufferReader_Create(DynamicByteBuffer_ConvertToFixedByteBufferAndDisposeDBB(dbb));
+	ThingSettings_Read(dst, br);
+	BufferReader_Dispose(br);
 }

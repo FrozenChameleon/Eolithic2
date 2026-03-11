@@ -140,6 +140,17 @@ static void ReceiveBroadcast(void* givenData, int32_t type, int32_t packet1, int
 		SystemFunc_ReceiveBroadcastHelper(ss->_mType, ss->_mReceiveBroadcastRoutine, type, packet1, packet2, packet3);
 	}
 }
+static void InitStringSettingsHere(void* givenData)
+{
+	SystemSimple* ss = (SystemSimple*)givenData;
+
+	InitSystemSimple(ss);
+
+	if (ss->_mInitStringSettingsHereRoutine != NULL)
+	{
+		ss->_mInitStringSettingsHereRoutine();
+	}
+}
 
 SystemSimple* SystemSimple_Create(ComponentType ctype)
 {
@@ -151,7 +162,6 @@ System* SystemSimple_CreateSystem(SystemSimple* ss)
 {
 	System* sys = System_Create();
 	sys->_mData = ss;
-	//sys->_mInitStringSettingsHere = InitStringSetting;
 	sys->_mInit = Init;
 	sys->_mUpdate = Update;
 	sys->_mDraw = Draw;
@@ -159,5 +169,6 @@ System* SystemSimple_CreateSystem(SystemSimple* ss)
 	sys->_mDrawDebugHud = DrawDebugHud;
 	sys->_mUpdateLastRenderPosition = UpdateLastRenderPosition;
 	sys->_mReceiveBroadcast = ReceiveBroadcast;
+	sys->_mInitStringSettingsHere = InitStringSettingsHere;
 	return sys;
 }

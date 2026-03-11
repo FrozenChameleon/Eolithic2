@@ -38,7 +38,7 @@ bool SoundEffectInstance_Setup(SoundEffectInstance* sei, const char* name, WaveF
 {
 	if (waveFileData == NULL)
 	{
-		Logger_LogInformation("Handed NULL wave file!");
+		Logger_Log(LOGGER_INFORMATION, "Handed NULL wave file!");
 		return false;
 	}
 
@@ -76,7 +76,7 @@ bool SoundEffectInstance_Setup(SoundEffectInstance* sei, const char* name, WaveF
 			MString* tempString = NULL;
 			MString_AssignString(&tempString, "Sound effect instance sample/channel mismatch for : ");
 			MString_AddAssignString(&tempString, name);
-			Logger_LogInformation(MString_Text(tempString));
+			Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 			MString_Dispose(&tempString);
 			init = true;
 		}

@@ -39,13 +39,13 @@ static void DisposeHelper(IStringArray* sa, bool checkForIsJustThisFrame)
 {
 	if (sa == NULL)
 	{
-		Logger_LogInformation("Attempted to dispose NULL IStringArray");
+		Logger_Log(LOGGER_INFORMATION, "Attempted to dispose NULL IStringArray");
 		return;
 	}
 
 	if (checkForIsJustThisFrame && sa->isJustThisFrame)
 	{
-		Logger_LogWarning("Attempted to dispose just-this-frame IStringArray in incorrect way!");
+		Logger_Log(LOGGER_WARNING, "Attempted to dispose just-this-frame IStringArray in incorrect way!");
 		return;
 	}
 

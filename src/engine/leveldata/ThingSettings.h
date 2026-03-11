@@ -18,16 +18,16 @@ enum
 	THING_SETTINGS_BINARY_VERSION = 3
 };
 
-typedef struct ThingGraphicsEntry
+typedef struct ThingGraphicsPhases
 {
 	char* key; 
 	ImageData* value; //THIS IS AN STB ARRAY, SHOULD BE ARR_
 } ThingGraphicsEntry;
 
-typedef struct ThingGraphicsData
+typedef struct ThingGraphicsStates
 {
 	char* key;
-	ThingGraphicsEntry* value; //THIS IS AN STB SHMAP, SHOULD BE SH_
+	ThingGraphicsPhases* value; //THIS IS AN STB SHMAP, SHOULD BE SH_
 } ThingGraphicsData;
 
 typedef struct ThingSettings
@@ -42,11 +42,11 @@ typedef struct ThingSettings
 	char mDefaultState[EE_FILENAME_MAX];
 	char mDefaultPhase[EE_FILENAME_MAX];
 	char mPreviewSheet[EE_FILENAME_MAX];
-	ThingGraphicsData* sh_graphics_data;
+	ThingGraphicsStates* sh_graphics_data;
 } ThingSettings;
 
 void ThingSettings_Init(ThingSettings* ts);
-
+ThingSettings* ThingSettings_CreateNew();
 void ThingSettings_Read(ThingSettings* ts, BufferReader* br);
 void ThingSettings_Write(ThingSettings* ts, DynamicByteBuffer* dbb);
 ThingSettings* ThingSettings_FromStream(const char* path, const char* filenameWithoutExtension, BufferReader* br);
@@ -68,3 +68,4 @@ int64_t ThingSettings_GetImagesLength(ThingSettings* ts, const char* state, cons
 ImageData* ThingSettings_GetImageDatas(ThingSettings* ts, const char* state, const char* phase, int32_t* out_image_datas_len);
 void ThingSettings_AddImageData(ThingSettings* ts, const char* state, const char* phase, ImageData data);
 void ThingSettings_RemoveImageData(ThingSettings* ts, const char* state, const char* phase, int32_t imageIndex);
+void ThingSettings_CopyTo(ThingSettings* dst, ThingSettings* src);

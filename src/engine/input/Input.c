@@ -220,7 +220,7 @@ void Input_Update(bool doNotUpdateMasterRecording)
 {
 	if (!_mHasInit)
 	{
-		Logger_LogError("Need to init input before update!");
+		Logger_Log(LOGGER_ERROR, "Need to init input before update!");
 		return;
 	}
 

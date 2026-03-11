@@ -73,10 +73,11 @@ static void MenuWindows()
         }
         if (ImGui::MenuItem("Thing Editor", "Ctrl+N"))
         {
+			ThingEditor_Activate();
         }
         if (ImGui::MenuItem("Toggles", "Ctrl+T"))
         {
-            WindowTogglesWindowMini_Activate();
+            WindowTogglesWindow_Activate();
         }
         if (ImGui::MenuItem("Tool Manager", "Ctrl+H"))
         {

@@ -55,7 +55,7 @@ void Strings_AddDoNotReplace(const char* key, const char* val, bool doNotReplace
 {
 	if (IStringMap_Contains(_mMap, key))
 	{
-		Logger_LogError("String map already contains string");
+		Logger_Log(LOGGER_ERROR, "String map already contains string");
 		return;
 	}
 

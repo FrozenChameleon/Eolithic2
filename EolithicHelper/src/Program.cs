@@ -89,7 +89,7 @@ namespace EolithicHelper
             gameStateDataHelperList.Add("{\n");
 
             List<string> componentTypeHeaderList = new List<string>();
-            componentTypeHeaderList.Add( "//THIS CODE IS AUTOMATICALLY GENERATED, DO NOT EDIT!\n\n");
+            componentTypeHeaderList.Add("//THIS CODE IS AUTOMATICALLY GENERATED, DO NOT EDIT!\n\n");
             componentTypeHeaderList.Add("#pragma once\n");
             componentTypeHeaderList.Add("\n");
             componentTypeHeaderList.Add("REPLACEME");
@@ -129,9 +129,6 @@ namespace EolithicHelper
 
                 string componentEnumName = "C_" + component;
 
-                listOfComponentNames.Add(component);
-                listOfComponentEnumNames.Add(componentEnumName);
-
                 if (!isUnused)
                 {
                     string fileWithStruct = FindFileWithStruct(component);
@@ -139,6 +136,11 @@ namespace EolithicHelper
                     {
                         Console.WriteLine("Unable to find: " + component + " (missing typedef perhaps?)");
                         continue;
+                    }
+                    else
+                    {
+                        listOfComponentNames.Add(component);
+                        listOfComponentEnumNames.Add(componentEnumName);
                     }
 
                     string fileLocation = fileWithStruct.Replace('\\', '/');
@@ -150,7 +152,11 @@ namespace EolithicHelper
                     {
                         fileLocation = fileLocation.Replace("src/engine/", "../");
                     }*/
-                    if (fileLocation.StartsWith("src/engine/")) //New location
+                    if (fileLocation.StartsWith("src/game2/")) //New location
+                    {
+                        fileLocation = fileLocation.Replace("src/game2/", "../game2/");
+                    }
+                    else if (fileLocation.StartsWith("src/engine/")) //New location
                     {
                         fileLocation = fileLocation.Replace("src/engine/", "../engine/");
                     }
@@ -196,7 +202,7 @@ namespace EolithicHelper
             {
                 string componentTypeHeaderPath = Path.Combine(DIR_SRC, DIR_GAME, "ComponentType.h");
                 string componentTypeHeaderString = "";
-                for(int i = 0; i < componentTypeHeaderList.Count; i += 1)
+                for (int i = 0; i < componentTypeHeaderList.Count; i += 1)
                 {
                     componentTypeHeaderString += componentTypeHeaderList[i];
                 }
@@ -212,7 +218,7 @@ namespace EolithicHelper
                 componentTypeBody.Add("{\n");
                 componentTypeBody.Add("    switch (ctype)\n");
                 componentTypeBody.Add("    {\n");
-                for(int i = 0; i < listOfComponentNames.Count; i += 1)
+                for (int i = 0; i < listOfComponentNames.Count; i += 1)
                 {
                     componentTypeBody.Add("    case " + listOfComponentEnumNames[i] + ":\n");
                     componentTypeBody.Add("        return " + '"' + listOfComponentNames[i] + '"' + ";\n");
@@ -294,7 +300,7 @@ namespace EolithicHelper
                     resourceManagerPathForHeader, replaceIncludePath, replaceResource, replaceResourceManager);
 
                 string resourceManagerPathForDefinition = Path.Combine(DIR_SRC, DIR_ENGINE, DIR_RESOURCES, replaceResourceManager + ".c");
-                WriteTemplate(Path.Combine(DIR_HELPER_RESOURCES, FILE_TEMPLATE_RESOURCE_DEFINITIONS), 
+                WriteTemplate(Path.Combine(DIR_HELPER_RESOURCES, FILE_TEMPLATE_RESOURCE_DEFINITIONS),
                     resourceManagerPathForDefinition, replaceIncludePath, replaceResource, replaceResourceManager);
             }
 
@@ -331,7 +337,7 @@ namespace EolithicHelper
             foreach (string directory in directories)
             {
                 string fileToReturn = FindFileWithStructHelper(directory, findThisStruct);
-                if(fileToReturn != null)
+                if (fileToReturn != null)
                 {
                     return fileToReturn;
                 }

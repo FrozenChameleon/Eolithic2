@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include "../utils/Macros.h"
+
+#define OeState_NOTHING EE_STR_EMPTY
 #define OeState_DEFAULT "DEFAULT"
 #define OeState_HEAD "HEAD"
 #define OeState_SHOOT "SHOOT"

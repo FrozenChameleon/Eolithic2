@@ -53,7 +53,7 @@ void InputPlayer_SetInputDevice(InputPlayer* ip, int32_t newDeviceNumber)
 		MString_AddAssignInt(&tempString, ip->_mPlayerNumber + 1);
 		MString_AddAssignString(&tempString, ", Device #");
 		MString_AddAssignInt(&tempString, newDeviceNumber);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -166,7 +166,7 @@ void InputPlayer_RemoveInputDevice(InputPlayer* ip)
 		MString_AddAssignInt(&tempString, ip->_mPlayerNumber + 1);
 		MString_AddAssignString(&tempString, ", Device #");
 		MString_AddAssignInt(&tempString, ip->_mInputDeviceNumber);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 

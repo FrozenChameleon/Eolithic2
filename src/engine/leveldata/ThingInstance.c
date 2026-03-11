@@ -187,7 +187,7 @@ void ThingInstance_RemoveUnrelatedPairs(ThingInstance* instance, StringPair* arr
 		{
 			if (!ignoreWarnings)
 			{
-				OeLogger_LogWarning("Removed unrelated string pair for " + pair.mKey);
+				OeLogger_Log(LOGGER_WARNING, "Removed unrelated string pair for " + pair.mKey);
 			}
 			arrayTo.erase(arrayTo.begin() + i);
 			i -= 1;
@@ -203,7 +203,7 @@ void ThingInstance_AddMissingPairs(StringPair* arr_from, StringPair* arr_to, boo
 		{
 			if (!ignoreWarnings)
 			{
-				OeLogger_LogWarning("Missing string pair for " + pair.mKey);
+				OeLogger_Log(LOGGER_WARNING, "Missing string pair for " + pair.mKey);
 			}
 			arrayTo.insert(arrayTo.begin() + i, pair);
 		}

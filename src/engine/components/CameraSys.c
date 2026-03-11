@@ -44,7 +44,7 @@ void CameraSys_UpdateCamera(Camera* data)
 	//Update shake no matter what
 	data->mCurrentShake = data->mNewShake;
 	data->mCurrentShakeMul = data->mNewShakeMul;
-	data->mNewShake = Point_Zero;
+	data->mNewShake = Vector2_Zero;
 	data->mNewShakeMul = 1;
 	//
 

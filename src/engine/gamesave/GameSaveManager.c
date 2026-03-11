@@ -74,7 +74,7 @@ void GameSaveManager_Save(void)
 	Service_SaveBuffer(true, CONTAINER_DISPLAY_NAME, CONTAINER_NAME, GLOBAL_DEF_SAVE_FILE_NAME, fbb);
 	FixedByteBuffer_Dispose(fbb);
 
-	Logger_LogInformation("Save file saved to save0.bin");
+	Logger_Log(LOGGER_INFORMATION, "Save file saved to save0.bin");
 }
 void GameSaveManager_Load(void)
 {
@@ -83,7 +83,7 @@ void GameSaveManager_Load(void)
 	if (Globals_IsLoadingUserDataDisabled())
 	{
 		_mHasLoaded = true;
-		Logger_LogInformation("Loading game save data is disabled");
+		Logger_Log(LOGGER_INFORMATION, "Loading game save data is disabled");
 		return;
 	}
 
@@ -93,7 +93,7 @@ void GameSaveManager_Load(void)
 		_mHasLoaded = true;
 		if (request.mBuffer == NULL)
 		{
-			Logger_LogInformation("No game save data to load...");
+			Logger_Log(LOGGER_INFORMATION, "No game save data to load...");
 			return;
 		}
 		else
@@ -103,7 +103,7 @@ void GameSaveManager_Load(void)
 			GameHelper_ReadGameSaveData(_mData, reader);
 			BufferReader_Dispose(reader);
 			_mWasDataJustLoaded = true;
-			Logger_LogInformation("Loaded game save data successfully!");
+			Logger_Log(LOGGER_INFORMATION, "Loaded game save data successfully!");
 			return;
 		}
 	}

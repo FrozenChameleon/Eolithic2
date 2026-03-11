@@ -307,8 +307,8 @@ static void ContinueReadSession(bool isFirst)
 		int32_t threshold = Cvars_GetAsInt(CVARS_ENGINE_RECORDING_FPS_THRESHOLD);
 		if (_mReaderData.mPerLevelData.mLowestFps <= threshold)
 		{
-			Logger_LogInformation("Low FPS for:");
-			Logger_LogInformation(MString_Text(_mLastReadRecordingFilename));
+			Logger_Log(LOGGER_INFORMATION, "Low FPS for:");
+			Logger_Log(LOGGER_INFORMATION, MString_Text(_mLastReadRecordingFilename));
 #ifndef DEBUG_DEF_DISABLE_LOW_FPS_READOUT_IN_RECORDING_TOOL
 			if (!IsSoakTesting())
 			{
@@ -345,8 +345,8 @@ static void ContinueReadSession(bool isFirst)
 			MString_AssignString(&tempString2, "FAIL: ");
 			MString_AddAssignString(&tempString2, MString_Text(_mLastReadRecordingFilename));
 			IStringArray_Add(_mDisplayReadout, MString_Text(tempString2));
-			Logger_LogInformation("Session success miss for:");
-			Logger_LogInformation(MString_Text(_mLastReadRecordingFilename));
+			Logger_Log(LOGGER_INFORMATION, "Session success miss for:");
+			Logger_Log(LOGGER_INFORMATION, MString_Text(_mLastReadRecordingFilename));
 			MString_Dispose(&tempString);
 			MString_Dispose(&tempString2);
 		}
@@ -354,7 +354,7 @@ static void ContinueReadSession(bool isFirst)
 
 	ResetRecordingData();
 
-	Logger_LogInformation("Reading next in session");
+	Logger_Log(LOGGER_INFORMATION, "Reading next in session");
 	for (int32_t i = 0; i < IStringArray_Length(_mReaderData.mRecordings); i += 1)
 	{
 		if (i == _mReaderData.mSessionCounter)
@@ -380,18 +380,18 @@ static void ContinueReadSession(bool isFirst)
 
 	for (int32_t i = 0; i < IStringArray_Length(_mDisplayReadout); i += 1)
 	{
-		Logger_LogInformation(IStringArray_Get(_mDisplayReadout, i));
+		Logger_Log(LOGGER_INFORMATION, IStringArray_Get(_mDisplayReadout, i));
 	}
 
 	{
 		MString* tempString = NULL;
 		MString_AssignString(&tempString, "SUCCESS:");
 		MString_AddAssignInt(&tempString, _mDisplaySuccessCounter);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 
 		MString_AssignString(&tempString, "FAILURE:");
 		MString_AddAssignInt(&tempString, _mDisplayFailureCounter);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 
 		MString_Dispose(&tempString);
 	}
@@ -781,7 +781,7 @@ bool RecordingTool_LoadNextRecordingIfAtEndOfRecording(bool isMapLoad)
 	_mReaderData.mPerLevelData.mReaderFailsafe += 1;
 	if (_mReaderData.mPerLevelData.mReaderFailsafe >= 60 * 60 * 15) //15 minutes
 	{
-		Logger_LogInformation("No input retrievals for a long time, forcing next recording to play.");
+		Logger_Log(LOGGER_INFORMATION, "No input retrievals for a long time, forcing next recording to play.");
 		ContinueReadSession(false);
 		readyForNextRecording = true;
 	}
@@ -814,8 +814,8 @@ bool RecordingTool_LoadNextRecordingIfAtEndOfRecording(bool isMapLoad)
 	Read(_mReaderData.mCurrentRecording);
 	GameStateManager_LoadMap(_mHeaderData.mLevelFileName);
 	_mReaderData.mIsReadyForNext = false;
-	Logger_LogInformation("Reading recording has begun for:");
-	Logger_LogInformation(_mHeaderData.mLevelFileName);
+	Logger_Log(LOGGER_INFORMATION, "Reading recording has begun for:");
+	Logger_Log(LOGGER_INFORMATION, _mHeaderData.mLevelFileName);
 	return true;
 }
 void RecordingTool_SetupReadSession(IStringArray* givenRecordings, int32_t priority, bool goFast)
@@ -868,7 +868,7 @@ void RecordingTool_SetupReadSession(IStringArray* givenRecordings, int32_t prior
 	Globals_DisableSavingAndLoadingAndAchievementsAndLeaderboards();
 	_mCurrentPriority = priority;
 	_mToolState = TOOL_STATE_READING;
-	Logger_LogInformation("Read session has begun");
+	Logger_Log(LOGGER_INFORMATION, "Read session has begun");
 	ContinueReadSession(true);
 }
 bool RecordingTool_IsGoFastFlagSet(void)
@@ -882,18 +882,18 @@ void RecordingTool_TickReadSessionSuccessCounter(int32_t successNumber)
 		MString* tempString = NULL;
 		MString_AssignString(&tempString, "Given success number is ");
 		MString_AddAssignInt(&tempString, successNumber);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 
 		MString_AssignString(&tempString, "Given success number is ");
 		MString_AddAssignInt(&tempString, _mHeaderData.mSuccessNumber);
 		if (successNumber == _mHeaderData.mSuccessNumber)
 		{
 			_mReaderData.mPerLevelData.mWasSessionSuccessCounterTicked = true;
-			Logger_LogInformation("Session success counter ticked");
+			Logger_Log(LOGGER_INFORMATION, "Session success counter ticked");
 		}
 		else
 		{
-			Logger_LogInformation("Success number mismatch");
+			Logger_Log(LOGGER_INFORMATION, "Success number mismatch");
 		}
 
 		MString_Dispose(&tempString);

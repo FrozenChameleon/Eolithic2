@@ -163,7 +163,7 @@ static void AddToAllocationArenas(UtilsAllocationArena allocationArena, void* me
 {
 	if (allocationArena == UTILS_ALLOCATION_ARENA_INVALID)
 	{
-		Logger_LogWarning("Attempted to allocate to invalid allocation arena!");
+		Logger_Log(LOGGER_WARNING, "Attempted to allocate to invalid allocation arena!");
 		return;
 	}
 
@@ -176,7 +176,7 @@ static void AddToAllocationArenas(UtilsAllocationArena allocationArena, void* me
 	index = hmgeti(hm_allocation_arenas, allocationArena);
 	if (index == -1)
 	{
-		Logger_LogWarning("Attempted to allocate to get allocation arena!");
+		Logger_Log(LOGGER_WARNING, "Attempted to allocate to get allocation arena!");
 		return;
 	}
 
@@ -1214,7 +1214,7 @@ void Utils_DeleteBinding(int32_t player, int32_t index, const char* dataName)
 		MString_AddAssignString(&tempString, " Name: ");
 		MString_AddAssignString(&tempString, dataName);
 		MString_AddAssignString(&tempString, " has been deleted");
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -1253,7 +1253,7 @@ bool Utils_UpdateBinding(int32_t player, int32_t index, const char* dataName, bo
 			MString_AddAssignString(&tempString, dataName);
 			MString_AddAssignString(&tempString, " has been set to ");
 			MString_AddAssignString(&tempString, InputCheck_GetName(&check));
-			Logger_LogInformation(MString_Text(tempString));
+			Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 			MString_Dispose(&tempString);
 		}
 		//

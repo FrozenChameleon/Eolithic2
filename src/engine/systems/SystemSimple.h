@@ -15,6 +15,7 @@ typedef void (*SystemSimple_CollideWithBodyFunc)(Body* myBody, Body* otherBody, 
 typedef bool (*SystemSimple_CollideWithCollisionFunc)(Body* myBody, int32_t x, int32_t y, int32_t width, int32_t height, int32_t myDirectionX, int32_t myDirectionY, int32_t collisionBit, bool isVertical);
 typedef void (*SystemSimple_BeforeUpdateFunc)(void);
 typedef void (*SystemSimple_AfterUpdateFunc)(void);
+typedef void (*SystemSimple_InitStringSettingsHereFunc)(void);
 typedef void (*SystemSimple_DrawFunc)(Entity owner, void* data, SpriteBatch* spriteBatch);
 typedef void (*SystemSimple_JustCompletedFunc)(Entity owner, void* data);
 typedef void (*SystemSimple_UpdateLastRenderPositionFunc)(void* data);
@@ -22,6 +23,7 @@ typedef void (*SystemSimple_ReceiveBroadcastFunc)(Entity owner, void* data, int3
 typedef void (*SystemSimple_UpdateFunc)(Entity entity, void* data);
 typedef void (*SystemSimple_InitFunc)(Entity owner, void* data);
 typedef void (*SystemSimple_SetupSystemFunc)(void);
+typedef void (*SystemSimple_InitStringSettingsHereFunc)(void);
 
 typedef struct SystemSimple
 {
@@ -40,6 +42,7 @@ typedef struct SystemSimple
 	SystemSimple_ReceiveBroadcastFunc _mReceiveBroadcastRoutine;
 	SystemSimple_UpdateFunc _mUpdateRoutine;
 	SystemSimple_InitFunc _mInitRoutine;
+	SystemSimple_InitStringSettingsHereFunc _mInitStringSettingsHereRoutine;
 	SystemSimple_SetupSystemFunc _mSetupSystem;
 } SystemSimple;
 

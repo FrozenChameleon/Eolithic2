@@ -29,7 +29,7 @@ static void* LoadResourceDataFromBufferReader(Resource* resource, BufferReader* 
 {
 	if ((resource->path == NULL) || (resource->name == NULL))
 	{
-		Logger_LogInformation("Resource missing path!");
+		Logger_Log(LOGGER_INFORMATION, "Resource missing path!");
 		return NULL;
 	}
 
@@ -39,18 +39,22 @@ static void LoadResourceDataFromResourcePath(Resource* resource)
 {
 	if ((resource->path == NULL) || (resource->name == NULL))
 	{
-		Logger_LogInformation("Resource missing path!");
+		Logger_Log(LOGGER_INFORMATION, "Resource missing path!");
 		return;
 	}
 
 	BufferReader* br = BufferReader_CreateFromPath(MString_Text(resource->path));
+	if (resource->manager->_mIsReadingText)
+	{
+		BufferReader_SetIsReadingText(br, true);
+	}
 	resource->data = LoadResourceDataFromBufferReader(resource, br);
 	BufferReader_Dispose(br);
 
 	{
 		MString* tempString = MString_CreateForJustThisFrame();
 		MString_Combine2(&tempString, "Loaded resource late: ", resource->name);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 	}
 }
 static void LoadResourceDataFromResourcePathIfMissing(Resource* resource)
@@ -67,7 +71,7 @@ static void PrintHelper(const char* str1, const char* str2)
 {
 	MString* tempString = MString_CreateForJustThisFrame();
 	MString_Combine2(&tempString, str1, str2);
-	Logger_LogInformation(MString_Text(tempString));
+	Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 }
 static void PrintResourceType(ResourceMan* rm)
 {
@@ -194,7 +198,7 @@ Resource* ResourceMan_CreateResource(ResourceMan* rm, const char* name, const ch
 		{
 			MString* tempString = MString_CreateForJustThisFrame();
 			MString_Combine4(&tempString, "Creating ", rm->_mResourceType, ": ", name);
-			Logger_LogInformation(MString_Text(tempString));
+			Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		}
 
 		resource = (Resource*)Utils_calloc(1, sizeof(Resource));
@@ -218,7 +222,7 @@ Resource* ResourceMan_LoadAssetFromStreamAndCreateResource(ResourceMan* rm, Buff
 	{
 		MString* tempString = MString_CreateForJustThisFrame();
 		MString_Combine4(&tempString, "Loading ", rm->_mResourceType, " from: ", path);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 	}
 
 	Resource* resource = ResourceMan_CreateResource(rm, name, path, false);
@@ -265,28 +269,26 @@ void ResourceMan_LoadAllFromDat(ResourceMan* rm)
 
 	DatReader_Dispose(dr);
 }
-void ResourceMan_Dispose(ResourceMan* rm, const char* name)
+void ResourceMan_Reload(ResourceMan* rm, const char* name)
 {
 	Resource* resource = shget(rm->sh_resources, name);
+	if (resource == NULL)
+	{
+		return;
+	}
+
 	if ((resource->data != NULL) && (rm->_mDispose != NULL))
 	{
 		rm->_mDispose(resource->data);
-		resource->data = NULL;
 	}
-	Utils_free(resource);
-	shdel(rm->sh_resources, name);
+	resource->data = NULL;
 }
-void ResourceMan_DisposeAll(ResourceMan* rm)
+void ResourceMan_ReloadAll(ResourceMan* rm)
 {
 	for (int32_t i = 0; i < shlen(rm->sh_resources); i += 1)
 	{
-		ResourceMan_Dispose(rm, rm->sh_resources[i].key);
+		ResourceMan_Reload(rm, rm->sh_resources[i].key);
 	}
-
-	shfree(rm->sh_resources);
-	rm->sh_resources = NULL;
-	rm->_mResourceCounter = 0;
-	rm->_mHasInit = false;
 }
 int64_t ResourceMan_Length(ResourceMan* rm)
 {
@@ -325,7 +327,7 @@ void ResourceMan_Write(ResourceMan* rm, const char* name, bool isWritingText)
 	{
 		MString* tempString = MString_CreateForJustThisFrame();
 		MString_Combine2(&tempString, "Unable to write: ", name);
-		Logger_LogWarning(MString_Text(tempString));
+		Logger_Log(LOGGER_WARNING, MString_Text(tempString));
 		return;
 	}
 
@@ -339,7 +341,7 @@ void ResourceMan_Write(ResourceMan* rm, const char* name, bool isWritingText)
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "Wrote to: ", MString_Text(resource->path));
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 }
@@ -362,7 +364,7 @@ void ResourceMan_Read(ResourceMan* rm, const char* name, bool isReadingText)
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "Unable to read: ", name);
-		Logger_LogWarning(MString_Text(tempString));
+		Logger_Log(LOGGER_WARNING, MString_Text(tempString));
 		MString_Dispose(&tempString);
 		return;
 	}
@@ -378,7 +380,7 @@ void ResourceMan_Read(ResourceMan* rm, const char* name, bool isReadingText)
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "Read from: ", MString_Text(resource->path));
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 }
@@ -435,7 +437,7 @@ void ResourceMan_CopyToResourceDataAndThenSaveAsText(ResourceMan* rm, const char
 	{
 		if (Utils_IsStringEmpty(rm->_mDirectories[0]))
 		{
-			Logger_LogWarning("Invalid directory to save resource.");
+			Logger_Log(LOGGER_WARNING, "Invalid directory to save resource.");
 			return;
 		}
 
@@ -447,7 +449,7 @@ void ResourceMan_CopyToResourceDataAndThenSaveAsText(ResourceMan* rm, const char
 
 	if (Utils_IsStringEmptyOrNotSet(name))
 	{
-		Logger_LogWarning("Invalid filename to save resource.");
+		Logger_Log(LOGGER_WARNING, "Invalid filename to save resource.");
 		return;
 	}
 
@@ -461,7 +463,7 @@ void ResourceMan_CopyToResourceDataAndThenSaveAsText(ResourceMan* rm, const char
 		{
 			MString_Combine2(&strDebugInfo, "Saving new resource ", path);
 		}
-		Logger_LogInformation(MString_Text(strDebugInfo));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(strDebugInfo));
 	}
 
 	Resource* resource = ResourceMan_CreateResource(rm, name, path, true);

@@ -107,7 +107,7 @@ int32_t Window_Init(void)
 {
 	if (_mHasWindowInit)
 	{
-		Logger_LogWarning("Window has already init");
+		Logger_Log(LOGGER_WARNING, "Window has already init");
 		return 0;
 	}
 
@@ -130,7 +130,7 @@ int32_t Window_Init(void)
 
 	if (_mWindowContext == NULL)
 	{
-		Logger_LogError("Unable to init window!");
+		Logger_Log(LOGGER_ERROR, "Unable to init window!");
 		return -1;
 	}
 
@@ -187,7 +187,7 @@ Rectangle Window_GetDisplayBounds(void)
 	int32_t success = SDL_GetDisplayBounds(GetCurrentDisplayID(), &displayBounds);
 	if (success < 0)
 	{
-		Logger_LogInformation("Unable to get display bounds");
+		Logger_Log(LOGGER_INFORMATION, "Unable to get display bounds");
 		returnRect.Width = 1280;
 		returnRect.Height = 720;
 		return returnRect;
@@ -210,7 +210,7 @@ Rectangle* Window_GetAllDisplayModeBounds(int32_t* length)
 	SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(GetCurrentDisplayID(), &count);
 	if (modes == NULL)
 	{
-		Logger_LogInformation("Unable to get num display modes");
+		Logger_Log(LOGGER_INFORMATION, "Unable to get num display modes");
 		return NULL;
 	}
 
@@ -235,7 +235,7 @@ void Window_LoadIcon(void)
 {
 	if (_mHasLoadedIcon)
 	{
-		Logger_LogWarning("Window icon has already been loaded");
+		Logger_Log(LOGGER_WARNING, "Window icon has already been loaded");
 		return;
 	}
 
@@ -243,7 +243,7 @@ void Window_LoadIcon(void)
 
 	if (!Service_PlatformShouldLoadWindowIcon())
 	{
-		Logger_LogWarning("Platform does not load window icon");
+		Logger_Log(LOGGER_WARNING, "Platform does not load window icon");
 		return;
 	}
 
@@ -260,17 +260,17 @@ void Window_LoadIcon(void)
 
 	if (icon == NULL)
 	{
-		Logger_LogWarning("Failed to load window icon");
+		Logger_Log(LOGGER_WARNING, "Failed to load window icon");
 		return;
 	}
 
 	if (!SDL_SetWindowIcon(_mWindowContext, icon))
 	{
-		Logger_LogWarning("Unable to load window icon");
+		Logger_Log(LOGGER_WARNING, "Unable to load window icon");
 	}
 	else
 	{
-		Logger_LogWarning("Successfully loaded window icon");
+		Logger_Log(LOGGER_WARNING, "Successfully loaded window icon");
 	}
 
 	SDL_DestroySurface(icon);

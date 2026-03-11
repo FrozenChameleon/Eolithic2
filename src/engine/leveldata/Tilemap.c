@@ -7,7 +7,7 @@ static bool BoundaryCheck(Rectangle boundary)
 {
 	if ((boundary.Width <= 0) || (boundary.Height <= 0))
 	{
-		Logger_LogWarning("Invalid dimensions for tilemap boundary");
+		Logger_Log(LOGGER_WARNING, "Invalid dimensions for tilemap boundary");
 		return false;
 	}
 	return true;
@@ -48,7 +48,7 @@ void Tilemap_CopyTo(Tilemap* dst, Rectangle dstLocation, Tilemap* src, Rectangle
 {
 	if ((dstLocation.Width != srcLocation.Width) || (dstLocation.Height != srcLocation.Height))
 	{
-		Logger_LogWarning("Cannot do Tilemap_CopyTo with these locations!");
+		Logger_Log(LOGGER_WARNING, "Cannot do Tilemap_CopyTo with these locations!");
 		return;
 	}
 
@@ -60,7 +60,7 @@ void Tilemap_CopyTo(Tilemap* dst, Rectangle dstLocation, Tilemap* src, Rectangle
 			Tile* dstTile = Tilemap_GetTile(dst, dstLocation.X + i, dstLocation.Y + j);
 			if ((srcTile == NULL) || (dstTile == NULL))
 			{
-				Logger_LogWarning("Tilemap_CopyTo getting NULL tiles!");
+				Logger_Log(LOGGER_WARNING, "Tilemap_CopyTo getting NULL tiles!");
 				continue;
 			}
 			Tile_CopyTo(dstTile, srcTile, respectCopyCvars);
@@ -110,7 +110,7 @@ void Tilemap_SetTile(Tilemap* tm, int32_t x, int32_t y, Tile* tile)
 	}
 	else if (tile == NULL)
 	{
-		Logger_LogWarning("Tilemap_SetTile given NULL tile!");
+		Logger_Log(LOGGER_WARNING, "Tilemap_SetTile given NULL tile!");
 		return;
 	}
 

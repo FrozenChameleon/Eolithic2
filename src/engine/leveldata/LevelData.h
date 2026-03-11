@@ -66,3 +66,8 @@ void LevelData_DrawProps(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera
 void LevelData_DrawProps2(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera, bool drawInfo);
 void LevelData_DrawCollision(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera);
 void LevelData_DrawThings(LevelData* ld, SpriteBatch* spriteBatch, Camera* camera);
+void LevelData_OffsetPoint(LevelData* ld, Point* point, int tileSizeMul, bool isColumn, int target, int direction);
+void LevelData_AddColumn(LevelData* ld, int loc);
+void LevelData_AddRow(LevelData* ld, int loc);
+void LevelData_DeleteColumn(LevelData* ld, int loc);
+void LevelData_DeleteRow(LevelData* ld, int loc);

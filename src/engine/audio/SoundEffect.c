@@ -276,7 +276,7 @@ static SoundEffectInstance* SetupNextInstance(const char* sound)
 				MString* tempString = NULL;
 				MString_AssignString(&tempString, "Unable to setup sound effect: ");
 				MString_AddAssignString(&tempString, sound);
-				Logger_LogInformation(MString_Text(tempString));
+				Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 				MString_Dispose(&tempString);
 				return NULL;
 			}
@@ -290,7 +290,7 @@ static SoundEffectInstance* SetupNextInstance(const char* sound)
 
 	if (!Globals_IsDebugGameSpeedSet())
 	{
-		Logger_LogWarning("Reached sound effect instance limit");
+		Logger_Log(LOGGER_WARNING, "Reached sound effect instance limit");
 	}
 	return NULL;
 }

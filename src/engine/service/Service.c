@@ -135,16 +135,16 @@ BufferRequest Service_AskToRetrieveBufferForPC(bool isPurelyGameSaveData, const 
 
 	if (rwop == NULL) //Missing file
 	{
-		Logger_LogWarning("Retrieve buffer: missing file!");
-		Logger_LogWarning(path);
+		Logger_Log(LOGGER_WARNING, "Retrieve buffer: missing file!");
+		Logger_Log(LOGGER_WARNING, path);
 		return request;
 	}
 
 	int64_t size = SDL_GetIOSize(rwop);
 	if (size == -1) //???
 	{
-		Logger_LogWarning("Retrieve buffer: something went wrong!");
-		Logger_LogWarning(path);
+		Logger_Log(LOGGER_WARNING, "Retrieve buffer: something went wrong!");
+		Logger_Log(LOGGER_WARNING, path);
 		return request;
 	}
 
@@ -154,8 +154,8 @@ BufferRequest Service_AskToRetrieveBufferForPC(bool isPurelyGameSaveData, const 
 
 	request.mBuffer = buffer;
 
-	Logger_LogInformation("Retrieve buffer: loaded the buffer!");
-	Logger_LogInformation(path);
+	Logger_Log(LOGGER_INFORMATION, "Retrieve buffer: loaded the buffer!");
+	Logger_Log(LOGGER_INFORMATION, path);
 
 	return request;
 }
@@ -172,16 +172,16 @@ int32_t Service_SaveBufferForPC(bool isPurelyGameSaveData, const char* container
 
 	if (rwop == NULL)
 	{
-		Logger_LogWarning("Save buffer: unable to open!");
-		Logger_LogWarning(path);
+		Logger_Log(LOGGER_WARNING, "Save buffer: unable to open!");
+		Logger_Log(LOGGER_WARNING, path);
 		return -1;
 	}
 
 	SDL_WriteIO(rwop, FixedByteBuffer_GetBuffer(buffer), FixedByteBuffer_GetLength(buffer));
 	SDL_CloseIO(rwop);
 
-	Logger_LogInformation("Save buffer: saved the buffer!");
-	Logger_LogInformation(path);
+	Logger_Log(LOGGER_INFORMATION, "Save buffer: saved the buffer!");
+	Logger_Log(LOGGER_INFORMATION, path);
 
  	return 0;
 }
@@ -474,7 +474,7 @@ void Service_LeaderboardGoLeft(void)
 }
 void Service_LogMessage(const char* message)
 {
-	Logger_LogInformation(message);
+	Logger_Log(LOGGER_INFORMATION, message);
 }
 void Service_TellServiceIfOnLeaderboardMenuRightNow(bool isOnLeaderboardMenuRightNow)
 {

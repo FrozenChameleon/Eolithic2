@@ -24,13 +24,13 @@ int32_t AudioEngine_Init(void)
 
 	if (FAudioCreate(&_mFAudioContext, 0, FAUDIO_DEFAULT_PROCESSOR))
 	{
-		Logger_LogError("Unable to init FAudio!");
+		Logger_Log(LOGGER_ERROR, "Unable to init FAudio!");
 		return -1;
 	}
 
 	if (FAudio_CreateMasteringVoice(_mFAudioContext, &_mMasteringVoiceContext, FAUDIO_DEFAULT_CHANNELS, FAUDIO_DEFAULT_SAMPLERATE, 0, 0, NULL))
 	{
-		Logger_LogError("Unable to create mastering voice!");
+		Logger_Log(LOGGER_ERROR, "Unable to create mastering voice!");
 		return -1;
 	}
 

@@ -96,7 +96,7 @@ void TilesetOffset_LoadOffsetPoint(DrawTile* drawTile, const char* tilesetName)
 
 	if (Utils_StringEqualTo(tilesetName, EE_STR_EMPTY))
 	{
-		Logger_LogInformation("Offset point map not found for tileset (tileset null)");
+		Logger_Log(LOGGER_INFORMATION, "Offset point map not found for tileset (tileset null)");
 		return;
 	}
 
@@ -108,14 +108,14 @@ void TilesetOffset_LoadOffsetPoint(DrawTile* drawTile, const char* tilesetName)
 	int64_t offset_index = shgeti(sh_draw_tile_offset, tilesetName);
 	if (offset_index < 0)
 	{
-		Logger_LogInformation("Offset point map not found for tileset (tileset not found)");
+		Logger_Log(LOGGER_INFORMATION, "Offset point map not found for tileset (tileset not found)");
 		return;
 	}
 
 	int64_t original_index = shgeti(sh_draw_tile_original, tilesetName);
 	if (original_index < 0)
 	{
-		Logger_LogInformation("Original point map not found for tileset (tileset not found)");
+		Logger_Log(LOGGER_INFORMATION, "Original point map not found for tileset (tileset not found)");
 		return;
 	}
 
@@ -126,7 +126,7 @@ void TilesetOffset_LoadOffsetPoint(DrawTile* drawTile, const char* tilesetName)
 	int32_t loc = (drawTile->mPoint.X / TILE_SIZE) + ((drawTile->mPoint.Y / TILE_SIZE) * offset);
 	if (loc > (hm_offset_map_ref_len - 1))
 	{
-		Logger_LogInformation("Offset point location mismatch.");
+		Logger_Log(LOGGER_INFORMATION, "Offset point location mismatch.");
 		return;
 	}
 

@@ -46,13 +46,13 @@ void PlayerBindingData_LogLoadSuccess(PlayerBindingData* pbd)
 {
 	MString_AssignString(&_mTempString, "Bindings have been loaded for player #");
 	MString_AddAssignString(&_mTempString, Utils_IntToStringGlobalBuffer(pbd->_mPlayerNumber));
-	Logger_LogInformation(MString_Text(_mTempString));
+	Logger_Log(LOGGER_INFORMATION, MString_Text(_mTempString));
 }
 void PlayerBindingData_LogLoadFailure(PlayerBindingData* pbd)
 {
 	MString_AssignString(&_mTempString, "Unable to load bindings for player #");
 	MString_AddAssignString(&_mTempString, Utils_IntToStringGlobalBuffer(pbd->_mPlayerNumber));
-	Logger_LogInformation(MString_Text(_mTempString));
+	Logger_Log(LOGGER_INFORMATION, MString_Text(_mTempString));
 }
 void PlayerBindingData_LoadFromStream(PlayerBindingData* pbd, BufferReader* reader)
 {
@@ -130,7 +130,7 @@ void PlayerBindingData_ResetCertainBindingsToDefault(PlayerBindingData* pbd, ISt
 		MString_AddAssignString(&tempString, "-");
 		MString_AddAssignInt(&tempString, (indexStart + (length - 1)));
 		MString_AddAssignString(&tempString, ") have been reset to default");
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 }
@@ -211,7 +211,7 @@ void PlayerBindingData_Load(PlayerBindingData* pbd)
 			// }
 			//catch (...)
 			//{
-			//	OeLogger_LogError("Unable to read binding data!");
+			//	OeLogger_Log(LOGGER_ERROR, "Unable to read binding data!");
 			//	LogLoadFailure();
 			//	return;
 			//}
@@ -231,7 +231,7 @@ void PlayerBindingData_Save(PlayerBindingData* pbd)
 	{
 		MString* tempString = NULL;
 		MString_Combine4(&tempString, "Bindings have been saved for player #", Utils_IntToStringGlobalBuffer(pbd->_mPlayerNumber), ", ", filename);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -460,7 +460,7 @@ InputAction* InputBindings_GetActionFromArray(InputAction* actions, const char* 
 
 	MString* tempStr = NULL;
 	MString_Combine2(&tempStr, "Unable to find action: ", name);
-	Logger_LogError(MString_Text(tempStr));
+	Logger_Log(LOGGER_ERROR, MString_Text(tempStr));
 	MString_Dispose(&tempStr);
 	return &INPUTACTION_DUMMY_ACTION;
 }

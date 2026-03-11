@@ -356,7 +356,7 @@ static void ApplyMultiColorReplaceShader(Effect* multi, ShaderProgram* shaderPro
 	int32_t colorLength = (int32_t)shaderProgram->mMultiColorReplaceLength * SHADER_PROGRAM_MAX_REPLACE_ENTRY_OFFSET;
 	if (colorLength > MULTI_COLOR_REPLACE_LEN)
 	{
-		Logger_LogInformation("Asking for too many colors for color replace!");
+		Logger_Log(LOGGER_INFORMATION, "Asking for too many colors for color replace!");
 		return;
 	}
 
@@ -975,14 +975,14 @@ void Renderer_ResetBackBuffer(void)
 	_mDeviceParams.backBufferWidth = _mActualBufferBounds.Width;
 	_mDeviceParams.backBufferHeight = _mActualBufferBounds.Height;
 
-	Logger_LogInformation("Back Buffer has been reset");
+	Logger_Log(LOGGER_INFORMATION, "Back Buffer has been reset");
 	{
 		MString* tempString = NULL;
 		MString_AssignString(&tempString, "Actual buffer bounds: ");
 		MString_AddAssignInt(&tempString, _mActualBufferBounds.Width);
 		MString_AddAssignString(&tempString, "x");
 		MString_AddAssignInt(&tempString, _mActualBufferBounds.Height);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -996,7 +996,7 @@ void Renderer_ResetBackBuffer(void)
 			MString_AddAssignInt(&tempString, _mVirtualBufferBounds.Width);
 			MString_AddAssignString(&tempString, "x");
 			MString_AddAssignInt(&tempString, _mVirtualBufferBounds.Height);
-			Logger_LogInformation(MString_Text(tempString));
+			Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 			MString_Dispose(&tempString);
 		}
 

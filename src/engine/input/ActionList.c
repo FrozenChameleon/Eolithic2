@@ -60,7 +60,7 @@ const char* ActionList_GetAction(int32_t index)
 
 	if (index > (ACTIONLIST_LENGTH - 1))
 	{
-		Logger_LogWarning("Trying to get action from action list that does not exist!");
+		Logger_Log(LOGGER_WARNING, "Trying to get action from action list that does not exist!");
 		return ACTIONLIST_GAME_A;
 	}
 

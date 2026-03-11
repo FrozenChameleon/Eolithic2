@@ -575,7 +575,7 @@ static void OperationGiveTime(void)
 {
 	MString* temp = NULL;
 	MString_AddAssignInt(&temp, _mData->_mFrameCounter);
-	Logger_LogInformation(MString_Text(temp));
+	Logger_Log(LOGGER_INFORMATION, MString_Text(temp));
 	MString_Dispose(&temp);
 }
 static void OperationFadeText(const char* operation, IStringArray* arguments)
@@ -934,7 +934,7 @@ void MoviePlayer_Update2(bool doNotAllowMovieSkip)
 	{
 		if (_mData->_mTimingsToUse->len == 0)
 		{
-			Logger_LogInformation("No timings to use, cannot use strict timing");
+			Logger_Log(LOGGER_INFORMATION, "No timings to use, cannot use strict timing");
 			_mData->_mUseStrictTiming = false;
 		}
 	}
@@ -947,7 +947,7 @@ void MoviePlayer_Update2(bool doNotAllowMovieSkip)
 		}
 		if (_mData->_mFrameCounter > targetTime)
 		{
-			Logger_LogInformation("Frame counter over target time, cannot continue movie");
+			Logger_Log(LOGGER_INFORMATION, "Frame counter over target time, cannot continue movie");
 			if (_mData->_mFrameCounter > (targetTime + (60 * 5)))
 			{
 				_mData->_mIsComplete = true;

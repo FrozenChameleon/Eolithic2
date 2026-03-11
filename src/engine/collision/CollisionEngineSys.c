@@ -222,7 +222,7 @@ void CollisionEngineSys_ImprintToCollisionGridHelper(CollisionEngine* data, Coll
 			}
 			else
 			{
-				Logger_LogError("Collision imprint out of bounds");
+				Logger_Log(LOGGER_ERROR, "Collision imprint out of bounds");
 			}
 		}
 	}

@@ -24,7 +24,7 @@ void EntitySearch_AddEntityToSearch(EntitySearch* search, Entity addThis)
 		}
 	}
 
-	Logger_LogWarning("Unable to add entity to search!");
+	Logger_Log(LOGGER_WARNING, "Unable to add entity to search!");
 }
 bool EntitySearch_Check(bool isValid, bool isReverse)
 {

@@ -15,6 +15,8 @@
 #include "../gamestate/ComponentPack.h"
 #include "limits.h"
 
+#define COMDRAWACTORSYS_NOTHING EE_STR_EMPTY
+
 typedef struct Animation Animation;
 typedef struct ImageDataInstance ImageDataInstance;
 
@@ -30,6 +32,7 @@ void DrawActorSys_SetImageState(Entity owner, DrawActor* data, const char* state
 void DrawActorSys_SetImageState2(Entity owner, DrawActor* data, const char* state, const char* newPhase, bool carryAnimationState);
 void DrawActorSys_SetStateRotation(Entity owner, const char* state, float rotation);
 const char* DrawActorSys_GetCurrentPhase(Entity owner, const char* state);
+Vector2 DrawActorSys_GetNudge(Entity owner, const char* state);
 void DrawActorSys_SetNudge(Entity owner, const char* state, float x, float y);
 ImageDataInstance* DrawActorSys_GetRender(Entity owner, const char* state, const char* phase, int32_t index);
 int32_t DrawActorSys_GetAnimationPosition(Entity owner, const char* state, const char* phase);

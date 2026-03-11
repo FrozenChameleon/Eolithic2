@@ -302,6 +302,8 @@ void ResourceList_Init(void)
 		thingSettingsMan->_mFromStream = (ResourceMan_FromStreamFunc)ThingSettings_FromStream;
 		thingSettingsMan->_mDispose = (ResourceMan_DisposeFunc)ThingSettings_Dispose;
 		thingSettingsMan->_mWrite = (ResourceMan_WriteFunc)ThingSettings_Write;
+		thingSettingsMan->_mCreateNew = (ResourceMan_CreateNewFunc)ThingSettings_CreateNew;
+		thingSettingsMan->_mCopyTo = (ResourceMan_CopyToFunc)ThingSettings_CopyTo;
 		thingSettingsMan->_mReadFromDirectory = true;
 		thingSettingsMan->_mIsReadingText = true;
 	}

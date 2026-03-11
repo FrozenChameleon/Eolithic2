@@ -27,12 +27,12 @@ static void ClampDepth(int32_t* depth)
 {
 	if (*depth > MAXIMUM_DEPTH)
 	{
-		Logger_LogWarning("Given depth over maximum depth");
+		Logger_Log(LOGGER_WARNING, "Given depth over maximum depth");
 		*depth = MAXIMUM_DEPTH;
 	}
 	if (*depth < MINIMUM_DEPTH)
 	{
-		Logger_LogWarning("Given depth under minimum depth");
+		Logger_Log(LOGGER_WARNING, "Given depth under minimum depth");
 		*depth = MINIMUM_DEPTH;
 	}
 }
@@ -77,7 +77,7 @@ RenderCommandSheet* SpriteBatch_Draw(SpriteBatch* sb, Texture* texture, Color co
 
 	if (texture == NULL)
 	{
-		Logger_LogInformation("MISSING TEXTURE FOR DRAW");
+		Logger_Log(LOGGER_INFORMATION, "MISSING TEXTURE FOR DRAW");
 		texture = GetDefaultTextureData();
 	}
 
@@ -110,7 +110,7 @@ RenderCommandSheet* SpriteBatch_DrawInterpolated(SpriteBatch* sb, Texture* textu
 
 	if (texture == NULL)
 	{
-		Logger_LogInformation("MISSING TEXTURE FOR DRAW");
+		Logger_Log(LOGGER_INFORMATION, "MISSING TEXTURE FOR DRAW");
 		texture = GetDefaultTextureData();
 	}
 
@@ -155,7 +155,7 @@ RenderCommandTileLayer* SpriteBatch_DrawLayer(SpriteBatch* sb, Texture* tileset,
 
 	if (tileset == NULL)
 	{
-		Logger_LogInformation("MISSING TILESET FOR DRAW");
+		Logger_Log(LOGGER_INFORMATION, "MISSING TILESET FOR DRAW");
 		tileset = GetDefaultTextureData();
 	}
 
@@ -190,8 +190,8 @@ RenderCommandString* SpriteBatch_DrawString3(SpriteBatch* sb, const char* font, 
 	BmFont* bitmapFont = (BmFont*)ResourceMan_GetResourceData(ResourceList_Font(), font);
 	if (bitmapFont == NULL)
 	{
-		Logger_LogError("MISSING FONT FOR DRAW: ");
-		Logger_LogError(font);
+		Logger_Log(LOGGER_ERROR, "MISSING FONT FOR DRAW: ");
+		Logger_Log(LOGGER_ERROR, font);
 		return &_mDummyRenderCommandString;
 	}
 
@@ -222,7 +222,7 @@ RenderCommandSheet* SpriteBatch_DrawRectangle(SpriteBatch* sb, Texture* texture,
 
 	if (texture == NULL)
 	{
-		Logger_LogInformation("MISSING TEXTURE FOR DRAW");
+		Logger_Log(LOGGER_INFORMATION, "MISSING TEXTURE FOR DRAW");
 		texture = GetDefaultTextureData();
 	}
 

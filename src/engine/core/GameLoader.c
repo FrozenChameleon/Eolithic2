@@ -169,7 +169,7 @@ static bool LoadStart(void)
 	Strings_Init();
 	ResourceList_Init();
 	//Tuning_SetCurrentDifficulty(Cvars_GetAsInt(CVARS_ENGINE_DEFAULT_DIFFICULTY)); //UNUSED
-	Logger_LogInformation("Loading started");
+	Logger_Log(LOGGER_INFORMATION, "Loading started");
 	return true;
 }
 static bool LoadResources(void)
@@ -189,12 +189,12 @@ static bool LoadAfterResources(void)
 static bool LoadGameStates(void)
 {
 	GameHelper_CreateGameStates();
-	Logger_LogInformation("Game states loaded");
+	Logger_Log(LOGGER_INFORMATION, "Game states loaded");
 	return true;
 }
 static bool LoadEnd(void)
 {
-	Logger_LogInformation("Loading complete");
+	Logger_Log(LOGGER_INFORMATION, "Loading complete");
 	return true;
 }
 static void SetupLoadingJobs(void)
@@ -211,7 +211,7 @@ static void HandleFps(void)
 		MString* tempString = NULL;
 		MString_AssignString(&tempString, "Frame rate was ");
 		MString_AddAssignInt(&tempString, _mFps);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -222,7 +222,7 @@ static void HandleFps(void)
 
 	if (_mFps >= FPS_TARGET_FOR_HIGH_FPS) //broad test
 	{
-		Logger_LogInformation("High hz detected, turning fixed time step off");
+		Logger_Log(LOGGER_INFORMATION, "High hz detected, turning fixed time step off");
 		Cvars_SetAsBool(CVARS_USER_IS_FIXED_TIMESTEP_ENABLED, false);
 		Cvars_SaveUserConfig2(false);
 	}
@@ -266,7 +266,7 @@ static void StepLoading(double deltaTime)
 		}
 		else
 		{
-			Logger_LogInformation("It is the first load, testing frame rate");
+			Logger_Log(LOGGER_INFORMATION, "It is the first load, testing frame rate");
 			_mStep = STEP_TEST_FPS;
 		}
 	}

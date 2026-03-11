@@ -36,36 +36,32 @@ static const Vector2 _mInitialPosition = { 0, 32 };
 #define FADE_OUT_TIME 30
 #define HARD_LIMIT_ON_NOTIFICATIONS 10
 
-static int32_t _mLoggerLevel = LOGGER_LEVEL_DEBUG;
+static LoggerLevel _mLoggerLevel = LOGGER_DEBUG;
 static LoggerNotification* arr_notifications;
 
-void Logger_SetLevel(int32_t level)
-{
-	_mLoggerLevel = level;
-}
-static void LogHelper(int32_t type, const char* message, bool isSilent)
+static void LogHelper(LoggerLevel level, const char* message, bool isSilent)
 {
 #ifdef GLOBAL_DEF_DISABLE_ALL_LOGGING
 	//DO NOTHING
 #else
-	if ((_mLoggerLevel < type) || message == NULL)
+	if ((_mLoggerLevel < level) || message == NULL)
 	{
 		return;
 	}
 
 	const char* strType;
-	switch (type)
+	switch (level)
 	{
-	case LOGGER_LEVEL_INFORMATION:
+	case LOGGER_INFORMATION:
 		strType = _mMessageStr;
 		break;
-	case LOGGER_LEVEL_WARNING:
+	case LOGGER_WARNING:
 		strType = _mWarningStr;
 		break;
-	case LOGGER_LEVEL_ERROR:
+	case LOGGER_ERROR:
 		strType = _mErrorStr;
 		break;
-	case LOGGER_LEVEL_DEBUG:
+	case LOGGER_DEBUG:
 		strType = NULL;
 		break;
 	default:
@@ -97,37 +93,17 @@ static void LogHelper(int32_t type, const char* message, bool isSilent)
 #endif
 }
 
-void Logger_LogInformation(const char* message)
+void Logger_SetLevel(LoggerLevel level)
 {
-	LogHelper(LOGGER_LEVEL_INFORMATION, message, false);
+	_mLoggerLevel = level;
 }
-void Logger_LogInformationSilently(const char* message)
+void Logger_Log(LoggerLevel level, const char* message)
 {
-	LogHelper(LOGGER_LEVEL_INFORMATION, message, true);
+	LogHelper(level, message, false);
 }
-void Logger_LogWarning(const char* message)
+void Logger_LogSilently(LoggerLevel level, const char* message)
 {
-	LogHelper(LOGGER_LEVEL_WARNING, message, false);
-}
-void Logger_LogWarningSilently(const char* message)
-{
-	LogHelper(LOGGER_LEVEL_WARNING, message, true);
-}
-void Logger_LogError(const char* message)
-{
-	LogHelper(LOGGER_LEVEL_ERROR, message, false);
-}
-void Logger_LogErrorSilently(const char* message)
-{
-	LogHelper(LOGGER_LEVEL_ERROR, message, true);
-}
-void Logger_LogDebug(const char* message)
-{
-	LogHelper(LOGGER_LEVEL_DEBUG, message, false);
-}
-void Logger_LogDebugSilently(const char* message)
-{
-	LogHelper(LOGGER_LEVEL_DEBUG, message, true);
+	LogHelper(level, message, true);
 }
 static bool UpdateNotification(LoggerNotification* data, Vector2 initialPosition, int32_t i)
 {

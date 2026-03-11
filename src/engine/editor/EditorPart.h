@@ -12,11 +12,13 @@ typedef struct SpriteBatch SpriteBatch;
 typedef struct EditorPartData EditorPartData;
 typedef struct Texture Texture;
 typedef struct LevelData LevelData;
+typedef struct Tilemap Tilemap;
 
 void EditorPart_PushPatchesWithSelectionRectangle();
 void EditorPart_PushPatches(Rectangle gridBoundary);
 void EditorPart_PushPatch(Tile* src);
 void EditorPart_FinishPatches();
+void EditorPart_ClearPatches();
 bool EditorPart_Undo(void);
 bool EditorPart_Redo(void);
 bool EditorPart_IsBlocking(void);
@@ -34,7 +36,6 @@ void EditorPart_DefaultDrawSingleSelectionSelectedTiles(SpriteBatch* spriteBatch
 void EditorPart_DefaultHandleColumnsAndRows(void);
 void EditorPart_DefaultHandleCopy(void);
 int EditorPart_GetCurrentLayer(void);
-void EditorPart_ClearPatches(void);
 void EditorPart_HandleCurrentLayerSelection(void);
 void EditorPart_DefaultHandleKeyMovement();
 void EditorPart_HandleTab(void);
@@ -49,13 +50,11 @@ void EditorPart_DoDefaultEditorPartUpdateRoutine();
 void EditorPart_DoDefaultEditorPartDrawRoutine(SpriteBatch* spriteBatch, EditorDrawFunc drawSingleSelectionSelectedTiles);
 void EditorPart_DoDefaultEditorPartDrawHudRoutine(SpriteBatch* spriteBatch, const char* status);
 void EditorPart_DrawCopyTiles(SpriteBatch* spriteBatch);
-void EditorPart_DrawTilesAsEditor(Tile* tile, SpriteBatch* spriteBatch, int tileSize, int gridX, int gridY, 
+void EditorPart_DrawTilesAsEditor(Tile* tile, SpriteBatch* spriteBatch, int gridX, int gridY, 
 	LevelData* level, bool overrideDepth, Texture* wrapper);
-void EditorPart_DrawTilesBorder(SpriteBatch* spriteBatch, Tile* tiles, int tilesWidth, int tilesHeight);
-void EditorPart_CutTiles(int x1, int x2, int y1, int y2);
+void EditorPart_DrawTilesBorder(SpriteBatch* spriteBatch, Tilemap* tilemap);
+void EditorPart_CutTiles(Rectangle srcLocation);
 void EditorPart_Move(void);
-void EditorPart_CheckPatch(void);
-void EditorPart_AddPatch(LevelPatch* patch);
 bool EditorPart_IsSelecting(void);
 void EditorPart_ReverseCopy(bool isFlipY);
 void EditorPart_HandleReverseCopy(void);
@@ -81,7 +80,6 @@ int EditorPart_GetSelectionRectangleGridX1(void);
 int EditorPart_GetSelectionRectangleGridX2(void);
 int EditorPart_GetSelectionRectangleGridY1(void);
 int EditorPart_GetSelectionRectangleGridY2(void);
-Tile* EditorPart_GetCloneOfTiles(int x1, int x2, int y1, int y2);
 void EditorPart_DefaultHandleSpacebarHingeMovement();
 bool EditorPart_IsMouseInsideSelectionRectangle(void);
 void EditorPart_ResetSelectionRectangle(void);

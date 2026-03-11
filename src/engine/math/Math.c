@@ -225,7 +225,7 @@ float Math_GetSlope(float x1, float y1, float x2, float y2)
 	float run = x1 - x2;
 	if (run == 0) //Undefined slope
 	{
-		Logger_LogError("Undefined slope!");
+		Logger_Log(LOGGER_ERROR, "Undefined slope!");
 	}
 	float m = rise / run;
 	return m;

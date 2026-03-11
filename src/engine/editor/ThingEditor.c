@@ -24,15 +24,9 @@
 #define PREVIEW_WIDTH 500
 #define PREVIEW_HEIGHT 500
 
-typedef struct PreviewGraphicsData
-{
-    char* key;
-    ImageDataInstance* value; //THIS IS AN STB ARRAY, SHOULD BE ARR_
-} PreviewGraphicsData;
-
 typedef struct PreviewImage
 {
-	PreviewGraphicsData* sh_images;
+	struct { const char* key; ImageDataInstance* value; }*sh_images;
 	bool mShowCollision;
 	Color mColor;
 } PreviewImage;
@@ -45,6 +39,7 @@ static PreviewImage _mPreview;
 static float _mPossibleScales[POSSIBLE_SCALES_LEN] = { 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f };
 static float _mScale = 1.0f;
 
+static bool _mIsActive;
 static char _mManualAddStateString[EE_FILENAME_MAX];
 static char _mManualAddPhaseString[EE_FILENAME_MAX];
 static char _mCurrentState[EE_FILENAME_MAX];
@@ -537,16 +532,12 @@ static void SetupCollision()
 }
 static void ThingEditorSave()
 {
-    if (ImGui::IsWindowFocused())
-    {
-        /*if (!_mTempFileName.Equals(OeUtils.NOT_SET))
-        {
-            string path = OeFile.Combine(OeThingSettings.THINGS_DIRECTORY[0], _mTempFileName + OeUtils.EXTENSION_INI);
-            OeResource<OeThingSettings> resource = OeResourceManagers.ThingSettingsManager.CreateResource(path, _mSettings);
-            resource.SaveAsIni();
-            Do_PlaySound("editorSave", 1f);
-        }*/
-    }
+    if (!ImGui::IsWindowFocused())
+	{
+		return;
+	}
+
+	ResourceMan_CopyToResourceDataAndThenSaveAsText(ResourceList_ThingSettings(), _mTempFileName, NULL, &_mSettings);
 }
 static void SetupImageData()
 {
@@ -631,7 +622,7 @@ static void SetupThingPreview()
 static void CreateThingEditor()
 {
     // 1600, 900
-    if (!ImGui::Begin(KEY_WINDOW_THING_EDITOR))
+    if (!ImGui::Begin(KEY_WINDOW_THING_EDITOR, &_mIsActive))
     {
         ImGui::End();
         return;
@@ -744,7 +735,16 @@ static void CreateThingEditor()
 
 void ThingEditor_Update()
 {
+    if (!_mIsActive)
+    {
+        return;
+    }
+
     _mPreview.mColor = Color_Create4(255, 255, 255, 127);
 
     CreateThingEditor();
+}
+void ThingEditor_Activate()
+{
+    _mIsActive = true;
 }

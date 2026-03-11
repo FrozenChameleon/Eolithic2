@@ -17,7 +17,7 @@ static const char* GetPackComponentName(ComponentPack* pack)
 }
 static void LogNothingEntityWarning(ComponentPack* pack)
 {
-	Logger_LogWarning("Attempted to use a nothing entity in a component pack");
+	Logger_Log(LOGGER_WARNING, "Attempted to use a nothing entity in a component pack");
 }
 static void GrowComponentPackIfNeeded(ComponentPack* pack, int32_t newCapacity)
 {
@@ -232,7 +232,7 @@ void* ComponentPack_Set2(ComponentPack* pack, Entity entity, bool isNotExclusive
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "Reached maximum capacity for pack name: ", GetPackComponentName(pack));
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 		return &pack->_mDummy;
 	}
@@ -240,7 +240,7 @@ void* ComponentPack_Set2(ComponentPack* pack, Entity entity, bool isNotExclusive
 	{
 		MString* tempString = NULL;
 		MString_Combine2(&tempString, "Component pack is expanding for pack: ", GetPackComponentName(pack));
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 

@@ -55,7 +55,7 @@ static void LogBoundsHelper(const char* str, Rectangle bounds)
 	MString_AddAssignString(&tempString, ",");
 	MString_AddAssignInt(&tempString, bounds.Height);
 	MString_AddAssignString(&tempString, "]");
-	Logger_LogInformation(MString_Text(tempString));
+	Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 	MString_Dispose(&tempString);
 }
 static void LogBoundsHelperSelectionRectangle(const char* str)
@@ -101,6 +101,12 @@ void EditorPart_FinishPatches()
 	}
 
 	arrsetlen(arr_patches_to_push, 0);
+}
+void EditorPart_ClearPatches()
+{
+	arrsetlen(arr_patches_to_push, 0);
+	arrsetlen(arr_patches_undo, 0);
+	arrsetlen(arr_patches_redo, 0);
 }
 bool EditorPart_Undo(void)
 {
@@ -160,15 +166,15 @@ void EditorPart_DummyCreateWindows(void)
 }
 void EditorPart_DummyUpdate()
 {
-	Logger_LogWarning("This should not run!");
+	Logger_Log(LOGGER_WARNING, "This should not run!");
 }
 void EditorPart_DummyDraw(SpriteBatch* spriteBatch)
 {
-	Logger_LogWarning("This should not run!");
+	Logger_Log(LOGGER_WARNING, "This should not run!");
 }
 void EditorPart_DummyDrawHud(SpriteBatch* spriteBatch)
 {
-	Logger_LogWarning("This should not run!");
+	Logger_Log(LOGGER_WARNING, "This should not run!");
 }
 PartFuncData EditorPart_CreateDummyFuncData(void)
 {
@@ -225,46 +231,50 @@ void EditorPart_DefaultDrawSingleSelectionSelectedTiles(SpriteBatch* spriteBatch
 }
 void EditorPart_DefaultHandleColumnsAndRows(void)
 {
-	/*int timeHeld = 30;
+	int timeHeld = 30;
 
-	Point unrestrainedGrid = GetUnrestrainedCurrentGrid();
+	Point unrestrainedGrid = EditorPart_GetUnrestrainedCurrentGrid();
+
+	Rectangle levelBoundaryAsGrid = LevelData_GetBoundary(Get_LevelData());
 
 	int addGridX = unrestrainedGrid.X;
-	addGridX = OeMath.Max(addGridX, 0);
-	addGridX = OeMath.Min(addGridX, GetLevelData().GetTileData().GetLength(0));
+	addGridX = Math_MaxInt(addGridX, 0);
+	addGridX = Math_MinInt(addGridX, levelBoundaryAsGrid.Width);
 
 	int addGridY = unrestrainedGrid.Y;
-	addGridY = OeMath.Max(addGridY, 0);
-	addGridY = OeMath.Min(addGridY, GetLevelData().GetTileData().GetLength(1));
+	addGridY = Math_MaxInt(addGridY, 0);
+	addGridY = Math_MinInt(addGridY, levelBoundaryAsGrid.Height);
 
 	if (Input_IsAltPressed())
 	{
-		if (Input_IsKeyTapped(Keys_C) || (Input_GetKeyTimeHeld(Keys_C) > timeHeld))
+		if (Input_IsKeyTapped(KEYS_C) || (Input_GetKeyTimeHeld(KEYS_C) > timeHeld))
 		{
-			GetLevelData().AddColumn(addGridX);
-			OeFunc.Do_ResetCollisionGrid();
-			_mArrayPatches.Clear();
+			LevelData_AddColumn(Get_LevelData(), addGridX);
+			Do_ResetCollisionGrid();
+			EditorPart_ClearPatches();
 		}
-		if (Input_IsKeyTapped(Keys_R) || (Input_GetKeyTimeHeld(Keys_R) > timeHeld))
+		if (Input_IsKeyTapped(KEYS_R) || (Input_GetKeyTimeHeld(KEYS_R) > timeHeld))
 		{
-			GetLevelData().AddRow(addGridY);
-			OeFunc.Do_ResetCollisionGrid();
-			_mArrayPatches.Clear();
+			LevelData_AddRow(Get_LevelData(), addGridY);
+			Do_ResetCollisionGrid();
+			EditorPart_ClearPatches();
 		}
 	}
 	if (Input_IsTabPressed())
 	{
-		if (Input_IsKeyTapped(Keys_C) || (Input_GetKeyTimeHeld(Keys_C) > timeHeld))
+		if (Input_IsKeyTapped(KEYS_C) || (Input_GetKeyTimeHeld(KEYS_C) > timeHeld))
 		{
-			GetLevelData().DeleteColumn(GetCurrentGrid().X);
-			_mArrayPatches.Clear();
+			LevelData_DeleteColumn(Get_LevelData(), EditorPart_GetCurrentGrid().X);
+			Do_ResetCollisionGrid();
+			EditorPart_ClearPatches();
 		}
-		if (Input_IsKeyTapped(Keys_R) || (Input_GetKeyTimeHeld(Keys_R) > timeHeld))
+		if (Input_IsKeyTapped(KEYS_R) || (Input_GetKeyTimeHeld(KEYS_R) > timeHeld))
 		{
-			GetLevelData().DeleteRow(GetCurrentGrid().Y);
-			_mArrayPatches.Clear();
+			LevelData_DeleteRow(Get_LevelData(), EditorPart_GetCurrentGrid().Y);
+			Do_ResetCollisionGrid();
+			EditorPart_ClearPatches();
 		}
-	}*/
+	}
 }
 void EditorPart_DefaultHandleCopy(void)
 {
@@ -275,12 +285,12 @@ void EditorPart_DefaultHandleCopy(void)
 	{
 		if (Input_IsKeyTapped(KEYS_Q))
 		{
-			//ReverseCopy(false);
+			EditorPart_ReverseCopy(false);
 			return;
 		}
 		else if (Input_IsKeyTapped(KEYS_E))
 		{
-			//ReverseCopy(true);
+			EditorPart_ReverseCopy(true);
 			return;
 		}
 	}
@@ -312,7 +322,7 @@ void EditorPart_DefaultHandleCopy(void)
 
 			if (isCut)
 			{
-				//CutTiles(x1, x2, y1, y2);
+				EditorPart_CutTiles(EditorPart_GetSelectionRectangleAsGridBounds());
 			}
 
 			_mCurrentLayerAtTimeOfCopy = EditorPart_GetCurrentLayer();
@@ -333,10 +343,6 @@ void EditorPart_DefaultHandleCopy(void)
 int EditorPart_GetCurrentLayer(void)
 {
 	return Cvars_GetAsInt(CVARS_EDITOR_CURRENT_LAYER);
-}
-void EditorPart_ClearPatches(void)
-{
-	//_mArrayPatches.Clear();
 }
 void EditorPart_HandleCurrentLayerSelection(void)
 {
@@ -492,27 +498,28 @@ void EditorPart_DefaultUpdateCameraPosition(void)
 }
 void EditorPart_DefaultHandleDeleteKey(void)
 {
-	/*
-	if (!Input_IsKeyTapped(Keys_Delete))
+	if (!Input_IsKeyTapped(KEYS_DELETE))
 	{
 		return;
 	}
 
-	Point currentGrid = GetCurrentGrid();
+	Point currentGrid = EditorPart_GetCurrentGrid();
 	int x1 = currentGrid.X;
 	int x2 = x1 + 1;
 	int y1 = currentGrid.Y;
 	int y2 = y1 + 1;
 
-	if (IsSelecting())
+	if (EditorPart_IsSelecting())
 	{
-		x1 = GetSelectionRectangleGridX1();
-		x2 = GetSelectionRectangleGridX2();
-		y1 = GetSelectionRectangleGridY1();
-		y2 = GetSelectionRectangleGridY2();
+		x1 = EditorPart_GetSelectionRectangleGridX1();
+		x2 = EditorPart_GetSelectionRectangleGridX2();
+		y1 = EditorPart_GetSelectionRectangleGridY1();
+		y2 = EditorPart_GetSelectionRectangleGridY2();
 	}
 
-	_mPatch1 = GetPatch(x1, x2, y1, y2, x1, y1);
+	Rectangle gridBoundary = Rectangle_Create(x1, y1, x2 - x1, y2 - y1);
+	EditorPart_PushPatches(gridBoundary);
+
 	for (int i = x1; i < x2; i += 1)
 	{
 		for (int j = y1; j < y2; j += 1)
@@ -521,27 +528,27 @@ void EditorPart_DefaultHandleDeleteKey(void)
 
 			if (Cvars_GetAsBool(CVARS_EDITOR_DELETE_COLLISION))
 			{
-				tile.DeleteCollision();
+				Tile_DeleteCollision(tile);
 			}
 
 			if (Cvars_GetAsBool(CVARS_EDITOR_DELETE_TILES))
 			{
-				tile.DeleteDrawTiles();
+				Tile_DeleteDrawTiles(tile);
 			}
 
 			if (Cvars_GetAsBool(CVARS_EDITOR_DELETE_THINGS))
 			{
-				tile.mInstances.Clear();
+				Tile_DeleteThings(tile);
 			}
 
 			if (Cvars_GetAsBool(CVARS_EDITOR_DELETE_PROPS))
 			{
-				tile.mProps.Clear();
+				Tile_DeleteProps(tile);
 			}
 		}
 	}
-	_mPatch2 = GetPatch(x1, x2, y1, y2, x1, y1);
-	CheckPatch();*/
+
+	EditorPart_FinishPatches();
 }
 void EditorPart_DoDefaultEditorPartUpdateRoutine()
 {
@@ -565,75 +572,73 @@ void EditorPart_DoDefaultEditorPartUpdateRoutine()
 }
 void EditorPart_DoDefaultEditorPartDrawRoutine(SpriteBatch* spriteBatch, EditorDrawFunc drawSingleSelectionSelectedTiles)
 {
-	//_mManyRectangles.Clear();
+	arrsetlen(arr_many_rectangles, 0);
 
 	if (Cvars_GetAsBool(CVARS_EDITOR_SHOW_GRID))
 	{
 		EditorPart_DrawGrid(spriteBatch);
 	}
 
-	/*
 	if (EditorPart_IsSelecting())
 	{
-		int x1 = AlignToGrid(_mSelectionRectangle.X) * tileSize;
-		int y1 = AlignToGrid(_mSelectionRectangle.Y) * tileSize;
+		int x1 = EditorPart_AlignToGridInt(_mSelectionRectangle.X) * TILE_SIZE;
+		int y1 = EditorPart_AlignToGridInt(_mSelectionRectangle.Y) * TILE_SIZE;
 
-		int tileWidth = ((AlignToGrid(_mSelectionRectangle.Right) * tileSize)) - x1;
-		int tileHeight = ((AlignToGrid(_mSelectionRectangle.Bottom) * tileSize)) - y1;
+		int tileWidth = ((EditorPart_AlignToGridInt(Rectangle_Right(&_mSelectionRectangle)) * TILE_SIZE)) - x1;
+		int tileHeight = ((EditorPart_AlignToGridInt(Rectangle_Bottom(&_mSelectionRectangle)) * TILE_SIZE)) - y1;
 
-		//OeDrawTool.DrawRectangle(spriteBatch, _mColorSelectionRectangle, 110, x1, y1, tileWidth, tileHeight, 0, false);
-		if (!OeGui.IsAnythingHoveredOrAnyItemFocusedOrActive())
+		if (!EditorGlobals_ImGuiIsAnyItemActiveOrFocusedOrHovered())
 		{
-			OeDrawTool.DrawRectangleHollow(spriteBatch, OeColors.WHITE, 111, new Rectangle(x1, y1, tileWidth, tileHeight), 0, false, 2);
+			DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_WHITE, 111, Rectangle_Create(x1, y1, tileWidth, tileHeight), 0, false, 2);
 		}
-	}*/
+	}
 
 	if (Input_IsCtrlPressed2(true) && (_mCopyTiles != NULL))
 	{
-		//DrawTilesBorder(spriteBatch, _mCopyTiles);
-		//DrawCopyTiles(spriteBatch);
+		EditorPart_DrawTilesBorder(spriteBatch, _mCopyTiles);
+		EditorPart_DrawCopyTiles(spriteBatch);
 	}
 	else
 	{
 		drawSingleSelectionSelectedTiles(spriteBatch);
 	}
 
-	/*
-	*
-	*
-
-
-	if (Cvars_GetAsBool(Cvars_EDITOR_DRAW_SHOW_GRID))
+	if (Cvars_GetAsBool(CVARS_EDITOR_DRAW_SHOW_GRID))
 	{
-		ref OeComCamera camera = ref OeEditor.GetCamera();
-		int width = OeComCamera.GetScreenWidthInTiles(ref camera) + 2;
-		int height = OeComCamera.GetScreenHeightInTiles(ref camera) + 2;
-		int leftOfCamera = OeComCamera.GetLeft(ref camera);
-		int topOfCamera = OeComCamera.GetTop(ref camera);
-
+		Camera* camera = Editor_GetCamera();
+		int width = Camera_GetScreenWidthInTiles(camera) + 2;
+		int height = Camera_GetScreenHeightInTiles(camera) + 2;
+		int leftOfCamera = Camera_GetLeft(camera);
+		int topOfCamera = Camera_GetTop(camera);
+		Rectangle levelBoundaryGrid = LevelData_GetBoundary(Get_LevelData());
 		for (int i = 0; i < width; i += 1)
 		{
 			for (int j = 0; j < height; j += 1)
 			{
-				Point position = new Point(((leftOfCamera / tileSize) * tileSize) + (i * tileSize), ((topOfCamera / tileSize) * tileSize) + (j * tileSize));
-				if (position.X >= 0 && position.Y >= 0 && position.X < OeFunc.Get_LevelData().GetRealSizeX() && position.Y < OeFunc.Get_LevelData().GetRealSizeY())
+				Point position = Point_Create(((leftOfCamera / TILE_SIZE) * TILE_SIZE) + (i * TILE_SIZE),
+					((topOfCamera / TILE_SIZE) * TILE_SIZE) + (j * TILE_SIZE));
+
+				if ((position.X >= 0) && 
+					(position.Y >= 0) && 
+					(position.X < levelBoundaryGrid.Width) &&
+					position.Y < levelBoundaryGrid.Height)
 				{
-					Color tempColor = Cvars_GetAsBool(Cvars_EDITOR_DRAW_GRID_BLACK) ? OeColors.WHITE : OeColors.BLACK;
-					_mManyRectangles.Add(new OeDrawRectangle(tempColor, new Rectangle(position.X, position.Y, tileSize / 5, 1)));
-					_mManyRectangles.Add(new OeDrawRectangle(tempColor, new Rectangle(position.X, position.Y, 1, tileSize / 5)));
+					Color tempColor = Cvars_GetAsBool(CVARS_EDITOR_DRAW_GRID_BLACK) ? COLOR_WHITE : COLOR_BLACK;
+					arrput(arr_many_rectangles, DrawRectangle_Create(tempColor, Rectangle_Create(position.X, position.Y, TILE_SIZE / 5, 1)));
+					arrput(arr_many_rectangles, DrawRectangle_Create(tempColor, Rectangle_Create(position.X, position.Y, 1, TILE_SIZE / 5)));
 				}
 			}
 		}
 	}
 
-	spriteBatch.DrawManyRectangle(100, _mManyRectangles);*/
+	SpriteBatch_DrawManyRectangle(spriteBatch, 100, arr_many_rectangles);
 }
 void EditorPart_DoDefaultEditorPartDrawHudRoutine(SpriteBatch* spriteBatch, const char* status)
 {
 	Vector2 mouse = Input_GetMouse();
 	Vector2 adjustedMouse = Input_GetCameraAdjustedMouse(Editor_GetCamera());
 
-	MString* display = NULL;
+	MString* display = MString_CreateForJustThisFrame();
 
 	MString_AddAssignString(&display, "|Mouse:");
 	MString_AddAssignInt(&display, (int32_t)mouse.X);
@@ -692,81 +697,79 @@ void EditorPart_DoDefaultEditorPartDrawHudRoutine(SpriteBatch* spriteBatch, cons
 
 	SpriteBatch_DrawString(spriteBatch, "editor", MString_Text(display), Color_White, 150,
 		Vector2_Create(0, (float)(drawableSize.Height - EDITOR_GLOBALS_MENU_ITEM_SIZE)));
-
-	MString_Dispose(&display);
 	//spriteBatch.DrawString(, status + scaleDisplay + selectedX + selectedY + xTileDisplay + yTileDisplay + xDisplay + yDisplay + xLockedDisplay + yLockedDisplay + parallaxDisplay + collisionDisplay + thingDisplay
 	//+ propDisplay + tileParallaxDisplay + gridDisplay + tileDisplay + autoTilerDisplay + fpsDisplay, OeColors.WHITE, 100, new Vector2(0, OeGame.GetCurrentBackBufferHeight() - OeGui.MENU_ITEM_SIZE));*/
 }
 void EditorPart_DrawCopyTiles(SpriteBatch* spriteBatch)
 {
-	/*int tileSize = OeUtils.GetTileSize();
+	Point currentGrid = EditorPart_GetCurrentGrid();
+	DrawTool_DrawRectangle2(spriteBatch, Color_Create4(0, 0, 0, 120), 190,
+		Rectangle_Create(currentGrid.X * TILE_SIZE, currentGrid.Y * TILE_SIZE, 
+			_mCopyTiles->boundary.Width * TILE_SIZE, _mCopyTiles->boundary.Height * TILE_SIZE), 0, false);
 
-	Point currentGrid = GetCurrentGrid();
-	OeDrawTool.DrawRectangle(spriteBatch, new Color(0, 0, 0, 120), 190,
-		new Rectangle(currentGrid.X * tileSize, currentGrid.Y * tileSize, _mCopyTiles.GetLength(0) * tileSize, _mCopyTiles.GetLength(1) * tileSize), 0, false);
-
-	OeTexture texture = GetLevelData().GetTilesetTexture();
-	for (int i = 0; i < _mCopyTiles.GetLength(0); i += 1)
+	Texture* texture = LevelData_GetTilesetTexture(Get_LevelData());
+	for (int i = 0; i < _mCopyTiles->boundary.Width; i += 1)
 	{
-		for (int j = 0; j < _mCopyTiles.GetLength(1); j += 1)
+		for (int j = 0; j < _mCopyTiles->boundary.Height; j += 1)
 		{
-			OeTile tile = _mCopyTiles[i, j];
+			Tile* tile = Tilemap_GetTile(_mCopyTiles, i, j);
 
 			int adjX = currentGrid.X + i;
 			int adjY = currentGrid.Y + j;
 
-			if (Cvars_GetAsBool(Cvars_EDITOR_COPY_COLLISION))
+			if (Cvars_GetAsBool(CVARS_EDITOR_COPY_COLLISION))
 			{
-				tile.DrawCollision(spriteBatch, tileSize, ref OeEditor.GetCamera(), adjX, adjY, true);
+				Tile_DrawCollision(tile, spriteBatch, Editor_GetCamera(), adjX, adjY, true);
 			}
-			if (Cvars_GetAsBool(Cvars_EDITOR_COPY_THINGS))
+			if (Cvars_GetAsBool(CVARS_EDITOR_COPY_THINGS))
 			{
-				tile.DrawThings(spriteBatch, tileSize, ref OeEditor.GetCamera(), adjX, adjY, true);
+				Tile_DrawThings(tile, spriteBatch, Editor_GetCamera(), adjX, adjY, true);
 			}
-			if (Cvars_GetAsBool(Cvars_EDITOR_COPY_PROPS))
+			if (Cvars_GetAsBool(CVARS_EDITOR_COPY_PROPS))
 			{
-				tile.DrawProps(spriteBatch, tileSize, ref OeEditor.GetCamera(), adjX, adjY, true);
+				Tile_DrawProps(tile, spriteBatch, Editor_GetCamera(), adjX, adjY, true);
 			}
-			if (Cvars_GetAsBool(Cvars_EDITOR_COPY_TILES))
+			if (Cvars_GetAsBool(CVARS_EDITOR_COPY_TILES))
 			{
-				DrawTilesAsEditor(tile, spriteBatch, tileSize, adjX, adjY, GetLevelData(), true, texture);
+				EditorPart_DrawTilesAsEditor(tile, spriteBatch, adjX, adjY, Get_LevelData(), true, texture);
 			}
 		}
-	}*/
+	}
 }
-void EditorPart_DrawTilesAsEditor(Tile* tile, SpriteBatch* spriteBatch, int tileSize, int gridX, int gridY,
+void EditorPart_DrawTilesAsEditor(Tile* tile, SpriteBatch* spriteBatch, int gridX, int gridY,
 	LevelData* level, bool overrideDepth, Texture* wrapper)
-
 {
-	/*for (int k = 0; k < OeTile.LAYER_AMOUNT; k += 1)
+	for (int i = 0; i < TILE_DRAW_LAYER_LENGTH; i += 1)
 	{
-		if (!Cvars_GetAsBool(Cvars_EDITOR_COPY_LAYER_ONLY) || k == _mCurrentLayerAtTimeOfCopy)
+		if (!Cvars_GetAsBool(CVARS_EDITOR_COPY_LAYER_ONLY) || (i == _mCurrentLayerAtTimeOfCopy))
 		{
-			if (Cvars_GetAsBool(Cvars_EDITOR_SHOW_LAYER + k))
+			MString* tempString = MString_CreateForJustThisFrame();
+			MString_AssignString(&tempString, CVARS_EDITOR_SHOW_LAYER);
+			MString_AddAssignInt(&tempString, i);
+			if (Cvars_GetAsBool(MString_Text(tempString)))
 			{
-				int currentDepth = level.mLayerData[k].mDepth;
+				int currentDepth = level->mLayerData[i].mDepth;
 				if (overrideDepth)
 				{
-					currentDepth = OeTile.OVERRIDE_DEPTH;
+					currentDepth = TILE_OVERRIDE_DEPTH;
 				}
-				OeDrawTile.Draw(ref tile.mDrawTiles[k], spriteBatch, wrapper, OeColors.WHITE, currentDepth, gridX * tileSize, gridY * tileSize);
+				DrawTile_Draw(&tile->mDrawTiles[i], spriteBatch, wrapper, COLOR_WHITE, currentDepth, gridX * TILE_SIZE, gridY * TILE_SIZE);
 			}
 		}
-	}*/
+	}
 }
-void EditorPart_DrawTilesBorder(SpriteBatch* spriteBatch, Tile* tiles, int tilesWidth, int tilesHeight)
+void EditorPart_DrawTilesBorder(SpriteBatch* spriteBatch, Tilemap* tilemap)
 {
-	/*int tileSize = OeUtils.GetTileSize();
+	Point currentGrid = EditorPart_GetCurrentGrid();
+	int x = currentGrid.X * TILE_SIZE;
+	int y = currentGrid.Y * TILE_SIZE;
 
-	Point currentGrid = GetCurrentGrid();
-	int x = currentGrid.X * tileSize;
-	int y = currentGrid.Y * tileSize;
+	int width = tilemap->boundary.Width * TILE_SIZE;
+	int height = tilemap->boundary.Height * TILE_SIZE;
 
-	int width = tiles.GetLength(0) * tileSize;
-	int height = tiles.GetLength(1) * tileSize;
-
-	int widthAdjustment = (x + width) - GetLevelData().GetRealSizeX();
-	int heightAdjustment = (y + height) - GetLevelData().GetRealSizeY();
+	Rectangle boundaryInPixels = LevelData_GetBoundaryInPixels(Get_LevelData());
+	int widthAdjustment = (x + width) - boundaryInPixels.Width;
+	int heightAdjustment = (y + height) - boundaryInPixels.Height;
 
 	if (widthAdjustment > 0)
 	{
@@ -777,83 +780,50 @@ void EditorPart_DrawTilesBorder(SpriteBatch* spriteBatch, Tile* tiles, int tiles
 		height -= heightAdjustment;
 	}
 
-	OeDrawTool.DrawRectangleHollow(spriteBatch, OeColors.WHITE, 100, new Rectangle(x, y, width, height), 0, false, 2);*/
+	DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_WHITE, 100, Rectangle_Create(x, y, width, height), 0, false, 2);
 }
-void EditorPart_CutTiles(int x1, int x2, int y1, int y2)
+void EditorPart_CutTiles(Rectangle srcLocation)
 {
-	/*int counterX = 0;
-	int counterY = 0;
+	EditorPart_PushPatches(srcLocation);
 
-	int width = GetSelectionRectangleGridX2() - GetSelectionRectangleGridX1();
-	int height = GetSelectionRectangleGridY2() - GetSelectionRectangleGridY1();
-
-	//_mMoveTiles = new OeTile[width, height];
-
-	//_mMoveNodeAnchor.X = x1;
-	//_mMoveNodeAnchor.Y = y1;
-
-	_mPatch1 = GetPatch(x1, x2, y1, y2, x1, y1);
-
-	for (int i = x1; i < x2; i += 1)
+	for (int i = srcLocation.X; i < (srcLocation.X + srcLocation.Width); i += 1)
 	{
-		for (int j = y1; j < y2; j += 1)
+		for (int j = srcLocation.Y; j < (srcLocation.Y + srcLocation.Height); j += 1)
 		{
-			//_mMoveTiles[counterX, counterY] = GetLevelData().GetTile(i, j).GetClone(false, null, true);
-			OeTile originalTile = GetLevelData().GetTile(i, j);
-			if (Cvars_GetAsBool(Cvars_EDITOR_COPY_COLLISION))
+			Tile* originalTile = LevelData_GetTile(Get_LevelData(), i, j);
+			if (Cvars_GetAsBool(CVARS_EDITOR_COPY_COLLISION))
 			{
-				originalTile.DeleteCollision();
+				Tile_DeleteCollision(originalTile);
 			}
-			if (Cvars_GetAsBool(Cvars_EDITOR_COPY_TILES))
+			if (Cvars_GetAsBool(CVARS_EDITOR_COPY_TILES))
 			{
-				if (!Cvars_GetAsBool(Cvars_EDITOR_COPY_LAYER_ONLY))
+				if (!Cvars_GetAsBool(CVARS_EDITOR_COPY_LAYER_ONLY))
 				{
-					originalTile.DeleteDrawTiles();
+					Tile_DeleteDrawTiles(originalTile);
 				}
 				else
 				{
-					originalTile.DeleteDrawTiles(GetCurrentLayer());
+					Tile_DeleteDrawTilesByLayer(originalTile, EditorPart_GetCurrentLayer());
 				}
 			}
-			if (Cvars_GetAsBool(Cvars_EDITOR_COPY_THINGS))
+			if (Cvars_GetAsBool(CVARS_EDITOR_COPY_THINGS))
 			{
-				originalTile.DeleteThings();
+				Tile_DeleteThings(originalTile);
 			}
-			if (Cvars_GetAsBool(Cvars_EDITOR_COPY_PROPS))
+			if (Cvars_GetAsBool(CVARS_EDITOR_COPY_PROPS))
 			{
-				originalTile.DeleteProps();
+				Tile_DeleteProps(originalTile);
 			}
-			counterY += 1;
 		}
-		counterY = 0;
-		counterX += 1;
 	}
 
-	_mPatch2 = GetPatch(x1, x2, y1, y2, x1, y1);
+	EditorPart_FinishPatches();
 
-	CheckPatch();
-
-	OeFunc.Do_ResetCollisionGrid();*/
+	Do_ResetCollisionGrid();
 }
 void EditorPart_Move(void)
 {
 	//UNUSED?
-}
-void EditorPart_CheckPatch(void)
-{
-	/*if (_mPatch1 != null)
-	{
-		if (!_mPatch1.IsEqualTo(_mPatch2))
-		{
-			AddPatch(_mPatch1);
-		}
-	}
-	_mPatch1 = null;
-	_mPatch2 = null;*/
-}
-void EditorPart_AddPatch(LevelPatch* patch)
-{
-	//_mArrayPatches.Insert(0, patch);
 }
 bool EditorPart_IsSelecting(void)
 {
@@ -861,10 +831,15 @@ bool EditorPart_IsSelecting(void)
 }
 void EditorPart_ReverseCopy(bool isFlipY)
 {
-	/*OeTile[, ] newTiles = new OeTile[_mCopyTiles.GetLength(0), _mCopyTiles.GetLength(1)];
+	if (_mCopyTiles == NULL)
+	{
+		return;
+	}
 
-	int xLength = _mCopyTiles.GetLength(0);
-	int yLength = _mCopyTiles.GetLength(1);
+	Tilemap* newTiles = Tilemap_Create(_mCopyTiles->boundary);
+
+	int xLength = newTiles->boundary.Width;
+	int yLength = newTiles->boundary.Height;
 	for (int i = 0; i < xLength; i += 1)
 	{
 		for (int j = 0; j < yLength; j += 1)
@@ -874,15 +849,15 @@ void EditorPart_ReverseCopy(bool isFlipY)
 
 			if (!isFlipY)
 			{
-				newTiles[i, j] = _mCopyTiles[newLocX, j].GetClone();
+				Tilemap_SetTile(newTiles, i, j, Tile_Clone(Tilemap_GetTile(_mCopyTiles, newLocX, j)));
 			}
 			else
 			{
-				newTiles[i, j] = _mCopyTiles[i, newLocY].GetClone();
+				Tilemap_SetTile(newTiles, i, j, Tile_Clone(Tilemap_GetTile(_mCopyTiles, i, newLocY)));
 			}
 
-			OeDrawTile[] draws = newTiles[i, j].mDrawTiles;
-			for (int k = 0; k < draws.Length; k += 1)
+			DrawTile* draws = Tilemap_GetTile(newTiles, i, j)->mDrawTiles;
+			for (int k = 0; k < TILE_DRAW_LAYER_LENGTH; k += 1)
 			{
 				if (!isFlipY)
 				{
@@ -904,7 +879,7 @@ void EditorPart_ReverseCopy(bool isFlipY)
 		}
 	}
 
-	_mCopyTiles = newTiles;*/
+	_mCopyTiles = newTiles;
 }
 void EditorPart_HandleReverseCopy(void)
 {
@@ -1092,27 +1067,6 @@ int EditorPart_GetSelectionRectangleGridY1(void)
 int EditorPart_GetSelectionRectangleGridY2(void)
 {
 	return EditorPart_AlignToGridInt(Rectangle_Bottom(&_mSelectionRectangle));
-}
-Tile* EditorPart_GetCloneOfTiles(int x1, int x2, int y1, int y2)
-{
-	return NULL;
-	//TODO
-	/*OeTile[, ] tiles = new OeTile[x2 - x1, y2 - y1];
-
-	int counterX = 0;
-	int counterY = 0;
-	for (int i = x1; i < x2; i += 1)
-	{
-		for (int j = y1; j < y2; j += 1)
-		{
-			tiles[counterX, counterY] = GetLevelData().GetTile(i, j).GetClone();
-			counterY += 1;
-		}
-		counterY = 0;
-		counterX += 1;
-	}
-
-	return tiles;*/
 }
 void EditorPart_DefaultHandleSpacebarHingeMovement()
 {

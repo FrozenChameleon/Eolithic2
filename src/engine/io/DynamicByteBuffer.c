@@ -398,7 +398,7 @@ void DynamicByteBuffer_WriteString(DynamicByteBuffer* dbb, const char* str, size
 {
 	if (str == NULL)
 	{
-		Logger_LogWarning("Handed null pointer to write string!");
+		Logger_Log(LOGGER_WARNING, "Handed null pointer to write string!");
 		return;
 	}
 

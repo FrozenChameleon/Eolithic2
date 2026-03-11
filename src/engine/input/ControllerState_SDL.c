@@ -174,7 +174,7 @@ int32_t ControllerState_AddControllerInstance(int32_t dev)
 
 	if (which == -1)
 	{
-		Logger_LogInformation("Unable to find index to add controller instance!");
+		Logger_Log(LOGGER_INFORMATION, "Unable to find index to add controller instance!");
 		return -1; // Ignoring more than 4 controllers.
 	}
 
@@ -194,7 +194,7 @@ int32_t ControllerState_AddControllerInstance(int32_t dev)
 	if (thisInstanceIndex != -1)
 	{
 		// Duplicate? Usually this is OSX being dumb, but...?
-		Logger_LogInformation("Duplicate controller instance!");
+		Logger_Log(LOGGER_INFORMATION, "Duplicate controller instance!");
 		INTERNAL_devices[which] = NULL;
 		return -1;
 	}
@@ -208,7 +208,7 @@ int32_t ControllerState_AddControllerInstance(int32_t dev)
 		MString_AddAssignInt(&tempString, which);
 		MString_AddAssignString(&tempString, ", ");
 		MString_AddAssignString(&tempString, SDL_GetGamepadName(INTERNAL_devices[which]));
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 
@@ -231,7 +231,7 @@ int32_t ControllerState_RemoveControllerInstance(int32_t dev)
 
 	if (output == -1)
 	{
-		Logger_LogInformation("Unable to remove controller instance!");
+		Logger_Log(LOGGER_INFORMATION, "Unable to remove controller instance!");
 		// Odds are, this is controller 5+ getting removed.
 		return -1;
 	}
@@ -242,7 +242,7 @@ int32_t ControllerState_RemoveControllerInstance(int32_t dev)
 		MString_AddAssignInt(&tempString, output);
 		MString_AddAssignString(&tempString, ", ");
 		MString_AddAssignString(&tempString, SDL_GetGamepadName(INTERNAL_devices[output]));
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 

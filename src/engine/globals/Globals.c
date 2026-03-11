@@ -115,7 +115,7 @@ void Globals_DisableAudioPermanently(void)
 		return;
 	}
 
-	Logger_LogError("Disabling all audio");
+	Logger_Log(LOGGER_ERROR, "Disabling all audio");
 	_mIsAudioDisabled = true;
 }
 void Globals_DisableAudioPermanentlyBecauseOfNoAudioHardware(void)
@@ -125,7 +125,7 @@ void Globals_DisableAudioPermanentlyBecauseOfNoAudioHardware(void)
 		return;
 	}
 
-	Logger_LogError("No audio hardware, disabling all audio");
+	Logger_Log(LOGGER_ERROR, "No audio hardware, disabling all audio");
 	_mIsAudioDisabled = true;
 }
 void Globals_SetDebugFileMode(bool value)
@@ -285,7 +285,7 @@ void Globals_ToggleGodMode(void)
 		MString* tempString = NULL;
 		MString_AssignString(&tempString, "God Mode: ");
 		MString_AddAssignBool(&tempString, GLOBALS_DEBUG_IS_GOD_MODE);
-		Logger_LogInformation(MString_Text(tempString));
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
 }
