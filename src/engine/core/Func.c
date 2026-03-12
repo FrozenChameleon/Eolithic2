@@ -1754,6 +1754,30 @@ void Do_InitStringSetting(ComponentType ctype, const char* key, const char* valu
 {
 	//TOOD 2026
 }
+bool Do_AnimSpinDown(Entity owner, const char* state, const char* phase, int* counter, int spinTime, int maxSpinSpeed)
+{
+	*counter += 1;
+	if (*counter > spinTime)
+	{
+		*counter = spinTime;
+	}
+
+	float percent = ((float)*counter / spinTime);
+	int current = (int)(maxSpinSpeed * percent);
+	current += 1;
+
+	Animation* anim = Get_Animation(owner, state, phase);
+	anim->mFlipTimer.mLimit = current;
+
+	if ((*counter == spinTime) && (anim->mFrameTimer.mCurrent == 0) && (anim->mFlipTimer.mCurrent == 0))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 
 //REGION GET
 Rectangle Get_GameInternalResolutionBounds()
@@ -2836,6 +2860,10 @@ int32_t Get_RandomDirection(Random32* random)
 		return 0;
 	}
 }
+bool Get_RandomBoolean(Random32* random)
+{
+	return (Get_RandomBinaryDirection(random) == 1);
+}
 float Get_ArcVelocityX(float targetPosX, float throwPosX, int32_t travelTime, float mul)
 {
 	float diffX = targetPosX - throwPosX;
@@ -3019,6 +3047,10 @@ int32_t Get_TuningAsInt(Entity owner, const char* tuning)
 {
 	//TODO 2026
 	return 0;
+}
+Animation* Get_CurrentDefaultAnimation(Entity entity)
+{
+	return DrawActorSys_GetCurrentAnimation(entity, OeState_DEFAULT);
 }
 
 //IS REGION

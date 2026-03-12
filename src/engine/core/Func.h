@@ -301,6 +301,7 @@ void INTERNAL_Do_ShakeCameraF(float minX, float maxX, float minY, float maxY,
 void Do_ShakeCameraF(float minX, float maxX, float minY, float maxY,
 	bool isLockedToInteger, bool isRandomDirection, int framesToShake);
 void Do_InitStringSetting(ComponentType ctype, const char* key, const char* value);
+bool Do_AnimSpinDown(Entity owner, const char* state, const char* phase, int* counter, int spinTime, int maxSpinSpeed);
 //ENDREGION
 
 //REGION GET
@@ -461,6 +462,7 @@ float Get_Distance5(float x1, float x2);
 double Get_Distance6(float x1, float y1, float x2, float y2);
 int32_t Get_RandomBinaryDirection(Random32* random);
 int32_t Get_RandomDirection(Random32* random);
+bool Get_RandomBoolean(Random32* random);
 float Get_ArcVelocityX(float targetPosX, float throwPosX, int32_t travelTime, float mul);
 float Get_ArcVelocityY(float targetPosY, float throwPosY, float grav, int32_t travelTime, float mul);
 int32_t Get_LevelFrameCount(void);
@@ -485,6 +487,7 @@ void Do_SaveUserConfig(void);
 Rectangle Get_CameraHingeGateBounds();
 float Get_TuningAsFloat(Entity owner, const char* tuning);
 int32_t Get_TuningAsInt(Entity owner, const char* tuning);
+Animation* Get_CurrentDefaultAnimation(Entity entity);
 //ENDREGION
 
 //REGION IS

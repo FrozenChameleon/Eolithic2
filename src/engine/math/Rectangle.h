@@ -44,3 +44,4 @@ bool Rectangle_Contains(const Rectangle* value, int32_t x, int32_t y);
 bool Rectangle_ContainsPoint(const Rectangle* value1, Point value2);
 bool Rectangle_ContainsRectangle(const Rectangle* value1, const Rectangle* value2);
 bool Rectangle_IsEmpty(const Rectangle* value);
+Rectangle Rectangle_Intersect(const Rectangle* value1, const Rectangle* value2);

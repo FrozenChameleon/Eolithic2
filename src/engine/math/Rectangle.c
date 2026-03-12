@@ -15,6 +15,8 @@
 
 #include "Rectangle.h"
 
+#include "../../engine/math/Math.h"
+
 const Rectangle Rectangle_Empty = { 0 };
 
 Rectangle Rectangle_Create(int32_t x, int32_t y, int32_t width, int32_t height)
@@ -105,4 +107,33 @@ bool Rectangle_IsEmpty(const Rectangle* value)
 		(value->Height == 0) &&
 		(value->X == 0) &&
 		(value->Y == 0));
+}
+
+Rectangle Rectangle_Intersect(const Rectangle* value1, const Rectangle* value2)
+{
+	Rectangle result;
+	if (Rectangle_Intersects(value1, value2))
+	{
+		int32_t right_side = Math_MinInt(
+			value1->X + value1->Width,
+			value2->X + value2->Width
+		);
+		int32_t left_side = Math_MaxInt(value1->X, value2->X);
+		int32_t top_side = Math_MaxInt(value1->Y, value2->Y);
+		int32_t bottom_side = Math_MinInt(
+			value1->Y + value1->Height,
+			value2->Y + value2->Height
+		);
+		result = Rectangle_Create(
+			left_side,
+			top_side,
+			right_side - left_side,
+			bottom_side - top_side
+		);
+	}
+	else
+	{
+		result = Rectangle_Empty;
+	}
+	return result;
 }
