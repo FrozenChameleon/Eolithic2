@@ -145,7 +145,7 @@ const char* MenuFunc_GetCurrentSoundTestMusic(void)
 const char* MenuFunc_GetCurrentSoundTestMusicAsNumber(void)
 {
 #ifdef EDITOR_MODE
-	if (GLOBALS_DEBUG_IS_GOD_MODE)
+	if (Globals_DebugIsGodMode())
 	{
 		return MenuFunc_GetCurrentSoundTestMusic();
 	}
@@ -159,7 +159,7 @@ const char* MenuFunc_GetCurrentSoundTestSfx(void)
 const char* MenuFunc_GetCurrentSoundTestSfxAsNumber(void)
 {
 #ifdef EDITOR_MODE
-	if (GLOBALS_DEBUG_IS_GOD_MODE)
+	if (Globals_DebugIsGodMode())
 	{
 		return MenuFunc_GetCurrentSoundTestSfx();
 	}

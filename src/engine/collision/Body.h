@@ -55,6 +55,7 @@ typedef struct Body
 	bool mIsExtraBodyThatFollows;
 	bool mIsDisplayingHitSuccess;
 	bool mIsHighPriorityBody;
+	bool mIsHighPriorityBody2;
 	bool mIsMovingPlatform;
 	bool mIsOneWayPlatform;
 	bool mIgnoreBodies;
@@ -116,6 +117,7 @@ int32_t Body_GetWidth(Body* body);
 void Body_SetWidth(Body* body, int32_t pixelWidth);
 int32_t Body_GetHeight(Body* body);
 void Body_SetHeight(Body* body, int32_t pixelHeight);
+void Body_SetWidthAndHeight(Body* body, int pixelWidth, int pixelHeight);
 int32_t Body_GetOriginalWidth(Body* body);
 int32_t Body_GetOriginalHeight(Body* body);
 void Body_SetPositionVector2(Body* body, Vector2 pixelMovement);

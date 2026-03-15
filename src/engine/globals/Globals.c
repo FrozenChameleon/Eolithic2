@@ -31,17 +31,29 @@ static bool _mIsRenderDisabled;
 static bool _mIsEditorActive;
 static Vector2 _mDebugQuickPlayerPosition;
 static bool _mDebugEditorJustReloadedGraphics;
+static bool _mDebugIsGodMode;
 
 int32_t GLOBALS_DEBUG_SHOW_INFO;
 int32_t GLOBALS_DEBUG_GAME_LOGIC_SPEED = GLOBALS_DEFAULT_DEBUG_GAME_LOGIC_SPEED;
 bool GLOBALS_DEBUG_SHOW_INGAME_COLLISION;
 bool GLOBALS_DEBUG_DISABLE_HUD;
-bool GLOBALS_DEBUG_IS_GOD_MODE;
 bool GLOBALS_DEBUG_IS_PAUSED;
 bool GLOBALS_DEBUG_JUST_LOADED_MAP_NOTIFY_EDITOR;
 bool GLOBALS_DEBUG_IS_META_MAP_EDIT_TILE_MODE_AT_MAP_LOAD;
 bool GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS;
 
+void Globals_SetDebugIsGodMode(bool value)
+{
+	_mDebugIsGodMode = value;
+}
+bool Globals_DebugIsGodMode()
+{
+	return _mDebugIsGodMode;
+}
+void Globals_ToggleDebugIsGodMode()
+{
+	_mDebugIsGodMode = !_mDebugIsGodMode;
+}
 bool Globals_DebugEditorJustReloadedGraphics()
 {
 	return _mDebugEditorJustReloadedGraphics;
@@ -280,12 +292,12 @@ uint32_t Globals_GetTimeForRandomSeed(void)
 }
 void Globals_ToggleGodMode(void)
 {
-	GLOBALS_DEBUG_IS_GOD_MODE = !GLOBALS_DEBUG_IS_GOD_MODE;
+	Globals_ToggleGodMode();
+
 	{
-		MString* tempString = NULL;
+		MString* tempString = MString_CreateForJustThisFrame();
 		MString_AssignString(&tempString, "God Mode: ");
-		MString_AddAssignBool(&tempString, GLOBALS_DEBUG_IS_GOD_MODE);
+		MString_AddAssignBool(&tempString, Globals_DebugIsGodMode());
 		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
-		MString_Dispose(&tempString);
 	}
 }

@@ -399,7 +399,7 @@ static void ContinueReadSession(bool isFirst)
 	ResetAllData();
 	GameSaveManager_ResetSaveData();
 	GameStateManager_LoadMap("777");
-	GLOBALS_DEBUG_IS_GOD_MODE = false;
+	Globals_SetDebugIsGodMode(false);
 	_mGoFastFlag = false;
 }
 static RecordingPlayerData* GetPlayerData(RecordingData* recordingData, int32_t playerNumber)
@@ -441,7 +441,7 @@ static void Read(const char* recordingFilenameWithoutExtension)
 		MString_Dispose(&path);
 	}
 
-	GLOBALS_DEBUG_IS_GOD_MODE = BufferReader_ReadBoolean(br);
+	Globals_SetDebugIsGodMode(BufferReader_ReadBoolean(br));
 	GameStateManager_SetUniqueMapSeed(BufferReader_ReadI32(br));
 	BufferReader_ReadI32(br); //Tuning_SetCurrentDifficulty(BufferReader_ReadI32()); //ORIGINALLY WAS THIS, NOW UNUSED
 	BufferReader_ReadString(br, _mHeaderData.mLevelFileName, EE_FILENAME_MAX);

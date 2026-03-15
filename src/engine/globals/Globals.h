@@ -25,12 +25,14 @@ extern int32_t GLOBALS_DEBUG_SHOW_INFO;
 extern int32_t GLOBALS_DEBUG_GAME_LOGIC_SPEED;
 extern bool GLOBALS_DEBUG_SHOW_INGAME_COLLISION;
 extern bool GLOBALS_DEBUG_DISABLE_HUD;
-extern bool GLOBALS_DEBUG_IS_GOD_MODE;
 extern bool GLOBALS_DEBUG_IS_PAUSED;
 extern bool GLOBALS_DEBUG_JUST_LOADED_MAP_NOTIFY_EDITOR;
 extern bool GLOBALS_DEBUG_IS_META_MAP_EDIT_TILE_MODE_AT_MAP_LOAD;
 extern bool GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS;
 
+void Globals_SetDebugIsGodMode(bool value);
+bool Globals_DebugIsGodMode();
+void Globals_ToggleDebugIsGodMode();
 bool Globals_DebugEditorJustReloadedGraphics();
 void Globals_SetEditorJustReloadedGraphics(bool value);
 void Globals_SetDebugQuickPlayerPosition(Vector2 value);

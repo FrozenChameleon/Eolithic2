@@ -8,8 +8,7 @@
 
 #include "ActionList.h"
 #include "InputAction.h"
-
-typedef struct ControllerState ControllerState;
+#include "ControllerState.h"
 
 typedef struct InputPlayer
 {

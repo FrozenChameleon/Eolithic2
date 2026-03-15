@@ -117,3 +117,5 @@ IStringArray* GameHelper_GetAllTheRecordings(void);
 void GameHelper_BakedCollisionCheck(float x, float y, int32_t collisionToCheck, Body* bodyRef, bool vertical, CollisionCheckData* data);
 void GameHelper_WriteGameSaveData(void* gsd, DynamicByteBuffer* writer);
 void GameHelper_ReadGameSaveData(void* gsd, BufferReader* reader);
+void GameHelper_AfterHighPriorityBodyStep(bool isVertical);
+void GameHelper_AfterHighPriorityBodyStep2(bool isVertical);

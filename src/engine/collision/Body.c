@@ -130,6 +130,11 @@ void Body_SetHeight(Body* body, int32_t pixelHeight)
 {
 	body->mPhysicsHeight = pixelHeight * BODY_PHYSICS_SCALER;
 }
+void Body_SetWidthAndHeight(Body* body, int pixelWidth, int pixelHeight)
+{
+	Body_SetWidth(body, pixelWidth);
+	Body_SetHeight(body, pixelHeight);
+}
 int32_t Body_GetOriginalWidth(Body* body)
 {
 	return body->mPhysicsOriginalWidth / BODY_PHYSICS_SCALER;

@@ -1010,16 +1010,30 @@ void CollisionEngineSys_Step(CollisionEngine* data, bool isVertical)
 		if (body->mIsHighPriorityBody)
 		{
 			CollisionEngineSys_ApplyBodyVelocity(data, body, isVertical);
-
 			CollisionEngineSys_ResolveWithOtherBodies(data, body, isVertical);
 		}
 	}
+
+	GameHelper_AfterHighPriorityBodyStep(isVertical);
+
+	for (int32_t i = 0; i < arrlen(arr_bodies); i += 1) // Second move and test high priority 2 bodies....
+	{
+		Body* body = arr_bodies[i];
+
+		if (body->mIsHighPriorityBody2)
+		{
+			CollisionEngineSys_ApplyBodyVelocity(data, body, isVertical);
+			CollisionEngineSys_ResolveWithOtherBodies(data, body, isVertical);
+		}
+	}
+
+	GameHelper_AfterHighPriorityBodyStep2(isVertical);
 
 	for (int32_t i = 0; i < arrlen(arr_bodies); i += 1) // Move for the step, do initial collision check with baked collision.
 	{
 		Body* body = arr_bodies[i];
 
-		if (!body->mIsHighPriorityBody)
+		if (!body->mIsHighPriorityBody && !body->mIsHighPriorityBody2)
 		{
 			CollisionEngineSys_ApplyBodyVelocity(data, body, isVertical);
 		}

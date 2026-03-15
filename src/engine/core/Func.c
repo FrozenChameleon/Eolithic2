@@ -102,7 +102,7 @@ static Point* Get_ArrGridNodes(Entity entity)
 //REGION DO
 Entity Do_CreatePlayer(float x, float y, const char* name)
 {
-	Entity player = Do_BuildActor2(x, y, NULL, name);
+	Entity player = Do_BuildActor(Vector2_Create(x, y), NULL, name);
 	int32_t playerNumber = Get_AmountOfPlayers();
 	Do_SetPlayerNumber(player, playerNumber);
 	Do_SetBoolTag(C_TagIsPlayer, player, true);
@@ -397,7 +397,7 @@ Entity Do_BuildThingFromData(int32_t i, int32_t j, ThingInstance* data)
 		int32_t initialPositionX = (i * TILE_SIZE) + buildOffset.X;
 		int32_t initialPositionY = (j * TILE_SIZE) + buildOffset.Y;
 		const char* thingName = ThingInstance_GetName(data);
-		return Do_BuildActor5(i, j, (float)initialPositionX, (float)initialPositionY, data, thingName);
+		return Do_BuildActorGrid(Point_Create(i, j), Vector2_Create((float)initialPositionX, (float)initialPositionY), data, thingName);
 	}
 	else
 	{
@@ -1778,6 +1778,23 @@ bool Do_AnimSpinDown(Entity owner, const char* state, const char* phase, int* co
 		return false;
 	}
 }
+void Do_MoveAtRadianAngle(Entity entity, double angle, float speed)
+{
+	Vector2 movement;
+	movement.X = (float)(Get_VectorFromRadianAngleX(angle) * speed);
+	movement.Y = (float)(Get_VectorFromRadianAngleY(angle) * speed);
+	Do_Move(entity, movement);
+}
+void Do_CopyArrGridNodesFromParent(Entity entity)
+{
+	Entity parent = Get_ParentEntity(entity);
+	if (parent == ENTITY_NOTHING)
+	{
+		return;
+	}
+
+	Do_SetArrNodes(entity, Get_ArrGridNodes(parent));
+}
 
 //REGION GET
 Rectangle Get_GameInternalResolutionBounds()
@@ -2292,6 +2309,22 @@ Rectangle Get_BodyRectangle(Entity entity)
 Body* Get_Body(Entity entity)
 {
 	return (Body*)Get_Component(C_Body, entity);
+}
+Body* Get_Body2(Entity entity, int number)
+{
+	if (number != 0)
+	{
+		EntitySearch* search = Do_SearchForChildrenWithComponent(C_TagIsExtraBody, entity);
+		for (int i = 0; i < search->len; i += 1)
+		{
+			Entity extraBody = search->entities[i];
+			if (i == (number - 1))
+			{
+				return Get_Body(extraBody);
+			}
+		}
+	}
+	return Get_Body(entity);
 }
 float Get_X(Entity entity)
 {
@@ -2918,25 +2951,17 @@ int32_t Get_DirectionFromCameraSideY(Entity entity)
 }
 Entity Do_BuildActor(Vector2 initialPosition, ThingInstance* instanceData, const char* name)
 {
-	return Do_BuildActor2(initialPosition.X, initialPosition.Y, instanceData, name);
+	return Do_BuildActorGrid2(Point_Zero, initialPosition, instanceData, name, ENTITY_NOTHING);
 }
-Entity Do_BuildActor2(float initialPositionX, float initialPositionY, ThingInstance* instanceData, const char* name)
+Entity Do_BuildActor2(Vector2 initialPosition, ThingInstance* instanceData, const char* name, Entity parent)
 {
-	return Do_BuildActor6(0, 0, initialPositionX, initialPositionY, instanceData, name, ENTITY_NOTHING);
+	return Do_BuildActorGrid2(Point_Zero, initialPosition, instanceData, name, parent);
 }
-Entity Do_BuildActor3(Vector2 initialPosition, ThingInstance* instanceData, const char* name, Entity parent)
+Entity Do_BuildActorGrid(Point gridPosition, Vector2 initialPosition, ThingInstance* instanceData, const char* name)
 {
-	return Do_BuildActor4(initialPosition.X, initialPosition.Y, instanceData, name, parent);
+	return Do_BuildActorGrid2(gridPosition, initialPosition, instanceData, name, ENTITY_NOTHING);
 }
-Entity Do_BuildActor4(float initialPositionX, float initialPositionY, ThingInstance* instanceData, const char* name, Entity parent)
-{
-	return Do_BuildActor6(0, 0, initialPositionX, initialPositionY, instanceData, name, parent);
-}
-Entity Do_BuildActor5(int32_t gridPositionX, int32_t gridPositionY, float initialPositionX, float initialPositionY, ThingInstance* instanceData, const char* name)
-{
-	return Do_BuildActor6(gridPositionX, gridPositionY, initialPositionX, initialPositionY, instanceData, name, ENTITY_NOTHING);
-}
-Entity Do_BuildActor6(int32_t gridPositionX, int32_t gridPositionY, float initialPositionX, float initialPositionY, ThingInstance* instanceData, const char* name, Entity parent)
+Entity Do_BuildActorGrid2(Point gridPosition, Vector2 initialPosition, ThingInstance* instanceData, const char* name, Entity parent)
 {
 	ThingSettings* settings = (ThingSettings*)ResourceMan_GetResourceData(ResourceList_ThingSettings(), name);
 	if (settings == NULL)
@@ -2959,11 +2984,11 @@ Entity Do_BuildActor6(int32_t gridPositionX, int32_t gridPositionY, float initia
 	}
 	Do_SetParentNumber(entity, parentNumber);
 
-	Do_SetGridPosition(entity, gridPositionX, gridPositionY);
+	Do_SetGridPosition(entity, gridPosition.X, gridPosition.Y);
 
-	Do_SetInitialPosition(entity, initialPositionX, initialPositionY);
+	Do_SetInitialPosition(entity, initialPosition.X, initialPosition.Y);
 
-	Do_SetPosition(entity, initialPositionX, initialPositionY);
+	Do_SetPosition(entity, initialPosition.X, initialPosition.Y);
 
 	Point* arr_nodes;
 	StringPair* arr_settings;
@@ -3051,6 +3076,74 @@ int32_t Get_TuningAsInt(Entity owner, const char* tuning)
 Animation* Get_CurrentDefaultAnimation(Entity entity)
 {
 	return DrawActorSys_GetCurrentAnimation(entity, OeState_DEFAULT);
+}
+Rectangle Get_RectangleFromTwoPoints(Point point1, Point point2)
+{
+	return PointRectangle_GetRectanglePoint(point1, point2);
+}
+Rectangle Get_RectangleFromFirstTwoNodes(Entity owner)
+{
+	if (Get_AmountOfNodes(owner) < 2)
+	{
+		return Rectangle_Empty;
+	}
+
+	Point point1 = Get_Node(owner, 0);
+	Point point2 = Get_Node(owner, 1);
+
+	return Get_RectangleFromTwoPoints(point1, point2);
+}
+int32_t Get_RectangleWidthOrHeightBiggerValue(Rectangle rect)
+{
+	if (rect.Width < rect.Height)
+	{
+		return rect.Height;
+	}
+	else
+	{
+		return rect.Width;
+	}
+}
+Point Get_RandomPointInRectangle(Random32* random, Rectangle rect, Point avoidThis, int avoidThisRange)
+{
+	Point pointValue = Point_Zero;
+
+	bool isComplete = false;
+	int safetyCounter = 0;
+	while (!isComplete)
+	{
+		safetyCounter += 1;
+		if (safetyCounter >= 100)
+		{
+			Logger_Log(LOGGER_WARNING, "Unable to find random point in rectangle");
+			break;
+		}
+
+		pointValue.X = Random32_NextInt(random, rect.Width) + rect.X;
+		pointValue.Y = Random32_NextInt(random, rect.Height) + rect.Y;
+
+		if ((Point_EqualTo(pointValue, Point_Zero)) || (avoidThisRange == 0))
+		{
+			return pointValue;
+		}
+
+		if (Point_EqualTo(pointValue, Point_Zero)) //Not valid return value
+		{
+			continue;
+		}
+		else
+		{
+			Vector2 tempVec1 = Vectors_ToVector2(pointValue);
+			Vector2 tempVec2 = Vectors_ToVector2(avoidThis);
+			float distance = Vector2_Distance(tempVec1, tempVec2);
+			if (distance > avoidThisRange)
+			{
+				isComplete = true;
+			}
+		}
+	}
+
+	return pointValue;
 }
 
 //IS REGION

@@ -302,6 +302,8 @@ void Do_ShakeCameraF(float minX, float maxX, float minY, float maxY,
 	bool isLockedToInteger, bool isRandomDirection, int framesToShake);
 void Do_InitStringSetting(ComponentType ctype, const char* key, const char* value);
 bool Do_AnimSpinDown(Entity owner, const char* state, const char* phase, int* counter, int spinTime, int maxSpinSpeed);
+void Do_MoveAtRadianAngle(Entity entity, double angle, float speed);
+void Do_CopyArrGridNodesFromParent(Entity entity);
 //ENDREGION
 
 //REGION GET
@@ -375,6 +377,7 @@ Resource* Get_LevelDataResource(void);
 const char* Get_LevelFileName(void);
 Rectangle Get_BodyRectangle(Entity entity);
 Body* Get_Body(Entity entity);
+Body* Get_Body2(Entity entity, int number);
 float Get_X(Entity entity);
 float Get_Y(Entity entity);
 Vector2 Get_PositionFromBody(Entity entity);
@@ -471,11 +474,9 @@ int32_t Get_CollisionBitSafe(float posX, float posY, int32_t tileOffsetX, int32_
 int32_t Get_DirectionFromCameraSideX(Entity entity);
 int32_t Get_DirectionFromCameraSideY(Entity entity);
 Entity Do_BuildActor(Vector2 initialPosition, ThingInstance* instanceData, const char* name);
-Entity Do_BuildActor2(float initialPositionX, float initialPositionY, ThingInstance* instanceData, const char* name);
-Entity Do_BuildActor3(Vector2 initialPosition, ThingInstance* instanceData, const char* name, Entity parent);
-Entity Do_BuildActor4(float initialPositionX, float initialPositionY, ThingInstance* instanceData, const char* name, Entity parent);
-Entity Do_BuildActor5(int32_t gridPositionX, int32_t gridPositionY, float initialPositionX, float initialPositionY, ThingInstance* instanceData, const char* name);
-Entity Do_BuildActor6(int32_t gridPositionX, int32_t gridPositionY, float initialPositionX, float initialPositionY, ThingInstance* instanceData, const char* name, Entity parent);
+Entity Do_BuildActor2(Vector2 initialPosition, ThingInstance* instanceData, const char* name, Entity parent);
+Entity Do_BuildActorGrid(Point gridPosition, Vector2 initialPosition, ThingInstance* instanceData, const char* name);
+Entity Do_BuildActorGrid2(Point gridPosition, Vector2 initialPosition, ThingInstance* instanceData, const char* name, Entity parent);
 void Do_SetSeedFromInitialCoordinates(Entity entity, Random32* random);
 void Do_SendBroadcast(int32_t type);
 void Do_SendBroadcast2(int32_t type, int32_t packet1);
@@ -488,6 +489,10 @@ Rectangle Get_CameraHingeGateBounds();
 float Get_TuningAsFloat(Entity owner, const char* tuning);
 int32_t Get_TuningAsInt(Entity owner, const char* tuning);
 Animation* Get_CurrentDefaultAnimation(Entity entity);
+Rectangle Get_RectangleFromTwoPoints(Point point1, Point point2);
+Rectangle Get_RectangleFromFirstTwoNodes(Entity owner);
+int32_t Get_RectangleWidthOrHeightBiggerValue(Rectangle rect);
+Point Get_RandomPointInRectangle(Random32* random, Rectangle rect, Point avoidThis, int avoidThisRange);
 //ENDREGION
 
 //REGION IS

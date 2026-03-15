@@ -13,10 +13,8 @@
 #include "../math/Point.h"
 #include "../components/Camera.h"
 #include "Keys.h"
-
-typedef struct InputPlayer InputPlayer;
-typedef struct ControllerState ControllerState;
-typedef struct InputAction InputAction;
+#include "InputAction.h"
+#include "InputPlayer.h"
 
 enum MasterRecordingState
 {

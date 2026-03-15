@@ -59,7 +59,7 @@ static void DrawHud(void* givenData, SpriteBatch* spriteBatch)
     const char* font = "menu";
 	Color color = COLOR_YELLOW;
 
-    if (GLOBALS_DEBUG_IS_GOD_MODE)
+    if (Globals_DebugIsGodMode())
     {
         SpriteBatch_DrawString(spriteBatch, font, "GOD_MODE_ON", COLOR_YELLOW, depth, Vector2_Create(middleX, 0));
 		textOff += 1;
