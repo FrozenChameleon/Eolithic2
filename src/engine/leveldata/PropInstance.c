@@ -82,7 +82,7 @@ void PropInstance_Draw4(PropInstance* prop, SpriteBatch* spriteBatch, int32_t de
 
 	if (propData == NULL)
 	{
-		DrawTool_DrawRectangle2(spriteBatch, COLOR_BLUE, 100, Rectangle_Create((int32_t)position.X, (int32_t)position.Y, TILE_SIZE, TILE_SIZE), 0, false);
+		DrawTool_DrawRectangle(spriteBatch, COLOR_BLUE, 100, Rectangle_Create((int32_t)position.X, (int32_t)position.Y, TILE_SIZE, TILE_SIZE), 0, false);
 	}
 	else
 	{

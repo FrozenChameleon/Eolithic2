@@ -32,7 +32,7 @@ extern bool GLOBALS_DEBUG_ENGINE_FORCE_LOAD_DATS;
 
 void Globals_SetDebugIsGodMode(bool value);
 bool Globals_DebugIsGodMode();
-void Globals_ToggleDebugIsGodMode();
+void Globals_ToggleGodMode(void);
 bool Globals_DebugEditorJustReloadedGraphics();
 void Globals_SetEditorJustReloadedGraphics(bool value);
 void Globals_SetDebugQuickPlayerPosition(Vector2 value);
@@ -71,4 +71,3 @@ int32_t Globals_GetNewestRecordingVersion(void);
 int32_t Globals_GetCurrentRecordingVersion(void);
 int64_t Globals_GetTime(void);
 uint32_t Globals_GetTimeForRandomSeed(void);
-void Globals_ToggleGodMode(void);

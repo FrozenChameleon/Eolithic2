@@ -34,11 +34,7 @@ Texture* DrawTool_GetSinglePixel(void)
 
 	return (Texture*)Resource_GetData(_mSinglePixel);
 }
-void DrawTool_DrawRectangle(SpriteBatch* spriteBatch, Color color, int32_t depth, int32_t x, int32_t y, int32_t width, int32_t height, float rotation, bool isCenter)
-{
-	DrawTool_DrawRectangle2(spriteBatch, color, depth, Rectangle_Create(x, y, width, height), rotation, isCenter);
-}
-void DrawTool_DrawRectangle2(SpriteBatch* spriteBatch, Color color, int32_t depth, Rectangle destinationRect, float rotation, bool isCenter)
+void DrawTool_DrawRectangle(SpriteBatch* spriteBatch, Color color, int32_t depth, Rectangle destinationRect, float rotation, bool isCenter)
 {
 	int32_t newX = destinationRect.X;
 	int32_t newY = destinationRect.Y;
@@ -51,16 +47,12 @@ void DrawTool_DrawRectangle2(SpriteBatch* spriteBatch, Color color, int32_t dept
 	SpriteBatch_DrawRectangle(spriteBatch, DrawTool_GetSinglePixel(), color, depth, NULL, Rectangle_Create(newX, newY, destinationRect.Width, destinationRect.Height),
 		Rectangle_Create(0, 0, 1, 1), rotation, false, false, origin);
 }
-void DrawTool_DrawRectangleHollow(SpriteBatch* spriteBatch, Color color, int32_t depth, int32_t x, int32_t y, int32_t width, int32_t height, float rotation, bool isCenter, int32_t thickness)
+void DrawTool_DrawRectangleHollow(SpriteBatch* spriteBatch, Color color, int32_t depth, Rectangle destinationRect, float rotation, bool isCenter, int32_t thickness)
 {
-	DrawTool_DrawRectangleHollow2(spriteBatch, color, depth, Rectangle_Create(x, y, width, height), rotation, isCenter, thickness);
-}
-void DrawTool_DrawRectangleHollow2(SpriteBatch* spriteBatch, Color color, int32_t depth, Rectangle destinationRect, float rotation, bool isCenter, int32_t thickness)
-{
-	DrawTool_DrawRectangle2(spriteBatch, color, depth, Rectangle_Create(destinationRect.X, destinationRect.Y, destinationRect.Width, thickness), rotation, isCenter);
-	DrawTool_DrawRectangle2(spriteBatch, color, depth, Rectangle_Create(destinationRect.X, destinationRect.Y + destinationRect.Height - thickness, destinationRect.Width, thickness), rotation, isCenter);
-	DrawTool_DrawRectangle2(spriteBatch, color, depth, Rectangle_Create(destinationRect.X, destinationRect.Y, thickness, destinationRect.Height), rotation, isCenter);
-	DrawTool_DrawRectangle2(spriteBatch, color, depth, Rectangle_Create(destinationRect.X + destinationRect.Width - thickness, destinationRect.Y, thickness, destinationRect.Height), rotation, isCenter);
+	DrawTool_DrawRectangle(spriteBatch, color, depth, Rectangle_Create(destinationRect.X, destinationRect.Y, destinationRect.Width, thickness), rotation, isCenter);
+	DrawTool_DrawRectangle(spriteBatch, color, depth, Rectangle_Create(destinationRect.X, destinationRect.Y + destinationRect.Height - thickness, destinationRect.Width, thickness), rotation, isCenter);
+	DrawTool_DrawRectangle(spriteBatch, color, depth, Rectangle_Create(destinationRect.X, destinationRect.Y, thickness, destinationRect.Height), rotation, isCenter);
+	DrawTool_DrawRectangle(spriteBatch, color, depth, Rectangle_Create(destinationRect.X + destinationRect.Width - thickness, destinationRect.Y, thickness, destinationRect.Height), rotation, isCenter);
 }
 Rectangle DrawTool_GetBounds(const char* str, const char* font)
 {
@@ -95,7 +87,7 @@ void DrawTool_DrawLine3(SpriteBatch* spriteBatch, Color color, int32_t depth, in
 		}
 		if ((counter + offset) % delay == 0)
 		{
-			DrawTool_DrawRectangle2(spriteBatch, color, depth, Rectangle_Create((int32_t)x, (int32_t)y, size, size), 0, true);
+			DrawTool_DrawRectangle(spriteBatch, color, depth, Rectangle_Create((int32_t)x, (int32_t)y, size, size), 0, true);
 		}
 		counter += 1;
 	}

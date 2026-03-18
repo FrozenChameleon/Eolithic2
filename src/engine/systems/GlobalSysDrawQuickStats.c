@@ -53,7 +53,7 @@ static void DrawHud(void* givenData, SpriteBatch* spriteBatch)
 	int32_t depth = 150;
 
 	Rectangle rect = Renderer_GetScreenBounds();
-    float middleX = (float)Rectangle_Center(&rect).X;
+    float middleX = (float)Rectangle_Center(rect).X;
 	int32_t textOff = 0;
 	Vector2 textDiff = Vector2_Create(0, 24);
     const char* font = "menu";

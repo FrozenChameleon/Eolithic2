@@ -73,7 +73,7 @@ static Rectangle GetProposedWindowBounds(void)
 	Rectangle returnRect = { 0 };
 
 	Rectangle forcedWindowSize = Service_PlatformGetForcedWindowSize();
-	if (!Rectangle_IsEmpty(&forcedWindowSize))
+	if (!Rectangle_IsEmpty(forcedWindowSize))
 	{
 		returnRect.Width = forcedWindowSize.Width;
 		returnRect.Height = forcedWindowSize.Height;

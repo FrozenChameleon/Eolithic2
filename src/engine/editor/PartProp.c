@@ -413,7 +413,7 @@ static void GetMousedOverProp(MousedOverPropData* mousedOverProp)
                 Rectangle tempRectangle = PropInstance_GetRectangle(propInstance, position);
                 Vector2 restrainedMouse = EditorPart_GetRestrainedMouse();
                 Point currentMouse = Points_ToPointFromVector2(restrainedMouse);
-                if (Rectangle_ContainsPoint(&tempRectangle, currentMouse))
+                if (Rectangle_ContainsPoint(tempRectangle, currentMouse))
                 {
                     Point texRelativeMouse = Point_Create(currentMouse.X - tempRectangle.X, currentMouse.Y - tempRectangle.Y);
                     if (PropInstance_IsPropActuallyTouched(propInstance, texRelativeMouse))
@@ -454,9 +454,9 @@ static void DrawHelper(SpriteBatch* spriteBatch)
     if (_mIsInSelectingMode && !_mHideSelectionRectangle)
     {
         //mMouseOverRectangle = OePropInstance.GetRectangle(ref mDragProp, propPos);
-        if (!Rectangle_IsEmpty(&_mMouseOverRectangle))
+        if (!Rectangle_IsEmpty(_mMouseOverRectangle))
         {
-            DrawTool_DrawRectangleHollow2(spriteBatch, PROPINSTANCE_SELECTBOX_COLOR_OFF, 100, _mMouseOverRectangle, 0, false, 3);
+            DrawTool_DrawRectangleHollow(spriteBatch, PROPINSTANCE_SELECTBOX_COLOR_OFF, 100, _mMouseOverRectangle, 0, false, 3);
         }
     }
 

@@ -50,9 +50,16 @@ bool Globals_DebugIsGodMode()
 {
 	return _mDebugIsGodMode;
 }
-void Globals_ToggleDebugIsGodMode()
+void Globals_ToggleGodMode(void)
 {
 	_mDebugIsGodMode = !_mDebugIsGodMode;
+
+	{
+		MString* tempString = MString_CreateForJustThisFrame();
+		MString_AssignString(&tempString, "God Mode: ");
+		MString_AddAssignBool(&tempString, Globals_DebugIsGodMode());
+		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
+	}
 }
 bool Globals_DebugEditorJustReloadedGraphics()
 {
@@ -289,15 +296,4 @@ uint32_t Globals_GetTimeForRandomSeed(void)
 	Utils_memcpy(&dest, &source, sizeof(uint64_t));
 	uint32_t returnValue = (uint32_t)dest;
 	return returnValue;
-}
-void Globals_ToggleGodMode(void)
-{
-	Globals_ToggleGodMode();
-
-	{
-		MString* tempString = MString_CreateForJustThisFrame();
-		MString_AssignString(&tempString, "God Mode: ");
-		MString_AddAssignBool(&tempString, Globals_DebugIsGodMode());
-		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
-	}
 }

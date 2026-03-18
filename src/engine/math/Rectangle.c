@@ -35,11 +35,11 @@ void Rectangle_Init(Rectangle* value, int32_t x, int32_t y, int32_t width, int32
 	value->Width = width;
 	value->Height = height;
 }
-bool Rectangle_EqualTo(const Rectangle* value1, const Rectangle* value2)
+bool Rectangle_EqualTo(Rectangle value1, Rectangle value2)
 {
-	return (value1->X == value2->X) && (value1->Y == value2->Y) && (value1->Width == value2->Width) && (value1->Height == value2->Height);
+	return (value1.X == value2.X) && (value1.Y == value2.Y) && (value1.Width == value2.Width) && (value1.Height == value2.Height);
 }
-bool Rectangle_NotEqual(const Rectangle* value1, const Rectangle* value2)
+bool Rectangle_NotEqual(Rectangle value1, Rectangle value2)
 {
 	return !Rectangle_EqualTo(value1, value2);
 }
@@ -50,79 +50,79 @@ void Rectangle_Inflate(Rectangle* value, int32_t horizontalValue, int32_t vertic
 	value->Width += (horizontalValue * 2);
 	value->Height += (verticalValue * 2);
 }
-Point Rectangle_Center(const Rectangle* value)
+Point Rectangle_Center(Rectangle value)
 {
 	Point tempPoint;
-	tempPoint.X = (value->X + (value->Width / 2));
-	tempPoint.Y = (value->Y + (value->Height / 2));
+	tempPoint.X = (value.X + (value.Width / 2));
+	tempPoint.Y = (value.Y + (value.Height / 2));
 	return tempPoint;
 }
-int32_t Rectangle_Left(const Rectangle* value)
+int32_t Rectangle_Left(Rectangle value)
 {
-	return value->X;
+	return value.X;
 }
-int32_t Rectangle_Right(const Rectangle* value)
+int32_t Rectangle_Right(Rectangle value)
 {
-	return (value->X + value->Width);
+	return (value.X + value.Width);
 }
-int32_t Rectangle_Top(const Rectangle* value)
+int32_t Rectangle_Top(Rectangle value)
 {
-	return value->Y;
+	return value.Y;
 }
-int32_t Rectangle_Bottom(const Rectangle* value)
+int32_t Rectangle_Bottom(Rectangle value)
 {
-	return (value->Y + value->Height);
+	return (value.Y + value.Height);
 }
-bool Rectangle_Intersects(const Rectangle* value1, const Rectangle* value2)
+bool Rectangle_Intersects(Rectangle value1, Rectangle value2)
 {
 	return ((Rectangle_Left(value2) < Rectangle_Right(value1)) &&
 		(Rectangle_Left(value1) < Rectangle_Right(value2)) &&
 		(Rectangle_Top(value2) < Rectangle_Bottom(value1)) &&
 		(Rectangle_Top(value1) < Rectangle_Bottom(value2)));
 }
-bool Rectangle_Contains(const Rectangle* value, int32_t x, int32_t y)
+bool Rectangle_Contains(Rectangle value, int32_t x, int32_t y)
 {
-	return ((value->X <= x) &&
-		(x < (value->X + value->Width)) &&
-		(value->Y <= y) &&
-		(y < (value->Y + value->Height)));
+	return ((value.X <= x) &&
+		(x < (value.X + value.Width)) &&
+		(value.Y <= y) &&
+		(y < (value.Y + value.Height)));
 }
-bool Rectangle_ContainsPoint(const Rectangle* value1, Point value2)
+bool Rectangle_ContainsPoint(Rectangle value1, Point value2)
 {
-	return ((value1->X <= value2.X) &&
-		(value2.X < (value1->X + value1->Width)) &&
-		(value1->Y <= value2.Y) &&
-		(value2.Y < (value1->Y + value1->Height)));
+	return ((value1.X <= value2.X) &&
+		(value2.X < (value1.X + value1.Width)) &&
+		(value1.Y <= value2.Y) &&
+		(value2.Y < (value1.Y + value1.Height)));
 }
-bool Rectangle_ContainsRectangle(const Rectangle* value1, const Rectangle* value2)
+bool Rectangle_ContainsRectangle(Rectangle value1, Rectangle value2)
 {
-	return ((value1->X <= value2->X) &&
-		((value2->X + value2->Width) <= (value1->X + value1->Width)) &&
-		(value1->Y <= value2->Y) &&
-		((value2->Y + value2->Height) <= (value1->Y + value1->Height)));
+	return ((value1.X <= value2.X) &&
+		((value2.X + value2.Width) <= (value1.X + value1.Width)) &&
+		(value1.Y <= value2.Y) &&
+		((value2.Y + value2.Height) <= (value1.Y + value1.Height)));
 }
-bool Rectangle_IsEmpty(const Rectangle* value)
+bool Rectangle_IsEmpty(Rectangle value)
 {
-	return ((value->Width == 0) &&
-		(value->Height == 0) &&
-		(value->X == 0) &&
-		(value->Y == 0));
+	return ((value.Width == 0) &&
+		(value.Height == 0) &&
+		(value.X == 0) &&
+		(value.Y == 0));
 }
 
-Rectangle Rectangle_Intersect(const Rectangle* value1, const Rectangle* value2)
+Rectangle Rectangle_Intersect(Rectangle value1, Rectangle value2)
 {
 	Rectangle result;
 	if (Rectangle_Intersects(value1, value2))
 	{
 		int32_t right_side = Math_MinInt(
-			value1->X + value1->Width,
-			value2->X + value2->Width
+			value1.X + value1.Width,
+			value2.X + value2.Width
 		);
-		int32_t left_side = Math_MaxInt(value1->X, value2->X);
-		int32_t top_side = Math_MaxInt(value1->Y, value2->Y);
+		int32_t left_side = Math_MaxInt(value1.X, value2.X);
+		int32_t top_side = Math_MaxInt(value1.Y, value2.Y);
 		int32_t bottom_side = Math_MinInt(
-			value1->Y + value1->Height,
-			value2->Y + value2->Height
+			value1.Y + value1.Height,
+			value2.Y + value2.Height
 		);
 		result = Rectangle_Create(
 			left_side,

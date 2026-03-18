@@ -449,7 +449,7 @@ void GameLoader_Draw(SpriteBatch* spriteBatch)
 		float percent = Timer_GetPercentage(&_mFadeOutTimer);
 		uint8_t alpha = (uint8_t)(0xFF * percent);
 		Color tempColor = { 0, 0, 0, alpha };
-		DrawTool_DrawRectangle2(spriteBatch, tempColor, 100, destRect, 0, false);
+		DrawTool_DrawRectangle(spriteBatch, tempColor, 100, destRect, 0, false);
 	}
 }
 bool GameLoader_IsLoading(void)

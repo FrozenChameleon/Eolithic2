@@ -28,3 +28,4 @@
 #define OeState_STEP7 "STEP7"
 #define OeState_STEP8 "STEP8"
 #define OeState_STEP9 "STEP9"
+#define OeState_LEGS "LEGS"

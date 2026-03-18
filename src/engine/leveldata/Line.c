@@ -55,11 +55,11 @@ void Line_DrawLine(Line* line, SpriteBatch* spriteBatch, const char* font, Color
 	Point beginPoint = Line_GetRealBegin(line);
 	Point endPoint = Line_GetRealEnd(line);
 	Line_DrawLineText(line, spriteBatch, font, lineNumber, Vectors_ToVector2(beginPoint));
-	DrawTool_DrawRectangle2(spriteBatch, COLOR_COMETSTRIKER_RED, 100, Rectangle_Create(beginPoint.X, beginPoint.Y, HALF_TILE_SIZE, HALF_TILE_SIZE), 0, true);
+	DrawTool_DrawRectangle(spriteBatch, COLOR_COMETSTRIKER_RED, 100, Rectangle_Create(beginPoint.X, beginPoint.Y, HALF_TILE_SIZE, HALF_TILE_SIZE), 0, true);
 	int32_t lineDelay = 16;
 	int32_t lineThickness = 4;
 	DrawTool_DrawLine(spriteBatch, color, 99, lineDelay, offset, lineThickness, beginPoint, endPoint);
-	DrawTool_DrawRectangle2(spriteBatch, COLOR_COMETSTRIKER_BLUE, 100, Rectangle_Create(endPoint.X, endPoint.Y, HALF_TILE_SIZE, HALF_TILE_SIZE), 0, true);
+	DrawTool_DrawRectangle(spriteBatch, COLOR_COMETSTRIKER_BLUE, 100, Rectangle_Create(endPoint.X, endPoint.Y, HALF_TILE_SIZE, HALF_TILE_SIZE), 0, true);
 }
 void Line_DrawLineText(Line* line, SpriteBatch* spriteBatch, const char* font, int32_t lineNumber, Vector2 pos)
 {

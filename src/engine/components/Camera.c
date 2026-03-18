@@ -311,7 +311,7 @@ bool Camera_IntersectsCamera(const Camera* camera, int32_t x, int32_t y, int32_t
 {
 	Rectangle rect1 = { x, y, width, height };
 	Rectangle rect2 = Camera_GetRectangle(camera, mul);
-	return Rectangle_Intersects(&rect1, &rect2);
+	return Rectangle_Intersects(rect1, rect2);
 }
 Rectangle Camera_GetRectangle(const Camera* camera, float mul)
 {

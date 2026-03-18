@@ -1213,7 +1213,7 @@ void Renderer_AfterRender(void)
 		blitInfo.destination.w = dest.Width;
 		blitInfo.destination.h = dest.Height;
 		blitInfo.load_op = SDL_GPU_LOADOP_CLEAR;
-		if (Rectangle_EqualTo(&source, &dest))
+		if (Rectangle_EqualTo(source, dest))
 		{
 			blitInfo.filter = SDL_GPU_FILTER_NEAREST;
 		}

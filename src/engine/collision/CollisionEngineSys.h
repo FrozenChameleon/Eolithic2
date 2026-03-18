@@ -27,7 +27,7 @@ void CollisionEngineSys_DisableDynamicGravity(void);
 
 void CollisionEngineSys_CopyCollisionGridFromPristine(CollisionEngine* data);
 void CollisionEngineSys_UpdateRoutine(Entity owner, CollisionEngine* data);
-bool CollisionEngineSys_PushBody(CollisionEngine* data, bool isBakedCollision, bool isVertical, Body* body, const Rectangle* otherPhysicsRectangle);
+bool CollisionEngineSys_PushBody(CollisionEngine* data, bool isBakedCollision, bool isVertical, Body* body, Rectangle otherPhysicsRectangle);
 bool CollisionEngineSys_IsCollisionValid(Body* bodyOne, Body* bodyTwo, bool isVertical);
 void CollisionEngineSys_UpdateParticleBody(CollisionEngine* data, Body* body);
 void CollisionEngineSys_RemoveAllCollisionImprints(void);

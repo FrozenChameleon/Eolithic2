@@ -47,7 +47,7 @@ bool Body_IsPushesThisThingSet(Body* body)
 }
 void Body_DrawBody(Body* body, SpriteBatch* spriteBatch, double deltaTime, int32_t depth, Color color)
 {
-	DrawTool_DrawRectangle2(spriteBatch, color, depth, Body_GetRect(body), 0, false);
+	DrawTool_DrawRectangle(spriteBatch, color, depth, Body_GetRect(body), 0, false);
 }
 void Body_ResetCollideWithCollision(Body* body)
 {

@@ -54,7 +54,7 @@ bool WindowAnimTilePicker_CreateWindow()
 				Rectangle tempRectangle = Rectangle_Create((int)windowOffset.X + _mBounds.X + (i * TILE_SIZE),
 					(int)windowOffset.Y + _mBounds.Y + (j * TILE_SIZE), TILE_SIZE, TILE_SIZE);
 				ImVec2 imMouse = ImGui::GetMousePos();
-				if (Rectangle_Contains(&tempRectangle, (int32_t)imMouse.x, (int32_t)imMouse.y))
+				if (Rectangle_Contains(tempRectangle, (int32_t)imMouse.x, (int32_t)imMouse.y))
 				{
 					//if (!_mIsDragging)
 					//{
@@ -102,7 +102,7 @@ void WindowAnimTilePicker_DrawHud(SpriteBatch* spriteBatch)
 		}
 	}
 
-	DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_WHITE, myDepth + 1, 
+	DrawTool_DrawRectangleHollow(spriteBatch, COLOR_WHITE, myDepth + 1, 
 		Rectangle_Create(_mBounds.X + _mPoint.X * TILE_SIZE, _mBounds.Y + _mPoint.Y * TILE_SIZE, TILE_SIZE, TILE_SIZE),
 		0, false, 1);
 }

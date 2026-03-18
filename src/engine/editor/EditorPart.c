@@ -227,7 +227,7 @@ void EditorPart_DefaultDrawSingleSelectionSelectedTiles(SpriteBatch* spriteBatch
 	}
 
 	Rectangle selection = EditorPart_GetSelectionRectangle();
-	DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_WHITE, 150, selection, 0, false, 2);
+	DrawTool_DrawRectangleHollow(spriteBatch, COLOR_WHITE, 150, selection, 0, false, 2);
 }
 void EditorPart_DefaultHandleColumnsAndRows(void)
 {
@@ -584,12 +584,12 @@ void EditorPart_DoDefaultEditorPartDrawRoutine(SpriteBatch* spriteBatch, EditorD
 		int x1 = EditorPart_AlignToGridInt(_mSelectionRectangle.X) * TILE_SIZE;
 		int y1 = EditorPart_AlignToGridInt(_mSelectionRectangle.Y) * TILE_SIZE;
 
-		int tileWidth = ((EditorPart_AlignToGridInt(Rectangle_Right(&_mSelectionRectangle)) * TILE_SIZE)) - x1;
-		int tileHeight = ((EditorPart_AlignToGridInt(Rectangle_Bottom(&_mSelectionRectangle)) * TILE_SIZE)) - y1;
+		int tileWidth = ((EditorPart_AlignToGridInt(Rectangle_Right(_mSelectionRectangle)) * TILE_SIZE)) - x1;
+		int tileHeight = ((EditorPart_AlignToGridInt(Rectangle_Bottom(_mSelectionRectangle)) * TILE_SIZE)) - y1;
 
 		if (!EditorGlobals_ImGuiIsAnyItemActiveOrFocusedOrHovered())
 		{
-			DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_WHITE, 111, Rectangle_Create(x1, y1, tileWidth, tileHeight), 0, false, 2);
+			DrawTool_DrawRectangleHollow(spriteBatch, COLOR_WHITE, 111, Rectangle_Create(x1, y1, tileWidth, tileHeight), 0, false, 2);
 		}
 	}
 
@@ -692,7 +692,7 @@ void EditorPart_DoDefaultEditorPartDrawHudRoutine(SpriteBatch* spriteBatch, cons
 	MString_AddAssignInt(&display, GameUpdater_GetFPS());
 
 	Rectangle drawableSize = Renderer_GetDrawableSize();
-	DrawTool_DrawRectangle2(spriteBatch, COLOR_BLACK, 100,
+	DrawTool_DrawRectangle(spriteBatch, COLOR_BLACK, 100,
 		Rectangle_Create(0, drawableSize.Height - EDITOR_GLOBALS_MENU_ITEM_SIZE, drawableSize.Width, EDITOR_GLOBALS_MENU_ITEM_SIZE), 0, false);
 
 	SpriteBatch_DrawString(spriteBatch, "editor", MString_Text(display), Color_White, 150,
@@ -703,7 +703,7 @@ void EditorPart_DoDefaultEditorPartDrawHudRoutine(SpriteBatch* spriteBatch, cons
 void EditorPart_DrawCopyTiles(SpriteBatch* spriteBatch)
 {
 	Point currentGrid = EditorPart_GetCurrentGrid();
-	DrawTool_DrawRectangle2(spriteBatch, Color_Create4(0, 0, 0, 120), 190,
+	DrawTool_DrawRectangle(spriteBatch, Color_Create4(0, 0, 0, 120), 190,
 		Rectangle_Create(currentGrid.X * TILE_SIZE, currentGrid.Y * TILE_SIZE, 
 			_mCopyTiles->boundary.Width * TILE_SIZE, _mCopyTiles->boundary.Height * TILE_SIZE), 0, false);
 
@@ -780,7 +780,7 @@ void EditorPart_DrawTilesBorder(SpriteBatch* spriteBatch, Tilemap* tilemap)
 		height -= heightAdjustment;
 	}
 
-	DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_WHITE, 100, Rectangle_Create(x, y, width, height), 0, false, 2);
+	DrawTool_DrawRectangleHollow(spriteBatch, COLOR_WHITE, 100, Rectangle_Create(x, y, width, height), 0, false, 2);
 }
 void EditorPart_CutTiles(Rectangle srcLocation)
 {
@@ -1058,7 +1058,7 @@ int EditorPart_GetSelectionRectangleGridX1(void)
 }
 int EditorPart_GetSelectionRectangleGridX2(void)
 {
-	return EditorPart_AlignToGridInt(Rectangle_Right(&_mSelectionRectangle));
+	return EditorPart_AlignToGridInt(Rectangle_Right(_mSelectionRectangle));
 }
 int EditorPart_GetSelectionRectangleGridY1(void)
 {
@@ -1066,7 +1066,7 @@ int EditorPart_GetSelectionRectangleGridY1(void)
 }
 int EditorPart_GetSelectionRectangleGridY2(void)
 {
-	return EditorPart_AlignToGridInt(Rectangle_Bottom(&_mSelectionRectangle));
+	return EditorPart_AlignToGridInt(Rectangle_Bottom(_mSelectionRectangle));
 }
 void EditorPart_DefaultHandleSpacebarHingeMovement()
 {
@@ -1131,7 +1131,7 @@ void EditorPart_DefaultHandleSpacebarHingeMovement()
 bool EditorPart_IsMouseInsideSelectionRectangle(void)
 {
 	Vector2 restrainedMouse = EditorPart_GetRestrainedMouse();
-	return Rectangle_Contains(&_mSelectionRectangle, (int32_t)restrainedMouse.X, (int32_t)restrainedMouse.Y);
+	return Rectangle_Contains(_mSelectionRectangle, (int32_t)restrainedMouse.X, (int32_t)restrainedMouse.Y);
 }
 void EditorPart_ResetSelectionRectangle(void)
 {
@@ -1143,7 +1143,7 @@ bool EditorPart_HandleSelectionRectangle(void)
 {
 	if (_mSelectionState != EDITOR_SELECTION_STATE_SELECTING)
 	{
-		if (!EditorPart_IsMouseInsideSelectionRectangle() && !Rectangle_IsEmpty(&_mSelectionRectangle))
+		if (!EditorPart_IsMouseInsideSelectionRectangle() && !Rectangle_IsEmpty(_mSelectionRectangle))
 		{
 			if (Input_IsLeftMouseTapped() ||
 				Input_IsMiddleMouseTapped() ||

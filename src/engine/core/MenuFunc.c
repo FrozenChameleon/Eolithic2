@@ -363,7 +363,7 @@ void MenuFunc_VideoChangeWindowSize(int32_t direction, int32_t forcedSliderValue
 
 	for (int32_t i = 0; i < resolutionsLength; i += 1)
 	{
-		if (Rectangle_EqualTo(&resolutions[i], &_mTempWindowSize))
+		if (Rectangle_EqualTo(resolutions[i], _mTempWindowSize))
 		{
 			me = i;
 			break;

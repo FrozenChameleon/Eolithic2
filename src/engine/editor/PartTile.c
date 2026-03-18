@@ -162,7 +162,7 @@ void PartTile_DrawSingleSelectionSelectedTiles(SpriteBatch* spriteBatch)
     width = Math_MinInt(width, levelBoundaryInPixels.Width - x);
     height = Math_MinInt(height, levelBoundaryInPixels.Height - y);
 
-    DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_WHITE, 200, Rectangle_Create(x, y, width, height), 0, false, 2);
+    DrawTool_DrawRectangleHollow(spriteBatch, COLOR_WHITE, 200, Rectangle_Create(x, y, width, height), 0, false, 2);
 }
 void PartTile_BucketFill(DrawTile* givenDraw, int x, int y)
 {

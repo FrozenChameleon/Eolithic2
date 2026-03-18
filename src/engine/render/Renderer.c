@@ -135,7 +135,7 @@ Matrix Renderer_INTERNAL_GetCurrentTranslation()
 Rectangle Renderer_GetWantedBackBufferBounds(void)
 {
 	Rectangle forcedBackBuffer = Service_PlatformGetForcedBackBufferSize();
-	if (!Rectangle_IsEmpty(&forcedBackBuffer))
+	if (!Rectangle_IsEmpty(forcedBackBuffer))
 	{
 		return forcedBackBuffer;
 	}
@@ -1062,7 +1062,7 @@ int32_t Renderer_GetRenderTargetScale(void)
 	if (mul <= 0) //Auto
 	{
 		Rectangle drawableSize = Renderer_GetDrawableSize();
-		if (!Rectangle_IsEmpty(&drawableSize))
+		if (!Rectangle_IsEmpty(drawableSize))
 		{
 			int32_t widthCheck = drawableSize.Width / internalRenderWidth;
 			int32_t heightCheck = drawableSize.Height / internalRenderHeight;

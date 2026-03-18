@@ -155,11 +155,11 @@ bool CollisionEngineSys_ResolvePush(CollisionEngine* data, Body* pushingBody, Bo
 	}
 
 	Rectangle otherPhysicsRectangle = Body_GetPhysicsRect(pushingBody);
-	if (CollisionEngineSys_PushBody(data, false, isVertical, pushedBody,&otherPhysicsRectangle))
+	if (CollisionEngineSys_PushBody(data, false, isVertical, pushedBody,otherPhysicsRectangle))
 	{
 		Rectangle pushedBodyRectangle = Body_GetRect(pushedBody);
 		Rectangle pushingBodyRectangle = Body_GetRect(pushingBody);
-		if (Rectangle_Center(&pushedBodyRectangle).Y < Rectangle_Center(&pushingBodyRectangle).Y)
+		if (Rectangle_Center(pushedBodyRectangle).Y < Rectangle_Center(pushingBodyRectangle).Y)
 		{
 			if (pushingBody->mIsMovingPlatform && isVertical && (pushedBody->mMovingPlatformEntityNumber == ENTITY_NOTHING) 
 				&& (pushedBody->mLastDirection.Y > 0)) // Moving platform check.
@@ -256,7 +256,7 @@ bool CollisionEngineSys_CheckPoint(CollisionEngine* data, float checkX, float ch
 			int32_t physicsScaler = BODY_PHYSICS_SCALER;
 			Rectangle physicsRect = Body_GetPhysicsRect(body);
 			Rectangle testRect = { tempX * physicsScaler, tempY * physicsScaler, tempWidth * physicsScaler, tempHeight * physicsScaler };
-			if (Rectangle_Intersects(&physicsRect, &testRect))
+			if (Rectangle_Intersects(physicsRect, testRect))
 			{
 				collide = true;
 			}
@@ -285,7 +285,7 @@ bool CollisionEngineSys_CheckPoint(CollisionEngine* data, float checkX, float ch
 					if (move)
 					{
 						Rectangle otherPhysicsRectangle = { tempX * physicsScaler, tempY * physicsScaler, tempWidth * physicsScaler, tempHeight * physicsScaler };
-						CollisionEngineSys_PushBody(data, true, isVertical, body, &otherPhysicsRectangle);
+						CollisionEngineSys_PushBody(data, true, isVertical, body, otherPhysicsRectangle);
 
 						body->mTouchedCollision = true;
 
@@ -353,17 +353,17 @@ void CollisionEngineSys_UpdateRoutine(Entity owner, CollisionEngine* data)
 	Utils_ResetArrayAsBool(_mCornerChecks, CORNER_CHECKS_LEN, false);
 	_mImprintPack = NULL;
 }
-bool CollisionEngineSys_PushBody(CollisionEngine* data, bool isBakedCollision, bool isVertical, Body* body, const Rectangle* otherPhysicsRectangle)
+bool CollisionEngineSys_PushBody(CollisionEngine* data, bool isBakedCollision, bool isVertical, Body* body, Rectangle otherPhysicsRectangle)
 {
 	int32_t xDiff;
 	int32_t yDiff;
 
 	Rectangle myPhysicsRectangle = Body_GetPhysicsRect(body);
-
-	int32_t rightDif = Rectangle_Left(otherPhysicsRectangle) - Rectangle_Right(&myPhysicsRectangle) - 1; // Get minimums.
-	int32_t leftDif = Rectangle_Right(otherPhysicsRectangle) - Rectangle_Left(&myPhysicsRectangle) + 1;
-	int32_t bottomDif = Rectangle_Top(otherPhysicsRectangle) - Rectangle_Bottom(&myPhysicsRectangle) - 1;
-	int32_t topDif = Rectangle_Bottom(otherPhysicsRectangle) - Rectangle_Top(&myPhysicsRectangle) + 1;
+	
+	int32_t rightDif = Rectangle_Left(otherPhysicsRectangle) - Rectangle_Right(myPhysicsRectangle) - 1; // Get minimums.
+	int32_t leftDif = Rectangle_Right(otherPhysicsRectangle) - Rectangle_Left(myPhysicsRectangle) + 1;
+	int32_t bottomDif = Rectangle_Top(otherPhysicsRectangle) - Rectangle_Bottom(myPhysicsRectangle) - 1;
+	int32_t topDif = Rectangle_Bottom(otherPhysicsRectangle) - Rectangle_Top(myPhysicsRectangle) + 1;
 
 	if (Math_abs(topDif) < Math_abs(bottomDif)) // Find minimum.
 	{
@@ -698,7 +698,7 @@ bool CollisionEngineSys_DoPlatformCollision(Body* platformBody, Body* thingBody)
 	float leeway = GameHelper_GetMovingPlatformLeeway();
 	float heightCheck = lastLogicalPosition.Y + halfHeightOffset - leeway;
 	Rectangle bodyRectangle = Body_GetRect(platformBody);
-	float platformTop = (float)Rectangle_Top(&bodyRectangle);
+	float platformTop = (float)Rectangle_Top(bodyRectangle);
 	if ((velocity.Y <= 0) || (heightCheck >= platformTop))
 	{
 		return false;
@@ -774,7 +774,7 @@ bool CollisionEngineSys_IsRectIntersectsCollision(CollisionEngine* data, int32_t
 
 			Rectangle rect1 = { x, y, width, height };
 			Rectangle rect2 = { currentX, currentY, TILE_SIZE, TILE_SIZE };
-			if (Rectangle_Intersects(&rect1, &rect2))
+			if (Rectangle_Intersects(rect1, rect2))
 			{
 				return true;
 			}
@@ -786,8 +786,8 @@ bool CollisionEngineSys_CheckFeetCollision(CollisionEngine* data, Body* body, bo
 {
 	Rectangle rect = Body_GetRect(body); // Add Vector2s (quadrants of the rectangle)
 
-	Point pnt1 = CollisionEngineSys_GetCollisionGridPosition((float)(Rectangle_Left(&rect) + offset), (float)(Rectangle_Bottom(&rect) + 1));
-	Point pnt2 = CollisionEngineSys_GetCollisionGridPosition((float)(Rectangle_Right(&rect) - offset), (float)(Rectangle_Bottom(&rect) + 1));
+	Point pnt1 = CollisionEngineSys_GetCollisionGridPosition((float)(Rectangle_Left(rect) + offset), (float)(Rectangle_Bottom(rect) + 1));
+	Point pnt2 = CollisionEngineSys_GetCollisionGridPosition((float)(Rectangle_Right(rect) - offset), (float)(Rectangle_Bottom(rect) + 1));
 
 	if ((pnt1.X < 0) || (pnt1.Y < 0) || (pnt1.X >= data->mCollisionGridSize.Width) || (pnt1.Y >= data->mCollisionGridSize.Height))
 	{
@@ -897,7 +897,7 @@ bool CollisionEngineSys_HasLineOfSight2(CollisionEngine* data, bool draw, Sprite
 
 		if (draw)
 		{
-			DrawTool_DrawRectangle2(spriteBatch, COLOR_RED, 100, Rectangle_Create((int32_t)x, (int32_t)y, 2, 2), 0, true);
+			DrawTool_DrawRectangle(spriteBatch, COLOR_RED, 100, Rectangle_Create((int32_t)x, (int32_t)y, 2, 2), 0, true);
 		}
 	}
 
@@ -1061,12 +1061,12 @@ void CollisionEngineSys_ResolveWithBakedCollision(CollisionEngine* data, Body* b
 
 	Rectangle rect = Body_GetRect(body);
 
-	int32_t top = Rectangle_Top(&rect);
-	int32_t right = Rectangle_Right(&rect);
-	int32_t bottom = Rectangle_Bottom(&rect);
-	int32_t left = Rectangle_Left(&rect);
-	int32_t centerX = Rectangle_Center(&rect).X;
-	int32_t centerY = Rectangle_Center(&rect).Y;
+	int32_t top = Rectangle_Top(rect);
+	int32_t right = Rectangle_Right(rect);
+	int32_t bottom = Rectangle_Bottom(rect);
+	int32_t left = Rectangle_Left(rect);
+	int32_t centerX = Rectangle_Center(rect).X;
+	int32_t centerY = Rectangle_Center(rect).Y;
 
 	if (CollisionEngineSys_CheckPoint(data, (float)centerX, (float)top, directionX, directionY, body, vertical)) // TOP
 	{

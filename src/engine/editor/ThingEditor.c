@@ -107,7 +107,7 @@ static void PreviewImageData_LoadArray(const char* state, ImageData* imageDatas,
 }
 static void PreviewImageData_DrawHud(SpriteBatch* spriteBatch)
 {
-	DrawTool_DrawRectangle2(spriteBatch, COLOR_CORNFLOWER_BLUE, 100, Rectangle_Create(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT), 0, false);
+	DrawTool_DrawRectangle(spriteBatch, COLOR_CORNFLOWER_BLUE, 100, Rectangle_Create(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT), 0, false);
 
 	for (int i = 0; i < shlen(_mPreview.sh_images); i += 1)
     {
@@ -127,7 +127,7 @@ static void PreviewImageData_DrawHud(SpriteBatch* spriteBatch)
                 float tempHeight = _mSettings.mCollisionHeight * _mScale;
                 int width = (int)tempWidth;
                 int height = (int)tempHeight;
-				DrawTool_DrawRectangle2(spriteBatch, _mPreview.mColor, 200, Rectangle_Create(tempX, tempY, width, height), 0, true);
+				DrawTool_DrawRectangle(spriteBatch, _mPreview.mColor, 200, Rectangle_Create(tempX, tempY, width, height), 0, true);
             }
         }
     }

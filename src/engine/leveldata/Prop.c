@@ -59,7 +59,7 @@ void Prop_Draw(Prop* p, SpriteBatch* spriteBatch, int32_t depth, Point position,
 
 	if (showInfo)
 	{
-		DrawTool_DrawRectangle2(spriteBatch, COLOR_GREEN, 200, Rectangle_Create(position.X, position.Y, TILE_SIZE / 4, TILE_SIZE / 4), 0, false);
+		DrawTool_DrawRectangle(spriteBatch, COLOR_GREEN, 200, Rectangle_Create(position.X, position.Y, TILE_SIZE / 4, TILE_SIZE / 4), 0, false);
 		SpriteBatch_DrawString2(spriteBatch, "editor", Utils_IntToStringGlobalBuffer(depth), COLOR_YELLOW, 200,
 			Vector2_Create(position.X + (scaledWidth / 2), position.Y + (scaledHeight / 2)), ALIGN_CENTER, ALIGN_CENTER);
 	}

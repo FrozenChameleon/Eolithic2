@@ -153,7 +153,7 @@ void Tile_DrawProps2(Tile* t, SpriteBatch* spriteBatch, const  Camera* camera, i
 		}
 		Rectangle_Inflate(&cameraCheck, cameraCheck.Width + HALF_TILE_SIZE, cameraCheck.Height + HALF_TILE_SIZE);
 		//
-		if (!Rectangle_Intersects(&cameraRect, &cameraCheck))
+		if (!Rectangle_Intersects(cameraRect, cameraCheck))
 		{
 			continue;
 		}
@@ -343,5 +343,5 @@ void Tile_DrawCollision(Tile* t, SpriteBatch* spriteBatch, Camera* camera, int g
 
 	Rectangle rect = Tile_GetCollisionRectangle(t, gridX, gridY);
 	Color color = Utils_GetCollisionColor(t->mCollisionType);
-	DrawTool_DrawRectangle2(spriteBatch, color, depth, rect, 0, false);
+	DrawTool_DrawRectangle(spriteBatch, color, depth, rect, 0, false);
 }

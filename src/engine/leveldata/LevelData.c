@@ -529,7 +529,7 @@ void LevelData_DrawCollision(LevelData* ld, SpriteBatch* spriteBatch, Camera* ca
 			int type = tile->mCollisionType;
 			if ((type != lastType) || type == 0)
 			{
-				if (!Rectangle_IsEmpty(&rect))
+				if (!Rectangle_IsEmpty(rect))
 				{
 					Color color = Utils_GetCollisionColor(lastType);
 					arrput(arr_many_rectangles, DrawRectangle_Create(color, rect));
@@ -549,7 +549,7 @@ void LevelData_DrawCollision(LevelData* ld, SpriteBatch* spriteBatch, Camera* ca
 			}
 			lastType = type;
 		}
-		if (!Rectangle_IsEmpty(&rect))
+		if (!Rectangle_IsEmpty(rect))
 		{
 			Color color = Utils_GetCollisionColor(lastType);
 			arrput(arr_many_rectangles, DrawRectangle_Create(color, rect));

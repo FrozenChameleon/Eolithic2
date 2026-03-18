@@ -284,7 +284,7 @@ void ThingInstance_Draw(ThingInstance* ti, SpriteBatch* spriteBatch, Color color
 }
 void ThingInstance_Draw2(ThingInstance* ti, SpriteBatch* spriteBatch, Color color, int32_t depth, Point position, bool isSelected)
 {
-	DrawTool_DrawRectangle2(spriteBatch, color, depth - 1, 
+	DrawTool_DrawRectangle(spriteBatch, color, depth - 1, 
 		Rectangle_Create(position.X, position.Y, ThingInstance_GetWidth(ti), ThingInstance_GetHeight(ti)), 0, false);
 
 	ThingSettings* settings = ThingInstance_GetThingSettings(ti);
@@ -314,7 +314,7 @@ void ThingInstance_Draw2(ThingInstance* ti, SpriteBatch* spriteBatch, Color colo
 		int32_t nodeOnePositionX = position.X + nodeOne.X * TILE_SIZE + HALF_TILE_SIZE;
 		int32_t nodeOnePositionY = position.Y + nodeOne.Y * TILE_SIZE + HALF_TILE_SIZE;
 
-		DrawTool_DrawRectangle2(spriteBatch, COLOR_PINK, depth + 5, Rectangle_Create(nodeOnePositionX, nodeOnePositionY, TILE_SIZE, TILE_SIZE), 0, true);
+		DrawTool_DrawRectangle(spriteBatch, COLOR_PINK, depth + 5, Rectangle_Create(nodeOnePositionX, nodeOnePositionY, TILE_SIZE, TILE_SIZE), 0, true);
 		SpriteBatch_DrawString2(spriteBatch, "editor", Utils_IntToStringGlobalBuffer(i), COLOR_BLUE, 200,
 			Vector2_Create(nodeOnePositionX, nodeOnePositionY), ALIGN_CENTER, ALIGN_CENTER);
 

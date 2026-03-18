@@ -112,7 +112,7 @@ bool WindowTilePicker_FindPoint(int width, int height, float scale)
                 Rectangle tempRectangle = Rectangle_Create((int)windowOffset.X + _mBounds.X + (i * tempSize),
                     (int)windowOffset.Y + _mBounds.Y + (j * tempSize), tempSize, tempSize);
                 ImVec2 imguiMousePos = ImGui::GetMousePos();
-				if (Rectangle_Contains(&tempRectangle, (int32_t)imguiMousePos.x, (int32_t)imguiMousePos.y))
+				if (Rectangle_Contains(tempRectangle, (int32_t)imguiMousePos.x, (int32_t)imguiMousePos.y))
                 {
                     if (!_mIsDragHold)
                     {
@@ -211,6 +211,6 @@ void WindowTilePicker_DrawHud(SpriteBatch* spriteBatch)
     float tempY = _mBounds.Y + _mPoint1.Y * (TILE_SIZE * scale);
     float tempWidth = width * scale;
     float tempHeight = height * scale;
-	DrawTool_DrawRectangleHollow2(spriteBatch, COLOR_MAGENTA, myDepth + 1,
+	DrawTool_DrawRectangleHollow(spriteBatch, COLOR_MAGENTA, myDepth + 1,
 		Rectangle_Create((int)tempX, (int)tempY, (int)tempWidth, (int)tempHeight), 0, false, 1);
 }

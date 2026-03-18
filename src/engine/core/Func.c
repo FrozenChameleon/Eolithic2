@@ -880,7 +880,7 @@ void Do_SetBlendStateNormal(Entity entity)
 void Do_DrawFullscreenRectangle(SpriteBatch* spriteBatch, Color color)
 {
 	Rectangle internalBounds = Utils_GetInternalBounds();
-	DrawTool_DrawRectangle2(spriteBatch, color, 100, Rectangle_Create(0, 0, internalBounds.X, internalBounds.Y), 0, false);
+	DrawTool_DrawRectangle(spriteBatch, color, 100, Rectangle_Create(0, 0, internalBounds.X, internalBounds.Y), 0, false);
 }
 void Do_SetAnimationTimeLimit(Entity entity, const char* state, const char* phase, int32_t time)
 {
@@ -2471,6 +2471,10 @@ Body* Get_PlayerBody(void)
 {
 	return Get_Body(Get_Player());
 }
+Rectangle Get_PlayerBodyRectangle()
+{
+	return Body_GetRect(Get_Body(Get_Player()));
+}
 Entity Get_ClosestPlayer2(Entity entity)
 {
 	return Get_ClosestPlayer(Get_X(entity), Get_Y(entity));
@@ -3187,12 +3191,12 @@ bool Is_InLevelBounds(Entity entity)
 		float posX = temp.X - HALF_TILE_SIZE;
 		float posY = temp.Y - HALF_TILE_SIZE;
 		Rectangle otherRect = Rectangle_Create((int32_t)posX, (int32_t)posY, TILE_SIZE, TILE_SIZE);
-		return Rectangle_Intersects(&levelBounds, &otherRect);
+		return Rectangle_Intersects(levelBounds, otherRect);
 	}
 	else
 	{
 		Rectangle bodyRect = Body_GetRect(body);
-		return Rectangle_Intersects(&levelBounds, &bodyRect);
+		return Rectangle_Intersects(levelBounds, bodyRect);
 	}
 }
 bool Is_ThisBodyThePlayerBody(Body* body)
@@ -3382,49 +3386,61 @@ bool Is_FlipY(Entity entity)
 bool Is_NearCollisionLowerRight(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Right(&rect), Rectangle_Bottom(&rect),
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Right(rect), Rectangle_Bottom(rect),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionLowerLeft(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Left(&rect), Rectangle_Bottom(&rect),
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Left(rect), Rectangle_Bottom(rect),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionUpperCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(&rect).X, Rectangle_Top(&rect),
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(rect).X, Rectangle_Top(rect),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionLowerCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(&rect).X, Rectangle_Bottom(&rect),
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(rect).X, Rectangle_Bottom(rect),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionMiddleRight(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Right(&rect), Rectangle_Center(&rect).Y,
+	return Is_NearCollisionMiddleRight2(rect, xDirection, yDirection, collisionToCheck, collisionToCheckLen);
+}
+bool Is_NearCollisionMiddleRight2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
+{
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Right(bodyRect), Rectangle_Center(bodyRect).Y,
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionMiddleLeft(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Left(&rect), Rectangle_Center(&rect).Y,
+	return Is_NearCollisionMiddleLeft2(rect, xDirection, yDirection, collisionToCheck, collisionToCheckLen);
+}
+bool Is_NearCollisionMiddleLeft2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
+{
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Left(bodyRect), Rectangle_Center(bodyRect).Y,
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionUpperRight(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Right(&rect), Rectangle_Top(&rect),
+	return Is_NearCollisionUpperRight2(rect, xDirection, yDirection, collisionToCheck, collisionToCheckLen);
+}
+bool Is_NearCollisionUpperRight2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
+{
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Right(bodyRect), Rectangle_Top(bodyRect),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(&rect).X, Rectangle_Center(&rect).Y,
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(rect).X, Rectangle_Center(rect).Y,
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollision(int32_t x, int32_t y, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
@@ -3434,7 +3450,11 @@ bool Is_NearCollision(int32_t x, int32_t y, int32_t xDirection, int32_t yDirecti
 bool Is_NearCollisionUpperLeft(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Left(&rect), Rectangle_Top(&rect), 
+	return Is_NearCollisionUpperLeft2(rect, xDirection, yDirection, collisionToCheck, collisionToCheckLen);
+}
+bool Is_NearCollisionUpperLeft2(Rectangle bodyRectangle, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
+{
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Left(bodyRectangle), Rectangle_Top(bodyRectangle),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_LineOfSight(float x1, float y1, float x2, float y2, bool respectOneWays)
@@ -3482,9 +3502,9 @@ bool Is_PlayerNearBody(Entity entity, int32_t buffer)
 	Rectangle rect1 = Body_GetRect(Get_Body(Get_Player()));
 	Body* body = Get_Body(entity);
 	Rectangle bodyRect = Body_GetRect(body);
-	Rectangle rect2 = Rectangle_Create(Rectangle_Left(&bodyRect) - buffer, Rectangle_Top(&bodyRect) - buffer,
+	Rectangle rect2 = Rectangle_Create(Rectangle_Left(bodyRect) - buffer, Rectangle_Top(bodyRect) - buffer,
 		Body_GetWidth(body) + buffer * 2, Body_GetHeight(body) + buffer * 2);
-	return Rectangle_Intersects(&rect1, &rect2);
+	return Rectangle_Intersects(rect1, rect2);
 }
 bool Is_ClosestPlayerNearBody(Entity entity, int32_t buffer)
 {
@@ -3497,14 +3517,14 @@ bool Is_ClosestPlayerNearBody(Entity entity, int32_t buffer)
 	Rectangle rect1 = Body_GetRect(Get_Body(closestPlayer));
 	Body* body = Get_Body(entity);
 	Rectangle bodyRect = Body_GetRect(body);
-	Rectangle rect2 = Rectangle_Create(Rectangle_Left(&bodyRect) - buffer, Rectangle_Top(&bodyRect) - buffer,
+	Rectangle rect2 = Rectangle_Create(Rectangle_Left(bodyRect) - buffer, Rectangle_Top(bodyRect) - buffer,
 		Body_GetWidth(body) + buffer * 2, Body_GetHeight(body) + buffer * 2);
-	return Rectangle_Intersects(&rect1, &rect2);
+	return Rectangle_Intersects(rect1, rect2);
 }
 bool Is_LeftOfCamera(Entity entity)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	if (Rectangle_Center(&rect).X < Camera_GetLeft(Get_Camera()))
+	if (Rectangle_Center(rect).X < Camera_GetLeft(Get_Camera()))
 	{
 		return true;
 	}
@@ -3513,7 +3533,7 @@ bool Is_LeftOfCamera(Entity entity)
 bool Is_RightOfCamera(Entity entity)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	if (Rectangle_Center(&rect).X > Camera_GetRight(Get_Camera()))
+	if (Rectangle_Center(rect).X > Camera_GetRight(Get_Camera()))
 	{
 		return true;
 	}
@@ -3522,7 +3542,7 @@ bool Is_RightOfCamera(Entity entity)
 bool Is_TopOfCamera(Entity entity)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	if (Rectangle_Center(&rect).Y < Camera_GetTop(Get_Camera()))
+	if (Rectangle_Center(rect).Y < Camera_GetTop(Get_Camera()))
 	{
 		return true;
 	}
@@ -3531,7 +3551,7 @@ bool Is_TopOfCamera(Entity entity)
 bool Is_BottomOfCamera(Entity entity)
 {
 	Rectangle bodyRect = Body_GetRect(Get_Body(entity));
-	if (Rectangle_Center(&bodyRect).Y > Camera_GetBottom(Get_Camera()))
+	if (Rectangle_Center(bodyRect).Y > Camera_GetBottom(Get_Camera()))
 	{
 		return true;
 	}
@@ -3544,7 +3564,7 @@ bool Is_UnderCameraHinge(Entity entity)
 bool Is_UnderCameraHinge2(Entity entity, int32_t offset)
 {
 	Rectangle bodyRect = Body_GetRect(Get_Body(entity));
-	if (Rectangle_Top(&bodyRect) > Get_CameraHingeBottom() + offset)
+	if (Rectangle_Top(bodyRect) > Get_CameraHingeBottom() + offset)
 	{
 		return true;
 	}
@@ -3558,7 +3578,7 @@ bool Is_UnderLevelBounds2(Entity entity, int32_t offset)
 {
 	Rectangle bodyRect = Body_GetRect(Get_Body(entity));
 	Rectangle levelBoundsRectangle = Get_LevelBoundsRectangle();
-	if (Rectangle_Top(&bodyRect) > (Rectangle_Bottom(&levelBoundsRectangle) + offset))
+	if (Rectangle_Top(bodyRect) > (Rectangle_Bottom(levelBoundsRectangle) + offset))
 	{
 		return true;
 	}
@@ -3571,7 +3591,7 @@ bool Is_UnderCamera(Entity entity)
 bool Is_UnderCamera2(Entity entity, int32_t offset)
 {
 	Rectangle bodyRect = Body_GetRect(Get_Body(entity));
-	if (Rectangle_Top(&bodyRect) > Camera_GetBottom(Get_Camera()) + offset)
+	if (Rectangle_Top(bodyRect) > Camera_GetBottom(Get_Camera()) + offset)
 	{
 		return true;
 	}

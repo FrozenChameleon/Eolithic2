@@ -71,7 +71,7 @@ void DrawTile_Draw(DrawTile* drawTile, SpriteBatch* spriteBatch, Texture* textur
 		}
 		else
 		{
-			DrawTool_DrawRectangle2(spriteBatch, COLOR_RED, 100, Rectangle_Create(x, y, TILE_SIZE, TILE_SIZE), 0, false);
+			DrawTool_DrawRectangle(spriteBatch, COLOR_RED, 100, Rectangle_Create(x, y, TILE_SIZE, TILE_SIZE), 0, false);
 		}
 	}
 }

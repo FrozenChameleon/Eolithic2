@@ -117,7 +117,7 @@ static void DrawHudRoutine(Entity owner, SpecialMcFinalBossEffect* data, SpriteB
 {
 	if (data->mLineCounter == 0)
 	{
-		DrawTool_DrawRectangle2(spriteBatch, COLOR_WHITE, 100, Rectangle_Create(0, 0, 1280, 720), 0, false);
+		DrawTool_DrawRectangle(spriteBatch, COLOR_WHITE, 100, Rectangle_Create(0, 0, 1280, 720), 0, false);
 	}
 }
 

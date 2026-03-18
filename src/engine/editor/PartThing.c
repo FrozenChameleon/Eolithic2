@@ -53,7 +53,7 @@ static bool NodeInMouse(Point point)
 
     Vector2 restrainedMouse = EditorPart_GetRestrainedMouse();
     Rectangle tempRectangle = Rectangle_Create(current.X, current.Y, TILE_SIZE, TILE_SIZE);
-    if (Rectangle_Contains(&tempRectangle, (int)restrainedMouse.X, (int)restrainedMouse.Y))
+    if (Rectangle_Contains(tempRectangle, (int)restrainedMouse.X, (int)restrainedMouse.Y))
     {
         return true;
     }
@@ -146,7 +146,7 @@ static void DrawHelper(SpriteBatch* spriteBatch)
 
         if (drawDefault)
         {
-            DrawTool_DrawRectangle2(spriteBatch, COLOR_RED, 100, Rectangle_Create((int)x, (int)y, TILE_SIZE, TILE_SIZE), 0, true);
+            DrawTool_DrawRectangle(spriteBatch, COLOR_RED, 100, Rectangle_Create((int)x, (int)y, TILE_SIZE, TILE_SIZE), 0, true);
             SpriteBatch_DrawString2(spriteBatch, "editor", Resource_GetName(resource),
                 COLOR_WHITE, 100, Vector2_Create(x, y), ALIGN_CENTER, ALIGN_CENTER);
         }
@@ -156,7 +156,7 @@ static bool InstanceInMouse(Point pos, ThingInstance* instance)
 {
     Vector2 resMouse = EditorPart_GetRestrainedMouse();
     Rectangle tempRectangle = ThingInstance_GetRectangle(instance, pos.X, pos.Y);
-    if (Rectangle_Contains(&tempRectangle, (int32_t)resMouse.X, (int32_t)resMouse.Y))
+    if (Rectangle_Contains(tempRectangle, (int32_t)resMouse.X, (int32_t)resMouse.Y))
     {
         return true;
     }
@@ -171,7 +171,7 @@ static bool InstanceInSelectionRectangle(Point pos, ThingInstance* instance)
 
     Rectangle rect1 = EditorPart_GetSelectionRectangle();
     Rectangle rect2 = ThingInstance_GetRectangle(instance, pos.X, pos.Y);
-    if (Rectangle_Intersects(&rect1, &rect2))
+    if (Rectangle_Intersects(rect1, rect2))
     {
         return true;
     }

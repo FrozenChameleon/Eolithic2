@@ -89,7 +89,7 @@ static void PreviewParticles_StartReset()
 }
 static void PreviewParticles_DrawHud(SpriteBatch* spriteBatch)
 {
-	DrawTool_DrawRectangle2(spriteBatch, COLOR_CORNFLOWER_BLUE, 100, Rectangle_Create(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT), 0, false);
+	DrawTool_DrawRectangle(spriteBatch, COLOR_CORNFLOWER_BLUE, 100, Rectangle_Create(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT), 0, false);
 
 	for (int i = 0; i < arrlen(_mPreview.arr_particles); i += 1)
 	{
