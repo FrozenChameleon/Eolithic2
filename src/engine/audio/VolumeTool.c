@@ -111,7 +111,7 @@ static void LoadHelper(bool isMusic)
 	int32_t count = BufferReader_ReadI32(br);
 	for (int32_t i = 0; i < count; i += 1)
 	{
-		MString* key = NULL;
+		MString* key = MString_CreateForJustThisFrame();
 		BufferReader_ReadMString(&key, br);
 		int32_t volume = BufferReader_ReadI32(br);
 		VolumeTool_SetVolume(MString_Text(key), volume, isMusic);

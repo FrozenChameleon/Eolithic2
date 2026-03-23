@@ -23,6 +23,7 @@
 #include "../font/TTFont.h"
 #include "../leveldata/ThingSettings.h"
 #include "../io/File.h"
+#include "../utils/Tuning.h"
 
 #define MANAGERS_LEN 50
 
@@ -44,6 +45,11 @@
 #define MANAGERS_INDEX_MOVIE 13
 #define MANAGERS_INDEX_TTFONT 14
 #define MANAGERS_INDEX_THING_SETTINGS 15
+#define MANAGERS_INDEX_TUNING0 16
+#define MANAGERS_INDEX_TUNING1 17
+#define MANAGERS_INDEX_TUNING2 18
+#define MANAGERS_INDEX_TUNING3 19
+#define MANAGERS_INDEX_TUNING777 20
 
 static bool _mHasInit;
 static ResourceMan _mManagers[MANAGERS_LEN];
@@ -308,6 +314,42 @@ void ResourceList_Init(void)
 		thingSettingsMan->_mIsReadingText = true;
 	}
 
+	for (int i = 0; i < 5; i += 1) //The tuning at index "4" is actually 777 GLOBAL difficulty
+	{
+		int difficulty = i;
+		if (i >= 4)
+		{
+			difficulty = 777;
+		}
+
+		ResourceMan* tuningsMan = ResourceList_Tuning(difficulty);
+		ResourceMan_Init(tuningsMan);
+
+		MString_AssignString(&tempString, "Tunings");
+		MString_AddAssignInt(&tempString, difficulty);
+		Utils_strlcpy(tuningsMan->_mResourceType, MString_Text(tempString), EE_FILENAME_MAX);
+
+		MString* folderName = MString_CreateForJustThisFrame();
+		MString_AssignString(&folderName, "tunings");
+		MString_AddAssignInt(&folderName, difficulty);
+
+		MString_AddAssignMString(&tempString, folderName);
+		MString_AddAssignString(&tempString, ".dat");
+		Utils_strlcpy(tuningsMan->_mDatFileName, MString_Text(tempString), EE_FILENAME_MAX);
+
+		Utils_strlcpy(tuningsMan->_mFileExtension, ".txt", EE_FILENAME_MAX);
+		File_PathCombine3(&tempString, "data", "tunings", Utils_IntToStringGlobalBuffer(difficulty));
+		Utils_strlcpy(tuningsMan->_mDirectories[0], MString_Text(tempString), EE_FILENAME_MAX);
+
+		tuningsMan->_mFromStream = (ResourceMan_FromStreamFunc)Tuning_FromStream;
+		tuningsMan->_mDispose = (ResourceMan_DisposeFunc)Tuning_Dispose;
+		tuningsMan->_mWrite = (ResourceMan_WriteFunc)Tuning_Write;
+		tuningsMan->_mCreateNew = (ResourceMan_CreateNewFunc)Tuning_CreateNew;
+		tuningsMan->_mCopyTo = (ResourceMan_CopyToFunc)Tuning_CopyTo;
+		tuningsMan->_mReadFromDirectory = true;
+		tuningsMan->_mIsReadingText = true;
+	}
+
 	MString_Dispose(&tempString);
 
 	_mHasInit = true;
@@ -385,4 +427,20 @@ ResourceMan* ResourceList_TTFont(void)
 ResourceMan* ResourceList_ThingSettings(void)
 {
 	return &_mManagers[MANAGERS_INDEX_THING_SETTINGS];
+}
+ResourceMan* ResourceList_Tuning(int32_t difficulty)
+{
+	switch (difficulty)
+	{
+	case 0:
+		return &_mManagers[MANAGERS_INDEX_TUNING0];
+	case 1:
+		return &_mManagers[MANAGERS_INDEX_TUNING1];
+	case 2:
+		return &_mManagers[MANAGERS_INDEX_TUNING2];
+	case 3:
+		return &_mManagers[MANAGERS_INDEX_TUNING3];
+	default:
+		return &_mManagers[MANAGERS_INDEX_TUNING777];
+	}
 }

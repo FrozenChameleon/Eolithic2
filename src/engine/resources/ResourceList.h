@@ -26,3 +26,4 @@ ResourceMan* ResourceList_MovieTiming(void);
 ResourceMan* ResourceList_Movie(void);
 ResourceMan* ResourceList_TTFont(void);
 ResourceMan* ResourceList_ThingSettings(void);
+ResourceMan* ResourceList_Tuning(int32_t difficulty);

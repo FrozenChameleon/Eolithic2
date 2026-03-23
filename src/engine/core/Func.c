@@ -80,10 +80,12 @@
 #include "../components/ShakeFOverTime.h"
 #include "../globals/OeState.h"
 #include "../globals/OePhase.h"
+#include "../utils/Tuning.h"
 //#include "../components/MoveGetterSys.h" //UNUSED
 //#include "../utils/Tuning.h" //UNUSED
 
 static int32_t _mAttackIdCounter;
+static MString* _mTempStringForTuning;
 
 static Point* Get_ArrGridNodes(Entity entity)
 {
@@ -562,6 +564,10 @@ bool Do_UpdateStepTimer(Entity entity, int32_t limit)
 	StepTimer* data = (StepTimer*)Get_Component(C_StepTimer, entity);
 	data->mTimer.mLimit = limit;
 	return Timer_Update(&data->mTimer);
+}
+bool Do_UpdateStepTimer2(Entity entity, const char* tuning)
+{
+	return Do_UpdateStepTimer(entity, Get_TuningAsInt(entity, tuning));
 }
 void Do_SetBodyFramesInAir(Entity entity, int32_t value)
 {
@@ -3067,15 +3073,54 @@ Rectangle Get_CameraHingeGateBounds()
 {
 	return Camera_GetHingeGateBounds(Get_Camera());
 }
-float Get_TuningAsFloat(Entity owner, const char* tuning)
+int Get_TuningAsInt(Entity entity, const char* dataName)
 {
-	//TODO 2026
-	return 0;
+	return Tuning_GetTuningAsInt(Get_Name(entity), Get_TuningNameAsInt(entity, dataName));
 }
-int32_t Get_TuningAsInt(Entity owner, const char* tuning)
+float Get_TuningAsFloat(Entity entity, const char* dataName)
 {
-	//TODO 2026
-	return 0;
+	return Tuning_GetTuning(Get_Name(entity), Get_TuningNameAsFloat(entity, dataName));
+}
+int Get_GlobalTuningAsInt(Entity entity, const char* dataName)
+{
+	return Tuning_GetGlobalTuningAsInt(Get_Name(entity), Get_TuningNameAsInt(entity, dataName));
+}
+float Get_GlobalTuningAsFloat(Entity entity, const char* dataName)
+{
+	return Tuning_GetGlobalTuning(Get_Name(entity), Get_TuningNameAsFloat(entity, dataName));
+}
+int Get_Global777TuningAsInt(Entity entity, const char* dataName)
+{
+	return Tuning_GetGlobal777TuningAsInt(Get_TuningNameAsInt(entity, dataName));
+}
+float Get_Global777TuningAsFloat(Entity entity, const char* dataName)
+{
+	return Tuning_GetGlobal777Tuning(Get_TuningNameAsFloat(entity, dataName));
+}
+int Get_System777TuningAsInt(Entity entity, const char* dataName)
+{
+	return Tuning_GetSystem777TuningAsInt(Get_TuningNameAsInt(entity, dataName));
+}
+float Get_System777TuningAsFloat(Entity entity, const char* dataName)
+{
+	return Tuning_GetSystem777Tuning(Get_TuningNameAsFloat(entity, dataName));
+}
+const char* Get_TuningNameAsInt(Entity entity, const char* dataName)
+{
+	return Get_TuningName(entity, "INT", dataName);
+}
+const char* Get_TuningName(Entity entity, const char* dataType, const char* dataName)
+{
+	const char* thingName = Get_Name(entity);
+	MString_AssignEmptyString(&_mTempStringForTuning); //TODO C 2026 This should probably be cached...
+	MString_AddAssignString(&_mTempStringForTuning, dataType);
+	MString_AddAssignChar(&_mTempStringForTuning, '_');
+	MString_AddAssignString(&_mTempStringForTuning, dataName);
+	return MString_Text(_mTempStringForTuning);
+}
+const char* Get_TuningNameAsFloat(Entity entity, const char* dataName)
+{
+	return Get_TuningName(entity, "FLT", dataName);
 }
 Animation* Get_CurrentDefaultAnimation(Entity entity)
 {
@@ -3398,13 +3443,21 @@ bool Is_NearCollisionLowerLeft(Entity entity, int32_t xDirection, int32_t yDirec
 bool Is_NearCollisionUpperCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(rect).X, Rectangle_Top(rect),
+	return Is_NearCollisionUpperCenter2(rect, xDirection, yDirection, collisionToCheck, collisionToCheckLen);
+}
+bool Is_NearCollisionUpperCenter2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
+{
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(bodyRect).X, Rectangle_Top(bodyRect),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionLowerCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(rect).X, Rectangle_Bottom(rect),
+	return Is_NearCollisionLowerCenter2(rect, xDirection, yDirection, collisionToCheck, collisionToCheckLen);
+}
+bool Is_NearCollisionLowerCenter2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
+{
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(bodyRect).X, Rectangle_Bottom(bodyRect),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionMiddleRight(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
@@ -3440,7 +3493,11 @@ bool Is_NearCollisionUpperRight2(Rectangle bodyRect, int32_t xDirection, int32_t
 bool Is_NearCollisionCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(rect).X, Rectangle_Center(rect).Y,
+	return Is_NearCollisionCenter2(rect, xDirection, yDirection, collisionToCheck, collisionToCheckLen);
+}
+bool Is_NearCollisionCenter2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
+{
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Center(bodyRect).X, Rectangle_Center(bodyRect).Y,
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollision(int32_t x, int32_t y, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)

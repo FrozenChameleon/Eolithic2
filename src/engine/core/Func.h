@@ -16,6 +16,8 @@
 #include "../render/Color.h"
 #include "../gamestate/GameState.h"
 #include "../collision/Body.h"
+#include "../render/Animation.h"
+#include "../render/Sheet.h"
 
 typedef struct Camera Camera;
 typedef struct DrawActor DrawActor;
@@ -97,6 +99,7 @@ bool Do_Bounce(Entity entity, float dampener, float jumpSpeed, float velocityInc
 void Do_ResetStepTimer(Entity entity);
 Timer* Get_StepTimer(Entity entity);
 bool Do_UpdateStepTimer(Entity entity, int32_t limit);
+bool Do_UpdateStepTimer2(Entity entity, const char* tuning);
 void Do_SetBodyFramesInAir(Entity entity, int32_t value);
 void Do_SetBodyIgnoreGravityY(Entity entity, bool value);
 void Do_SetBodyIsOneWayPlatform(Entity entity, bool value);
@@ -487,8 +490,17 @@ int32_t Get_CameraHingeBottom(void);
 void Do_SaveGame(void);
 void Do_SaveUserConfig(void);
 Rectangle Get_CameraHingeGateBounds();
-float Get_TuningAsFloat(Entity owner, const char* tuning);
-int32_t Get_TuningAsInt(Entity owner, const char* tuning);
+int Get_TuningAsInt(Entity entity, const char* dataName);
+float Get_TuningAsFloat(Entity entity, const char* dataName);
+int Get_GlobalTuningAsInt(Entity entity, const char* dataName);
+float Get_GlobalTuningAsFloat(Entity entity, const char* dataName);
+int Get_Global777TuningAsInt(Entity entity, const char* dataName);
+float Get_Global777TuningAsFloat(Entity entity, const char* dataName);
+int Get_System777TuningAsInt(Entity entity, const char* dataName);
+float Get_System777TuningAsFloat(Entity entity, const char* dataName);
+const char* Get_TuningNameAsInt(Entity entity, const char* dataName);
+const char* Get_TuningName(Entity entity, const char* dataType, const char* dataName);
+const char* Get_TuningNameAsFloat(Entity entity, const char* dataName);
 Animation* Get_CurrentDefaultAnimation(Entity entity);
 Rectangle Get_RectangleFromTwoPoints(Point point1, Point point2);
 Rectangle Get_RectangleFromFirstTwoNodes(Entity owner);
@@ -538,7 +550,9 @@ bool Is_FlipY(Entity entity);
 bool Is_NearCollisionLowerRight(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionLowerLeft(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionUpperCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
+bool Is_NearCollisionUpperCenter2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionLowerCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
+bool Is_NearCollisionLowerCenter2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionMiddleRight(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionMiddleRight2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionMiddleLeft(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
@@ -546,6 +560,7 @@ bool Is_NearCollisionMiddleLeft2(Rectangle bodyRect, int32_t xDirection, int32_t
 bool Is_NearCollisionUpperRight(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionUpperRight2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
+bool Is_NearCollisionCenter2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollision(int32_t x, int32_t y, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionUpperLeft(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionUpperLeft2(Rectangle bodyRectangle, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);

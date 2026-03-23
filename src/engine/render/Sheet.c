@@ -14,6 +14,7 @@
 #include "SpriteBatch.h"
 #include "../render/TextureOffset.h"
 #include "../utils/PNGPeakTool.h"
+#include "../resources/ResourceMan.h"
 
 #define DEBUG_SHEET_NAME "DEBUG_ERROR_777"
 

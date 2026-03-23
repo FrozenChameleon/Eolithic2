@@ -105,12 +105,12 @@ static void GenerateNewConstant(ParticleInstance* data)
 
 static void UpdateAttachedPosition(ParticleInstance* data)
 {
-	/*if (OeEntity_Nothing == data->mAttachedEntity) //UNUSED
+	/*if (Entity_Nothing == data->mAttachedEntity) //UNUSED
 	{
 		return;
 	}
 
-	OeEntity entity = Get_Entity(data->mAttachedEntity);
+	Entity entity = Get_Entity(data->mAttachedEntity);
 	if (data->mAttachedThingFollowFlipX && Is_DrawActorPresent(entity))
 	{
 		data->mFlipX = Is_FlipX(entity);
