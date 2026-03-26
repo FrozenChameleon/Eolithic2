@@ -9,10 +9,7 @@
 #include "stdint.h"
 #include "stdbool.h"
 
-enum
-{
-	FIXED_LIST_EIGHT_INT_VALUES_LEN = 8
-};
+#define FIXED_LIST_EIGHT_INT_VALUES_LEN 8
 
 typedef struct FixedListEightInt
 {
@@ -21,6 +18,7 @@ typedef struct FixedListEightInt
 } FixedListEightInt;
 
 void FixedListEightInt_AddAll(FixedListEightInt* from, FixedListEightInt* to);
+void FixedListEightInt_SetAll(FixedListEightInt* flei, int32_t value);
 int32_t FixedListEightInt_Count(const FixedListEightInt* flei);
 void FixedListEightInt_Clear(FixedListEightInt* flei);
 bool FixedListEightInt_Contains(const FixedListEightInt* flei, int32_t value);

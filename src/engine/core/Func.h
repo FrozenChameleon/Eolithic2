@@ -98,6 +98,8 @@ int32_t Get_AmountOfBounces(Entity entity);
 bool Do_Bounce(Entity entity, float dampener, float jumpSpeed, float velocityIncrease, bool fallFirstBounce);
 void Do_ResetStepTimer(Entity entity);
 Timer* Get_StepTimer(Entity entity);
+int32_t Get_StepTimerCurrent(Entity entity);
+int32_t Get_StepTimerLimit(Entity entity);
 bool Do_UpdateStepTimer(Entity entity, int32_t limit);
 bool Do_UpdateStepTimer2(Entity entity, const char* tuning);
 void Do_SetBodyFramesInAir(Entity entity, int32_t value);
@@ -307,6 +309,9 @@ void Do_InitStringSetting(ComponentType ctype, const char* key, const char* valu
 bool Do_AnimSpinDown(Entity owner, const char* state, const char* phase, int* counter, int spinTime, int maxSpinSpeed);
 void Do_MoveAtRadianAngle(Entity entity, double angle, float speed);
 void Do_CopyArrGridNodesFromParent(Entity entity);
+void Do_SetBodyWidth(Entity owner, int width);
+void Do_SetBodyHeight(Entity owner, int height);
+void Do_SetBodyWidthAndHeight(Entity owner, int width, int height);
 //ENDREGION
 
 //REGION GET
@@ -548,7 +553,9 @@ bool Is_StringSettingsPresent(Entity entity);
 bool Is_FlipX(Entity entity);
 bool Is_FlipY(Entity entity);
 bool Is_NearCollisionLowerRight(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
+bool Is_NearCollisionLowerRight2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionLowerLeft(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
+bool Is_NearCollisionLowerLeft2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionUpperCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionUpperCenter2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);
 bool Is_NearCollisionLowerCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen);

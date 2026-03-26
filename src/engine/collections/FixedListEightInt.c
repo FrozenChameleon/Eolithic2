@@ -16,6 +16,13 @@ void FixedListEightInt_AddAll(FixedListEightInt* from, FixedListEightInt* to)
 		FixedListEightInt_Add(to, FixedListEightInt_Get(from, i));
 	}
 }
+void FixedListEightInt_SetAll(FixedListEightInt* flei, int32_t value)
+{
+	for (int i = 0; i < flei->_mCount; i += 1)
+	{
+		FixedListEightInt_Set(flei, i, value);
+	}
+}
 int32_t FixedListEightInt_Count(const FixedListEightInt* flei)
 {
 	return flei->_mCount;

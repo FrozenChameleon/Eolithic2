@@ -7,6 +7,8 @@
 #include "Timer.h"
 
 #include "Utils.h"
+#include "../core/Func.h"
+#include "../math/Math.h"
 
 const Timer Timer_Zero = { 0, 0 };
 
@@ -38,8 +40,7 @@ int32_t Timer_GetRemainingTime(const Timer* timer)
 }
 bool Timer_UpdateWithTuningLimit(Timer* timer, Entity entity, const char* tuning)
 {
-	return false;
-	//WILLNOTDO MCDX 2023return Update(timer, OeFunc.Get_TuningAsInt(entity, tuning));
+	return Timer_UpdateWithLimit(timer, Get_TuningAsInt(entity, tuning));
 }
 bool Timer_UpdateWithLimit(Timer* timer, int32_t limit)
 {
@@ -62,13 +63,12 @@ void Timer_Reset(Timer* timer)
 }
 bool Timer_IsAtPercentage(const Timer* timer, float percent)
 {
+	int32_t goal = (int32_t)Math_round(timer->mLimit * percent);
+	if (timer->mCurrent == goal)
+	{
+		return true;
+	}
 	return false;
-	//int32_t goal = OeMath::Round(timer->mLimit * percent); //UNUSED
-	//if (timer->mCurrent == goal)
-	//{
-	//	return true;
-	//}
-	//return false;
 }
 void Timer_SetToTwoFourthsOfLimit(Timer* timer)
 {

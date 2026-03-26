@@ -559,6 +559,14 @@ Timer* Get_StepTimer(Entity entity)
 	StepTimer* data = (StepTimer*)Get_Component(C_StepTimer, entity);
 	return &data->mTimer;
 }
+int32_t Get_StepTimerCurrent(Entity entity)
+{
+	return Get_StepTimer(entity)->mCurrent;
+}
+int32_t Get_StepTimerLimit(Entity entity)
+{
+	return Get_StepTimer(entity)->mLimit;
+}
 bool Do_UpdateStepTimer(Entity entity, int32_t limit)
 {
 	StepTimer* data = (StepTimer*)Get_Component(C_StepTimer, entity);
@@ -1800,6 +1808,18 @@ void Do_CopyArrGridNodesFromParent(Entity entity)
 	}
 
 	Do_SetArrNodes(entity, Get_ArrGridNodes(parent));
+}
+void Do_SetBodyWidth(Entity owner, int width)
+{
+	Body_SetWidth(Get_Body(owner), width);
+}
+void Do_SetBodyHeight(Entity owner, int height)
+{
+	Body_SetHeight(Get_Body(owner), height);
+}
+void Do_SetBodyWidthAndHeight(Entity owner, int width, int height)
+{
+	Body_SetWidthAndHeight(Get_Body(owner), width, height);
 }
 
 //REGION GET
@@ -3431,13 +3451,21 @@ bool Is_FlipY(Entity entity)
 bool Is_NearCollisionLowerRight(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Right(rect), Rectangle_Bottom(rect),
+	return Is_NearCollisionLowerRight2(rect, xDirection, yDirection, collisionToCheck, collisionToCheckLen);
+}
+bool Is_NearCollisionLowerRight2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
+{
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Right(bodyRect), Rectangle_Bottom(bodyRect),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionLowerLeft(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
 {
 	Rectangle rect = Body_GetRect(Get_Body(entity));
-	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Left(rect), Rectangle_Bottom(rect),
+	return Is_NearCollisionLowerLeft2(rect, xDirection, yDirection, collisionToCheck, collisionToCheckLen);
+}
+bool Is_NearCollisionLowerLeft2(Rectangle bodyRect, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)
+{
+	return CollisionEngineSys_CheckSurroundingCollision(Get_CollisionEngine(), Rectangle_Left(bodyRect), Rectangle_Bottom(bodyRect),
 		xDirection, yDirection, collisionToCheck, collisionToCheckLen);
 }
 bool Is_NearCollisionUpperCenter(Entity entity, int32_t xDirection, int32_t yDirection, const int32_t* collisionToCheck, int32_t collisionToCheckLen)

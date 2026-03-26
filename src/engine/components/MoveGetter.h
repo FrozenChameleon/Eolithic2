@@ -1,29 +1,39 @@
-/* Eolithic2
- * Copyright 2025-2026 Patrick Derosby
- * Released under the zlib License.
- * See eolithic2.LICENSE for details.
- */
+﻿#include "../utils/Macros.h"
 
-#pragma once
-
-#include "../utils/Macros.h"
+#include "../systems/SystemSimple.h"
+#include "../collections/FixedListEightInt.h"
 #include "../math/Point.h"
-
-#define MOVE_GETTER_MAX_LEN 20
+#include "../math/Random32.h"
 
 typedef struct MoveGetter
 {
-	int32_t mLastMove;
-	int32_t mMovesCounter;
+	int mFixedOrderLoops;
+	int mLastMove;
+	int mMovesCounter;
 	bool mIsFixedOrder;
-	int32_t mFixedOrderMoves[MOVE_GETTER_MAX_LEN];
-	int32_t mLastMoves[MOVE_GETTER_MAX_LEN];
-	const char* mMoves[MOVE_GETTER_MAX_LEN][EE_FILENAME_MAX];
-	int32_t mConstraints[MOVE_GETTER_MAX_LEN];
-	int32_t mDebugMyId;
-	int32_t mDebugHeight;
+	const int* mFixedOrderMoves;
+	int mFixedOrderMovesLength;
+	FixedListEightInt mLastMoves;
+	FixedListEightInt mConstraints;
+	const char** mMoveNames;
+	int mMoveNamesLength;
+	int mDebugMyId;
+	int mDebugHeight;
 	bool mDebugIsShowing;
 	bool mDebugDoNotUseMoveForcedByTool;
-	const char* mDebugName;
+	char mDebugName[EE_FILENAME_MAX];
 	Point mDebugFirstWindowPosition;
 } MoveGetter;
+
+void MoveGetter_Setup(MoveGetter* mg, const char* name, int movesToRemember);
+void MoveGetter_SetFixedOrderMoves(MoveGetter* mg, const int* moves, int movesLength);
+void MoveGetter_SetMoveNames(MoveGetter* mg, const char** moveNames, int moveNamesLength);
+void MoveGetter_OverflowCheck(MoveGetter* mg);
+int MoveGetter_GetLastMove(MoveGetter* mg);
+void MoveGetter_AddConstraint(MoveGetter* mg, int value);
+
+System* MoveGetter_CreateSystem(void);
+int MoveGetter_GetMove2(MoveGetter* data, Random32* random);
+int MoveGetter_GetMove(MoveGetter* data);
+void MoveGetter_InitRoutine(Entity owner, MoveGetter* data);
+void MoveGetter_UpdateRoutine(Entity owner, MoveGetter* data);

@@ -1,4 +1,6 @@
-﻿#include "Macros.h"
+﻿#pragma once
+
+#include "Macros.h"
 
 #define TUNING_DIFFICULTY_EASY 0
 #define TUNING_DIFFICULTY_NORMAL 1
