@@ -370,6 +370,12 @@ void Renderer_Draw2(
 void Renderer_Draw3(Texture* texture, Rectangle destinationRectangle, Rectangle sourceRectangle, Color color,
 	float rotation, Vector2 origin, SpriteEffects effects, float layerDepth
 ) {
+	if (texture == NULL)
+	{
+		Logger_Log(LOGGER_WARNING, "NULL TEXTURE");
+		return;
+	}
+
 	float sourceX, sourceY, sourceW, sourceH;
 
 	sourceX = sourceRectangle.X / (float)texture->mBounds.Width;

@@ -158,12 +158,11 @@ void* ComponentPack_GetFirstSetComponent(ComponentPack* pack)
 	else
 	{
 		{
-			MString* tempString = NULL;
-			MString_Combine2(&tempString, "Reached maximum capacity for pack: ", GetPackComponentName(pack));
-			Exception_Run(MString_Text(tempString), false);
-			MString_Dispose(&tempString);
+			MString* tempString = MString_CreateForJustThisFrame();
+			MString_Combine3(&tempString, "Unable to get first set component for pack: ", GetPackComponentName(pack), ". Returning dummy component!");
+			Logger_Log(LOGGER_WARNING, MString_Text(tempString));
 		}
-		return pack->Components;
+		return pack->_mDummy;
 	}
 }
 Entity ComponentPack_GetFirstSetEntity(ComponentPack* pack)
