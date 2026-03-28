@@ -146,6 +146,8 @@ Rectangle Renderer_GetWantedBackBufferBounds(void)
 	int32_t mul = Renderer_GetRenderTargetScale();
 #endif
 
+	mul = 1; //TODO 2026 REMOVE THIS!!
+
 	Rectangle internalRenderBounds = Utils_GetInternalRenderBounds();
 
 	Rectangle bounds;

@@ -22,6 +22,8 @@
 #ifdef EDITOR_MODE
 #include "../editor/Editor.h"
 #endif
+#include "../resources/ResourceList.h"
+#include "../io/File.h"
 
 static int32_t _mUniqueMapSeed;
 static int32_t _mCurrentGameState;
@@ -158,6 +160,24 @@ void GameStateManager_DebugForceReloadMapNow(void)
 	GameStateManager_SetupLoadMap(GameStateManager_GetCurrentFileName());
 	GameStateManager_HandleLoadNextMap();
 }
+static void CreateLevelDataIfItDoesNotExist(const char* mapToLoad)
+{
+	ResourceMan* rmLevel = ResourceList_LevelData();
+	if (!ResourceMan_HasResource(rmLevel, mapToLoad))
+	{
+		{
+			MString* logInfo = MString_CreateForJustThisFrame();
+			MString_Combine2(&logInfo, "Creating new level data for: ", mapToLoad);
+			Logger_Log(LOGGER_INFORMATION, MString_Text(logInfo));
+		}
+		{
+			MString* path = MString_CreateForJustThisFrame();
+			File_PathCombine3(&path, "data", "lvl", mapToLoad);
+			MString_AddAssignString(&path, ".txt");
+			ResourceMan_CreateResource(rmLevel, mapToLoad, MString_Text(path), true);
+		}
+	}
+}
 void GameStateManager_LoadMap(const char* mapToLoad)
 {
 	if(mapToLoad == NULL)
@@ -177,6 +197,8 @@ void GameStateManager_LoadMap(const char* mapToLoad)
 		Logger_Log(LOGGER_INFORMATION, MString_Text(tempString));
 		MString_Dispose(&tempString);
 	}
+
+	CreateLevelDataIfItDoesNotExist(mapToLoad);
 
 	Music_SetDoNotAllowUpdatesWhilePaused(false);
 

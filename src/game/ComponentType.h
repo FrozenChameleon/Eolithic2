@@ -1,3 +1,9 @@
+/* Eolithic2
+ * Copyright 2025-2026 Patrick Derosby
+ * Released under the zlib License.
+ * See eolithic2.LICENSE for details.
+ */
+ 
 //THIS CODE IS AUTOMATICALLY GENERATED, DO NOT EDIT!
 
 #pragma once

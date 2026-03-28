@@ -190,8 +190,9 @@ RenderCommandString* SpriteBatch_DrawString3(SpriteBatch* sb, const char* font, 
 	BmFont* bitmapFont = (BmFont*)ResourceMan_GetResourceData(ResourceList_Font(), font);
 	if (bitmapFont == NULL)
 	{
-		Logger_Log(LOGGER_ERROR, "MISSING FONT FOR DRAW: ");
-		Logger_Log(LOGGER_ERROR, font);
+		MString* tempString = MString_CreateForJustThisFrame();
+		MString_Combine2(&tempString, "MISSING FONT FOR DRAW: ", font);
+		Logger_Log(LOGGER_ERROR, MString_Text(tempString));
 		return &_mDummyRenderCommandString;
 	}
 

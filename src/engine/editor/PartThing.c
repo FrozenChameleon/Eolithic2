@@ -122,6 +122,11 @@ static void DrawHelper(SpriteBatch* spriteBatch)
     else
     {
         Resource* resource = GetCurrentThingSetting();
+        if (resource == NULL)
+        {
+			return;
+        }
+
         ThingSettings* settings = (ThingSettings*)Resource_GetData(resource);
         if (settings == NULL)
         {
